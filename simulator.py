@@ -175,8 +175,11 @@ def draw():
   #  glTranslatef(0.0, 0.0, 60.0)
     room.render()
     
-    global msh
-    msh.draw()
+    try:
+        global msh
+        msh.draw()
+    except:
+        pass
     
     glPopMatrix()
 
@@ -185,31 +188,46 @@ def draw():
 def setup():
     glClearColor(1.0, 1.0, 1.0, 0.0)
     glEnable(GL_DEPTH_TEST)
+    glEnable(GL_LIGHTING)
+
+    # Light property vectors.
+    lightAmb = [ 0.0, 0.0, 0.0, 1.0 ]
+    lightDifAndSpec = [ 1.0, 1.0, 1.0, 1.0 ]
+    lightPos = [ 0.0, 1.5, 3.0, 1.0 ]
+    globAmb = [ 0.2, 0.2, 0.2, 1.0 ]
+
+    # Light properties.
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb)
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec)
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec)
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
+
+    glEnable(GL_LIGHT0) # Enable particular light source.
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb) # Global ambient light.
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE) # Enable two-sided lighting.
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE) # Enable local viewpoint.
+
+    # Enable two vertex arrays: position and normal.
+    glEnableClientState(GL_VERTEX_ARRAY)
+    glEnableClientState(GL_NORMAL_ARRAY)
+
+    # Specify locations for the position and normal arrays.
+    #glVertexPointer(3, GL_FLOAT, 0, vertices)
+    #glNormalPointer(GL_FLOAT, 0, normals)
+
     global room
     room = Room(100,100,100)
     
 def resize(_w, _h):
-    width = _w
-    height = _h
-    glViewport(0, 0, width, height)
+    glViewport(0, 0, _w, _h)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    glOrtho (-width/scale, width/scale, -height/scale, height/scale, -100.0, 100.0)
+    glOrtho (-_w/scale, _w/scale, -_h/scale, _h/scale, -100.0, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
 
 def main():
-    global width, height 
-    glutInit([])
-
-    glutCreateWindow(sys.argv[0])
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
-    glutInitWindowSize(width , height)
-    glutInitWindowPosition(100, 100) 
-
-    setup()
-    
     try:
         print "converting " + sys.argv[1] + '...'
         global msh
@@ -217,6 +235,19 @@ def main():
     except IndexError:
         print "nothing to import"
     
+    
+    global width, height
+    glutInit()
+
+    glutInitWindowSize(width , height)
+    glutInitWindowPosition(100, 100) 
+
+    glutCreateWindow(sys.argv[0])
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
+
+    setup()
+    
+
     glutDisplayFunc(draw)
     #glutIdleFunc(timestep)
     glutKeyboardFunc(keyboard)
