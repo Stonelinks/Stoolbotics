@@ -7,7 +7,9 @@ from math import *
 import sys
 import Image
 import numpy
-import gmsh.gmsh as gmsh
+from numpy import *
+import os
+import ConfigParser
 
 width = 700
 height = 400
@@ -15,28 +17,42 @@ oldMouseDraggedX=0
 oldMouseDraggedY=0
 angleY = 0
 angleX = 60
-scale=10
+scale=7
 PI = 3.14159265
 R = 20.0
 mouseMiddlePressed=False
 msh = None
+room = None
+robot = None
 
-class arm():
-    rotation=[1,0,0]
-    links=[]
-    def __init__(self, axis):
-        rotation=axis
-
-    def __init__(self, axis, linkX, linkY, linkZ):
-        rotation=axis
-        addLink(linkX, linkY, linkZ)
-        
-    def addLink(self, linkX, linkY, linkZ):
-        links.append(array(linkX, linkY, linkZ))
-
-    def setRotation(axis):
-        rotation=axis
-        
+class Arm():
+	type=1
+	joint=[]
+	links=[]
+	def __init__(self, _type, _joint):
+		self.type=_type
+		self.joint=_joint
+	
+	def addLink(self, link):
+		self.links.append(link)
+		
+	def setJoint(_joint):
+		self.joint=_joint
+		
+	def setType(_type):
+		self.type=_type
+	
+	def repr(self):
+		return self.str()
+		
+	def str( self ):
+		s="Rotation =\n"
+		s=s+str(joint)+"\n"
+		for i in range(len(links)):
+			s=s+"Joint "+str(i)+"\n"
+			s=s+str(links[i])
+		s+="\n"
+		return s
 class Robot():
     x=0
     y=0
@@ -48,7 +64,7 @@ class Robot():
         self.z=_z
 
     def addArm(self, arm):
-        arms.append(arm)
+        self.arms.append(arm)
             
     def render(self):
         #for i in arms
@@ -56,7 +72,20 @@ class Robot():
          #   for j in i.links
                 
         return
-    
+	def repr(self):
+		print "test"
+		return self.str()
+		
+	def str( self ):
+		print "test2"
+		return "robot"
+		s="Position ="+str(x)+","+str(y)+","+str(z)+"\n"
+		for i in range(len(arms)):
+			s=s+"Arm"+str(i)+"\n"
+			s=s+str(arms[i])
+		s+="\n"
+		return s
+		
 class Room():
     length=0
     width=0
@@ -66,7 +95,6 @@ class Room():
         self.width=_width
         self.height=_height
     def render(self):
-
         glColor3f(0,0,0)
         glBegin(GL_LINES)
         glVertex3f(0,0,0)
@@ -76,7 +104,6 @@ class Room():
         glVertex3f(0,0,0)
         glVertex3f(0,0,scale)
         glEnd()
-        
         for i in range(-self.width/scale/2, self.width/scale/2):            
             for j in range (-self.length/scale/2, self.length/scale/2):
                 if ((i+j)%2 ==0):
@@ -169,17 +196,17 @@ def draw():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glPushMatrix()
     #looking at x/y plane - down z axis
-    glTranslatef(0.0, -20.0, -60.0)
+    glTranslatef(0.0, 0.0, -30.0)
     glRotatef(angleY, 0.0, 1.0, 0.0)
     glRotatef(angleX, 1.0, 0.0, 0.0)
   #  glTranslatef(0.0, 0.0, 60.0)
     room.render()
     
-    try:
-        global msh
-        msh.draw()
-    except:
-        pass
+    glColor3f(0.0, 0.0, 0.0)
+    glBegin(GL_LINE_STRIP)
+    for t in numpy.arange(0, 20 * PI, float(PI / 20.0)): 
+        glVertex3f(R * cos(t), t, R * sin(t))
+    glEnd()
     
     glPopMatrix()
 
@@ -188,7 +215,7 @@ def draw():
 def setup():
     glClearColor(1.0, 1.0, 1.0, 0.0)
     glEnable(GL_DEPTH_TEST)
-    glEnable(GL_LIGHTING)
+    #glEnable(GL_LIGHTING)
 
     # Light property vectors.
     lightAmb = [ 0.0, 0.0, 0.0, 1.0 ]
@@ -202,7 +229,7 @@ def setup():
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec)
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
 
-    glEnable(GL_LIGHT0) # Enable particular light source.
+    #glEnable(GL_LIGHT0) # Enable particular light source.
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb) # Global ambient light.
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE) # Enable two-sided lighting.
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE) # Enable local viewpoint.
@@ -214,40 +241,54 @@ def setup():
     # Specify locations for the position and normal arrays.
     #glVertexPointer(3, GL_FLOAT, 0, vertices)
     #glNormalPointer(GL_FLOAT, 0, normals)
-
     global room
     room = Room(100,100,100)
+
     
 def resize(_w, _h):
-    glViewport(0, 0, _w, _h)
+    width = _w
+    height = _h
+    glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    glOrtho (-_w/scale, _w/scale, -_h/scale, _h/scale, -100.0, 100.0)
+    glOrtho (-width/scale, width/scale, -height/scale, height/scale, -100.0, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
+def readTextFile(_fileName):
+	global robot
+	robot=Robot(50,0,50)
+	
+	_fileFullName=os.path.join(os.path.dirname(__file__),_fileName)
+	f=open(_fileFullName)
+	parser = ConfigParser.ConfigParser()
+	parser.read(_fileFullName.replace("/","//"))
+	
+	NumJoints=int(parser.get("Joints", "NumberOfJoints"))
+	for n in range(1,NumJoints+1):
+		type=int(parser.get("Joint%d" %n, "Type"))
+		numLinks=int(parser.get("Joint%d" %n, "NumberOfLinks"))
+		jointArray=str.split(str.strip(parser.get("Joint%d" %n, "Joint"),' []'),',')
+		joint=numpy.transpose(matrix(jointArray, dtype=float))
+		arm=Arm(type,joint)
+		for l in range (1, numLinks+1):
+			linkArray=str.split(str.strip(parser.get("Joint%d" %n, "Link%d" %l),' []'),',')
+			link=numpy.transpose(matrix(linkArray, dtype=float))
+			arm.addLink(link)
+		robot.addArm(arm)
+	print robot
 
-def main():
-    try:
-        print "converting " + sys.argv[1] + '...'
-        global msh
-        msh = gmsh.convert(sys.argv[1])
-    except IndexError:
-        print "nothing to import"
-    
-    
+def main():   
     global width, height
     glutInit()
-
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
     glutInitWindowSize(width , height)
     glutInitWindowPosition(100, 100) 
 
     glutCreateWindow(sys.argv[0])
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
 
     setup()
-    
-
+    readTextFile("robot_elbow.ini")
     glutDisplayFunc(draw)
     #glutIdleFunc(timestep)
     glutKeyboardFunc(keyboard)
