@@ -1,0 +1,13 @@
+*.pyc
+
+.DS_Store
+xcuserdata
+*.swp
+*~.nib
+
+build/
+pip-log.txt
+
+*.pbxuser
+*.perspective
+*.perspectivev3
