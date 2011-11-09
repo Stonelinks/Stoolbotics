@@ -2,7 +2,8 @@ TODO (not necessarily in order):
 
 - specification of a robot arm VIA matricies, somehow
   - robots matricies in json?
-
+  - ini files
+  
 - drawing of that arm in world
   - joints:
     - rotary = cylinder
