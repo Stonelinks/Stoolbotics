@@ -1,3 +1,8 @@
+from config import *
+from numpy import *
+from tools.tools import *
+import json, sys
+
 class arm(object):
     def __init__(self, _type=1, _joint=[]):
         self.type = _type
@@ -26,11 +31,52 @@ class arm(object):
         return s
 
 class robot(object):
-    def __init__(self, _x=0, _y=0, _z=0):
-        self.x=_x
-        self.y=_y
-        self.z=_z
-        self.arms=[]
+    def __init__(self, d, x=0, y=0, z=0):
+        
+        # establish literals
+        for k, v in d.iteritems():
+            locals()[k] = v
+        
+        # convert settings into something useful
+        _d = {}
+        for k, v in d.iteritems():
+            # joint parameter
+            if k[0] == 'q':
+                _d[k] = float(v)
+                continue
+            elif k[0] == 'N':
+                _d[k] = int(v)
+                continue
+            
+            # it is a vector
+            if v[0] == '[':
+                tmp = eval(v)
+                
+                # joint axis
+                if k[0] == 'h':
+                    # transpose
+                    v = array([[float(tmp[0])], [float(tmp[1])], [float(tmp[2])]])
+                else:
+                    # leave it alone
+                    v = array([float(tmp[0]), float(tmp[1]), float(tmp[2])])
+            _d[k] = v
+            
+        # set everything as class variables
+        for k, v in _d.iteritems():
+            if not (isinstance(v, float) or isinstance(v, int)):
+                if v[0] == 'r' or v[0] == 'e':
+                    cmd = v
+                    for key, val in _d.iteritems():
+                        cmd = cmd.replace( key, "_d['" + key + "']")
+                    setattr(self, k, eval(cmd))
+            else:
+                setattr(self, k, v)
+            
+        # origin
+        self.x = x
+        self.y = y
+        self.z = z
+        self.arms = []
 
     def addArm(self, arm):
         self.arms.append(arm)
