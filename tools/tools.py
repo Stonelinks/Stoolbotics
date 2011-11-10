@@ -28,7 +28,7 @@ def hat(k):
   return array([[0, -k[2][0], k[1][0]], [k[2][0], 0, -k[0][0]], [-k[1][0], k[0][0], 0]])
 
 # generates the (dim by dim) rotation matrix for 3x1 vector for theta degrees
-def rot(vector, theta, dim=4):
+def rot(vector, theta, dim=3):
   vector = vector/linalg.norm(vector);
   rot = identity(dim, float)
   rot += zeros_resize(sin(theta) * hat(vector), dim)

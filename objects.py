@@ -36,7 +36,7 @@ class robot(object):
         # establish literals
         for k, v in d.iteritems():
             locals()[k] = v
-        
+
         # convert settings into something useful
         _d = {}
         for k, v in d.iteritems():
@@ -47,7 +47,7 @@ class robot(object):
             elif k[0] == 'N':
                 _d[k] = int(v)
                 continue
-            
+
             # it is a vector
             if v[0] == '[':
                 tmp = eval(v)
@@ -60,18 +60,41 @@ class robot(object):
                     # leave it alone
                     v = array([float(tmp[0]), float(tmp[1]), float(tmp[2])])
             _d[k] = v
-            
+
         # set everything as class variables
         for k, v in _d.iteritems():
             if not (isinstance(v, float) or isinstance(v, int)):
-                if v[0] == 'r' or v[0] == 'e':
+                if v[:3] == 'rot' or v[:3] == 'eye':
                     cmd = v
                     for key, val in _d.iteritems():
                         cmd = cmd.replace( key, "_d['" + key + "']")
-                    setattr(self, k, eval(cmd))
-            else:
-                setattr(self, k, v)
-            
+                    _d[k] = eval(cmd)
+
+        for k, v in _d.iteritems():
+            print k + ' = ' + str(v)
+            setattr(self, k, v)
+        
+        self.joint_axes = []
+        self.joint_params = []
+        self.joint_geoms = []
+        
+        for i in range(1, self.N + 1):
+            self.joint_axes.append(eval('self.h' + str(i)))
+            self.joint_params.append(eval('self.q' + str(i)))
+            self.joint_geoms.append(eval('self.l' + str(i)))
+        
+        self.rotations = []
+        self.positions = []
+        
+        indexes = []
+        for i in range(1, self.N):
+            indexes.append(str(i) + str(i + 1))
+        indexes.append(str(self.N) + 'T')
+        
+        for i in indexes:
+            self.rotations.append(eval('self.R' + i))
+            self.rotations.append(eval('self.R' + i))
+        
         # origin
         self.x = x
         self.y = y
