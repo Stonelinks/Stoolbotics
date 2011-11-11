@@ -7,4 +7,6 @@ def as_robot(dict):
 
 r = json.loads(open('robots/sample.json').read(), object_hook=as_robot)
 
-print r.N
+for i in range(5):
+    r.timestep()
+    r.forwardkin()

@@ -3,48 +3,37 @@ from numpy import *
 from tools.tools import *
 import json, sys
 
-class arm(object):
-    def __init__(self, _type=1, _joint=[]):
-        self.type = _type
-        self.joint = _joint
-        self.links = []
-    
-    def addLink(self, link):
-        self.links.append(link)
-        
-    def setJoint(_joint):
-        self.joint=_joint
-        
-    def setType(_type):
-        self.type=_type
-    
-    def repr(self):
-        return self.str()
-        
-    def str( self ):
-        s="Rotation =\n"
-        s=s+str(joint)+"\n"
-        for i in range(len(links)):
-            s=s+"Joint "+str(i)+"\n"
-            s=s+str(links[i])
-        s+="\n"
-        return s
-
 class robot(object):
     def __init__(self, d, x=0, y=0, z=0):
         
-        # establish literals
+        # make initial params class variables
+        # also adds lists
+        self.init_params(d)
+        
+        # origin
+        self.x = x
+        self.y = y
+        self.z = z
+        self.arms = []
+
+    def init_params(self, d=None):
+        if d is None:
+            d = self.d
+        
+        globals()['t'] = 0
+        
+        # establish local vars and pick out
+        # symbolic expressions
+        self.syms = {}
         for k, v in d.iteritems():
+            if k[0] in ['q', 'R', 'P']:
+                self.syms[k] = v
             locals()[k] = v
 
-        # convert settings into something useful
-        _d = {}
+        # convert into something useful
+        _d = self._d = {}
         for k, v in d.iteritems():
-            # joint parameter
-            if k[0] == 'q':
-                _d[k] = float(v)
-                continue
-            elif k[0] == 'N':
+            if k[0] == 'N':
                 _d[k] = int(v)
                 continue
 
@@ -61,19 +50,12 @@ class robot(object):
                     v = array([float(tmp[0]), float(tmp[1]), float(tmp[2])])
             _d[k] = v
 
-        # set everything as class variables
-        for k, v in _d.iteritems():
-            if not (isinstance(v, float) or isinstance(v, int)):
-                if v[:3] == 'rot' or v[:3] == 'eye':
-                    cmd = v
-                    for key, val in _d.iteritems():
-                        cmd = cmd.replace( key, "_d['" + key + "']")
-                    _d[k] = eval(cmd)
-
-        for k, v in _d.iteritems():
-            print k + ' = ' + str(v)
-            setattr(self, k, v)
+        # eval syms
+        self.eval_syms()
         
+        self.build_lists()
+        
+    def build_lists(self):
         self.joint_axes = []
         self.joint_params = []
         self.joint_geoms = []
@@ -93,34 +75,56 @@ class robot(object):
         
         for i in indexes:
             self.rotations.append(eval('self.R' + i))
-            self.rotations.append(eval('self.R' + i))
+            self.positions.append(eval('self.P' + i))
         
-        # origin
-        self.x = x
-        self.y = y
-        self.z = z
-        self.arms = []
+    def eval_syms(self):
+        for k, v in self.syms.iteritems():
+          for key, _ in self._d.iteritems():
+              v = v.replace( key, "self._d['" + key + "']")
+          self._d[k] = eval(v)
+        self.sync_d()
+    
+    def sync_d(self):
+        for k, v in self._d.iteritems():
+            setattr(self, k, v)
 
-    def addArm(self, arm):
-        self.arms.append(arm)
-            
+    def timestep(self):
+        global t
+        t+=1
+        self.eval_syms()
+        self.build_lists()
+    
+    def forwardkin(self, params=None):
+        if params == None:
+            params = self.joint_params
+        
+        R0T = eye(3,3)
+        P0T = eye(3,3)
+        
+        # make R0T
+        for R in self.rotations:
+            R0T = dot(R0T, R)
+
+        # make P0T
+        accum = []
+        for R, P in zip(self.rotations, self.positions):
+            accum.append(R)
+            tmp = eye(3,3)
+            for _r in accum:
+                tmp = dot(tmp, _r)
+            P = eval('[%s,%s,%s]' % (P[0], P[1], P[2]))
+            P0T += dot(tmp, P)
+        
+        #print str(R0T)
+        #print str(P0T)
+        
+        self.R0T = R0T
+        self.P0T = P0T
+
     def render(self):
         pass
-                
-    def repr(self):
-        print "test"
-        return self.str()
         
-    def str(self):
-        print "test2"
-        return "robot"
-        s="Position ="+str(x)+","+str(y)+","+str(z)+"\n"
-        for i in range(len(arms)):
-            s=s+"Arm"+str(i)+"\n"
-            s=s+str(arms[i])
-        s+="\n"
-        return s
-        
+
 class room(object):
     def __init__(self, _length=0, _width=0, _height=0):
         self.length=_length

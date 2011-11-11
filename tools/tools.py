@@ -25,7 +25,9 @@ def zeros_resize(matrix, dim):
     
 # hat operator for 3x1 vector
 def hat(k):
-  return array([[0, -k[2][0], k[1][0]], [k[2][0], 0, -k[0][0]], [-k[1][0], k[0][0], 0]])
+  return array([[0, -k[2][0], k[1][0]],
+                [k[2][0], 0, -k[0][0]],
+                [-k[1][0], k[0][0], 0]])
 
 # generates the (dim by dim) rotation matrix for 3x1 vector for theta degrees
 def rot(vector, theta, dim=3):

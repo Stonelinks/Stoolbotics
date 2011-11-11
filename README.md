@@ -1,7 +1,7 @@
 TODO (not necessarily in order):
 
-- specification of a robot arm VIA matricies, somehow
-  - robots matricies in json?
+x specification of a robot arm VIA matricies, somehow
+  x robots matricies in json?
   - ini files
   
 - drawing of that arm in world
@@ -18,13 +18,13 @@ TODO (not necessarily in order):
 
 - port wen's matlab stuff to python
   - basic things:
-    - hat
-    - rot (euler-rodriguez)
+    x hat
+    x rot (euler-rodriguez)
     - trans
   - subproblems for inverse kinematics
   - jacobian (?)
 
-- forward kinematics solver
+x forward kinematics solver
   - give it any robot and joint angles, find end position in world
 
 - write proposal
