@@ -22,33 +22,32 @@ class robot(object):
         
         globals()['t'] = 0
         
-        # establish local vars and pick out
-        # symbolic expressions
-        self.syms = {}
+        # establish local vars
         for k, v in d.iteritems():
-            if k[0] in ['q', 'R', 'P']:
-                self.syms[k] = v
             locals()[k] = v
 
         # convert into something useful
-        _d = self._d = {}
+        self._d = {}
         for k, v in d.iteritems():
             if k[0] == 'N':
-                _d[k] = int(v)
+                self._d[k] = int(v)
                 continue
 
             # it is a vector
             if v[0] == '[':
                 tmp = eval(v)
                 
-                # joint axis
-                if k[0] == 'h':
+                # joint axis or position vector
+                if k[0] == 'h' or k[0] == 'P':
                     # transpose
-                    v = array([[float(tmp[0])], [float(tmp[1])], [float(tmp[2])]])
-                else:
-                    # leave it alone
-                    v = array([float(tmp[0]), float(tmp[1]), float(tmp[2])])
-            _d[k] = v
+                    v = [[tmp[0]], [tmp[1]], [tmp[2]]]
+            self._d[k] = v
+
+        # pick out symbolic expressions
+        self.syms = {}
+        for k, v in self._d.iteritems():
+            if k[0] in ['q', 'R', 'P']:
+                self.syms[k] = v
 
         # eval syms
         self.eval_syms()
@@ -79,9 +78,12 @@ class robot(object):
         
     def eval_syms(self):
         for k, v in self.syms.iteritems():
-          for key, _ in self._d.iteritems():
-              v = v.replace( key, "self._d['" + key + "']")
-          self._d[k] = eval(v)
+            for key, _ in self._d.iteritems():
+                v = str(v).replace( key, "self._d['" + key + "']")
+            if v[0] == '[':
+                v = str(v).replace('\n', ',').replace("u'", '').replace("'", '')
+                v = 'array(' + str(v) + ', float)'
+            self._d[k] = eval(v)
         self.sync_d()
     
     def sync_d(self):
@@ -98,28 +100,21 @@ class robot(object):
         if params == None:
             params = self.joint_params
         
-        R0T = eye(3,3)
-        P0T = eye(3,3)
+        self.R0T = eye(3,3)
+        self.P0T = zeros((3,1))
         
         # make R0T
         for R in self.rotations:
-            R0T = dot(R0T, R)
+            self.R0T = dot(self.R0T, R)
 
         # make P0T
-        accum = []
+        tmp = eye(3,3)
         for R, P in zip(self.rotations, self.positions):
-            accum.append(R)
-            tmp = eye(3,3)
-            for _r in accum:
-                tmp = dot(tmp, _r)
-            P = eval('[%s,%s,%s]' % (P[0], P[1], P[2]))
-            P0T += dot(tmp, P)
+            self.P0T += dot(tmp, P)
+            tmp = dot(tmp, R)
         
         #print str(R0T)
         #print str(P0T)
-        
-        self.R0T = R0T
-        self.P0T = P0T
 
     def render(self):
         pass
