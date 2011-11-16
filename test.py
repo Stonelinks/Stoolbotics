@@ -15,10 +15,10 @@ r = create_robot('robots/sample.json')
 #print 'q1 = ' + str(r.q1)
 #print 'P01 = ' + str(r.P01)
 #print 'P12 = ' + repr(r.P12)
-#print 'R23 = ' + str(r.R23)
+print 'R12 = ' + str(r.R12)
 
 
 for i in range(20):
   r.forwardkin()
   r.timestep()
-  print 'R23 = ' + str(r.R23)
+  print 'R12 = ' + str(r.R12)

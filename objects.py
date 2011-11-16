@@ -1,6 +1,10 @@
 from config import *
 from numpy import *
 from tools.tools import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+
 import json, sys
 
 class robot(object):
@@ -14,7 +18,6 @@ class robot(object):
         self.x = x
         self.y = y
         self.z = z
-        self.arms = []
 
     def init_params(self, d=None):
         if d is None:
@@ -117,8 +120,39 @@ class robot(object):
         #print str(P0T)
 
     def render(self):
-        pass
-        
+        i=0
+        glPushMatrix()
+        for R, P in zip(self.rotations, self.positions):
+            #if i ==0:
+            #    print str(R)+' '+str(P)
+            i=i+1
+            glColor3f(1,1.0/len(self.rotations)*i,1.0/len(self.rotations)*i)
+            
+            #draw P
+            glBegin(GL_LINES)
+            glVertex3f(0,0,0)
+            glVertex3f(P[0],P[1],P[2])
+            glEnd()
+            glTranslatef(P[0],P[1],P[2])
+            #draw joint
+            if array_equal(R,matrix(eye(3))): #prismatic
+                print "eye matrix"
+            else: #rotational
+                
+                print "rot matrix"
+            
+            #load matrix
+            glPushMatrix()
+            rm=zeros_resize(R,4)
+            #print rm
+            double_matrix=[[rm[0,0],rm[0,1],rm[0,2],rm[0,3]],[rm[1,0],rm[1,1],rm[1,2],rm[1,3]],[rm[2,0],rm[2,1],rm[2,2],rm[2,3]],[rm[3,0],rm[3,1],rm[3,2],rm[3,3]]]
+            glLoadMatrixf(double_matrix)
+            #print double_matrix
+            
+        #pop all joints off
+        for i in range(len(self.rotations)):
+            glPopMatrix()
+        glPopMatrix()
 
 class room(object):
     def __init__(self, _length=0, _width=0, _height=0):

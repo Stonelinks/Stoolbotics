@@ -11,6 +11,7 @@ from numpy import *
 import os
 import ConfigParser
 
+from tools.display import *
 from config import *
 from objects import *
 
@@ -98,11 +99,21 @@ def draw():
   #  glTranslatef(0.0, 0.0, 60.0)
     room.render()
     
+    glColor3f(0,0,0)
+    draw_axes('1')
+    
+    glColor3f(1,0.2,0.2)
+    #draw_rotational_joint(0, 0, 0, 10, 50)
+    draw_prismatic_joint(0, 0, 0, 40, 20, 10)
+    
+    #robot.forwardkin()
+    #robot.timestep()
+    #robot.render()
     glColor3f(0.0, 0.0, 0.0)
-    glBegin(GL_LINE_STRIP)
-    for t in numpy.arange(0, 20 * PI, float(PI / 20.0)): 
-        glVertex3f(R * cos(t), t, R * sin(t))
-    glEnd()
+    #glBegin(GL_LINE_STRIP)
+    #for t in numpy.arange(0, 20 * PI, float(PI / 20.0)): 
+    #    glVertex3f(R * cos(t), t, R * sin(t))
+    #glEnd()
     
     glPopMatrix()
 
@@ -138,8 +149,24 @@ def setup():
     #glVertexPointer(3, GL_FLOAT, 0, vertices)
     #glNormalPointer(GL_FLOAT, 0, normals)
     global room
-    room = Room(100,100,100)
+    room = room(100,100,100)
+    global robot
+    robot = create_robot('robots/sample.json')
+    robot.forwardkin()
+    robot.timestep()
+    print 'N = ' + str(robot.N)
+    print 'q1 = ' + str(robot.q1)
+    print 'P01 = ' + str(robot.P01)
+    print 'R01 = ' + str(robot.R01)
+    print 'P12 = ' + repr(robot.P12)
+    print 'R12 = ' + str(robot.R01)
+    print 'P23 = ' + repr(robot.P23)
+    print 'R23 = ' + str(robot.R23)
+    print 'P3T = ' + repr(robot.P3T)
 
+def create_robot(filename):
+    r = json.loads(open(filename).read(), object_hook=lambda d: robot(d))
+    return r
     
 def resize(_w, _h):
     width = _w
@@ -151,31 +178,9 @@ def resize(_w, _h):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
-def readTextFile(_fileName):
-    global robot
-    robot=Robot(50,0,50)
-    
-    _fileFullName=os.path.join(os.path.dirname(__file__),_fileName)
-    f=open(_fileFullName)
-    parser = ConfigParser.ConfigParser()
-    parser.read(_fileFullName.replace("/","//"))
-    
-    NumJoints=int(parser.get("Joints", "NumberOfJoints"))
-    for n in range(1,NumJoints+1):
-        type=int(parser.get("Joint%d" %n, "Type"))
-        numLinks=int(parser.get("Joint%d" %n, "NumberOfLinks"))
-        jointArray=str.split(str.strip(parser.get("Joint%d" %n, "Joint"),' []'),',')
-        joint=numpy.transpose(matrix(jointArray, dtype=float))
-        arm=Arm(type,joint)
-        for l in range (1, numLinks+1):
-            linkArray=str.split(str.strip(parser.get("Joint%d" %n, "Link%d" %l),' []'),',')
-            link=numpy.transpose(matrix(linkArray, dtype=float))
-            arm.addLink(link)
-        robot.addArm(arm)
-    print robot
-
 def main():   
     global width, height
+    
     glutInit()
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
     glutInitWindowSize(width , height)
@@ -184,7 +189,6 @@ def main():
     glutCreateWindow(sys.argv[0])
 
     setup()
-    readTextFile("robot_elbow.ini")
     glutDisplayFunc(draw)
     #glutIdleFunc(timestep)
     glutKeyboardFunc(keyboard)

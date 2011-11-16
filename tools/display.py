@@ -3,10 +3,11 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
+from config import *
 from math import *
 import sys
 import Image
-from numpy import *
+import numpy
 from tools import *
 
 class point():
@@ -25,6 +26,50 @@ class point():
     name += " (" + str(round(self.x, 3)) + ", " + str(round(self.y, 3)) + ", " + str(round(self.z, 3)) + ")"
     text_at_pos(self.x + 1, self.y + 1, self.z + 1, name, GLUT_BITMAP_TIMES_ROMAN_10)
 
+def draw_rotational_joint(cx, cy, cz, r, l): #draws cylinder along z axis
+    glTranslate(0,0,-l/2)
+    draw_rotational_joint_endCap(r,l/3)
+    gluCylinder(gluNewQuadric(), r, r, l, l/3, 1)
+    glTranslate(0,0,l)
+    draw_rotational_joint_endCap(r,l/3)
+    glTranslate(0,0,-l/2)
+
+def draw_rotational_joint_endCap(r, sides):
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex3f(0,r/2,0)
+    for angle in arange(0, 2*PI, 2*PI/sides):
+        glVertex3f(cos(angle)*r, sin(angle)*r,0)
+    glVertex3f(r, 0, 0)
+    glEnd()
+
+def draw_prismatic_joint(cx, cy, cz, l, w, h):
+    glBegin(GL_QUAD_STRIP)
+    #Quads 1 2 3 4
+    glVertex3f(cx+l/2, cy-w/2, cz-h/2)   #V2
+    glVertex3f(cx-l/2, cy-w/2, cz-h/2)   #V1
+    glVertex3f(cx+l/2, cy-w/2, cz+h/2)   #V4
+    glVertex3f(cx-l/2, cy-w/2, cz+h/2)   #V3
+    glVertex3f(cx+l/2, cy+w/2, cz+h/2)   #V6
+    glVertex3f(cx-l/2, cy+w/2, cz+h/2)   #V5
+    glVertex3f(cx+l/2, cy+w/2, cz-h/2)   #V8
+    glVertex3f(cx-l/2, cy+w/2, cz-h/2)   #V7
+    glVertex3f(cx+l/2, cy-w/2, cz-h/2)   #V2
+    glVertex3f(cx-l/2, cy-w/2, cz-h/2)   #V1
+    glEnd()
+    
+    #Quad 5
+    glBegin(GL_QUADS)
+    glVertex3f(cx+l/2, cy+w/2, cz-h/2)   #V8
+    glVertex3f(cx+l/2, cy+w/2, cz+h/2)   #V6
+    glVertex3f(cx+l/2, cy-w/2, cz+h/2)   #V4
+    glVertex3f(cx+l/2, cy-w/2, cz-h/2)   #V2
+    #Quad 6
+    glVertex3f(cx-l/2, cy+w/2, cz-h/2)   #V7
+    glVertex3f(cx-l/2, cy+w/2, cz+h/2)   #V5
+    glVertex3f(cx-l/2, cy-w/2, cz+h/2)   #V3
+    glVertex3f(cx-l/2, cy-w/2, cz-h/2)   #V1
+    glEnd()
+    
 def text_at_pos( x, y, z, text, font=GLUT_BITMAP_TIMES_ROMAN_24):
     glRasterPos3f(x, y, z)
     drawBitmapString(text, font)
@@ -32,7 +77,54 @@ def text_at_pos( x, y, z, text, font=GLUT_BITMAP_TIMES_ROMAN_24):
 def drawBitmapString(text, font=GLUT_BITMAP_TIMES_ROMAN_24):
     for c in text:
         glutBitmapCharacter(font, ord(c))
+        
+def draw_axes(number=''):
+    axes_l = 15
+    glBegin(GL_LINES)
+    
+    # x axis
+    glVertex3f(0, 0, 0)
+    glVertex3f(axes_l, 0, 0)
+    
+    glVertex3f(axes_l, 0, 0)
+    glVertex3f(axes_l-(axes_l/5), (axes_l/5), 0)
+    
+    glVertex3f(axes_l, 0, 0)
+    glVertex3f(axes_l-(axes_l/5), -(axes_l/5), 0)
+    
+    # y axis
+    glVertex3f(0, 0, 0)
+    glVertex3f(0, axes_l, 0)
+    
+    glVertex3f(0, axes_l, 0)
+    glVertex3f(0, axes_l-(axes_l/5), (axes_l/5))
 
+    glVertex3f(0, axes_l, 0)
+    glVertex3f(0, axes_l-(axes_l/5), -(axes_l/5))
+
+    # z axis
+    glVertex3f(0, 0, 0)
+    glVertex3f(0, 0, axes_l)
+
+    glVertex3f(0, 0, axes_l)
+    glVertex3f(0, (axes_l/5), axes_l-(axes_l/5))
+
+    glVertex3f(0, 0, axes_l)
+    glVertex3f(0, -(axes_l/5), axes_l-(axes_l/5))
+    
+    glEnd()
+    
+    text_at_pos(axes_l+1, 0, 0, 'x'+number)
+    text_at_pos(0, axes_l+1, 0, 'y'+number)
+    text_at_pos(0, 0, axes_l+1, 'z'+number)
+    
+def screendump(self, filename="screendump"):
+    s = glReadPixels(0, 0, self.w, self.h, GL_RGB, GL_UNSIGNED_BYTE)
+    img = Image.new('RGB', (self.w, self.h))
+    img.fromstring(s)
+    img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
+    img2.save(filename + ".jpg")
+    
 class gl_window():
     def __init__(self, w=700, h=400):
         self.w = w
@@ -55,12 +147,7 @@ class gl_window():
     def run(self):
         glutMainLoop()
   
-    def screendump(self, filename="screendump"):
-        s = glReadPixels(0, 0, self.w, self.h, GL_RGB, GL_UNSIGNED_BYTE)
-        img = Image.new('RGB', (self.w, self.h))
-        img.fromstring(s)
-        img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
-        img2.save(filename + ".jpg")
+
   
     def keyboard(self, key, x, y):
         if key == chr(27):
@@ -71,46 +158,7 @@ class gl_window():
         elif key == 's':
             self.screendump()
             
-    def draw_axes(self):
-        axes_l = 15
-        
-        glBegin(GL_LINES)
-        
-        # x axis
-        glVertex3f(0, 0, 0)
-        glVertex3f(axes_l, 0, 0)
-        
-        glVertex3f(axes_l, 0, 0)
-        glVertex3f(axes_l-(axes_l/5), (axes_l/5), 0)
-        
-        glVertex3f(axes_l, 0, 0)
-        glVertex3f(axes_l-(axes_l/5), -(axes_l/5), 0)
-        
-        # y axis
-        glVertex3f(0, 0, 0)
-        glVertex3f(0, axes_l, 0)
-        
-        glVertex3f(0, axes_l, 0)
-        glVertex3f(0, axes_l-(axes_l/5), (axes_l/5))
-
-        glVertex3f(0, axes_l, 0)
-        glVertex3f(0, axes_l-(axes_l/5), -(axes_l/5))
-
-        # z axis
-        glVertex3f(0, 0, 0)
-        glVertex3f(0, 0, axes_l)
-
-        glVertex3f(0, 0, axes_l)
-        glVertex3f(0, (axes_l/5), axes_l-(axes_l/5))
-
-        glVertex3f(0, 0, axes_l)
-        glVertex3f(0, -(axes_l/5), axes_l-(axes_l/5))
-        
-        glEnd()
-        
-        text_at_pos(axes_l+1, 0, 0, 'x')
-        text_at_pos(0, axes_l+1, 0, 'y')
-        text_at_pos(0, 0, axes_l+1, 'z')
+    
 
     def draw(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -218,5 +266,3 @@ class gl_window():
       
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-
-gl_window()
