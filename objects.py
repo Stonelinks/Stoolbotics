@@ -67,7 +67,7 @@ class robot(object):
                 # joint axis or position vector
                 if k[0] == 'h' or k[0] == 'P':
                     # transpose
-                    v = array([[tmp[0]], [tmp[1]], [tmp[2]]], float)
+                    v = array([[tmp[0], tmp[1], tmp[2]]], float).T
             self._d[k] = v
         
         # eval syms
