@@ -5,9 +5,22 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import json, sys
+import json, sys, re
+import copy as realcopy
 
 from tools.display import *
+
+class link():
+  def __init__(self, name, pos, rot, type):
+      self.name = name
+      self.pos = pos
+      self.P = pos
+      self.rot = rot
+      self.R = rot
+      self.type = type
+  
+  def is_prismatic(self):
+      return self.type == 'prismatic'
 
 class robot(object):
     def __init__(self, d, x=0, y=0, z=0):
@@ -27,8 +40,11 @@ class robot(object):
         
         globals()['t'] = 0
         
-        # establish local vars
+        # establish local vars, pick out syms
+        self.syms = {}
         for k, v in d.iteritems():
+            if k[0] in ['q', 'R', 'P']:
+                self.syms[k] = v
             locals()[k] = v
 
         # convert into something useful
@@ -37,7 +53,13 @@ class robot(object):
             if k[0] == 'N':
                 self._d[k] = int(v)
                 continue
-
+            elif k[0] == 'q':
+                self._d[k] = eval(v)
+                continue
+            elif k[0] == 'l':
+                self._d[k] = float(v)
+                continue
+                
             # it is a vector
             if v[0] == '[':
                 tmp = eval(v)
@@ -45,15 +67,9 @@ class robot(object):
                 # joint axis or position vector
                 if k[0] == 'h' or k[0] == 'P':
                     # transpose
-                    v = [[tmp[0]], [tmp[1]], [tmp[2]]]
+                    v = array([[tmp[0]], [tmp[1]], [tmp[2]]], float)
             self._d[k] = v
-
-        # pick out symbolic expressions
-        self.syms = {}
-        for k, v in self._d.iteritems():
-            if k[0] in ['q', 'R', 'P']:
-                self.syms[k] = v
-
+        
         # eval syms
         self.eval_syms()
         
@@ -69,26 +85,45 @@ class robot(object):
             self.joint_params.append(eval('self.q' + str(i)))
             self.joint_geoms.append(eval('self.l' + str(i)))
         
-        self.rotations = []
-        self.positions = []
+        self.links = []
         
         indexes = []
-        for i in range(1, self.N):
+        for i in range(0, self.N):
             indexes.append(str(i) + str(i + 1))
         indexes.append(str(self.N) + 'T')
         
         for i in indexes:
-            self.rotations.append(eval('self.R' + i))
-            self.positions.append(eval('self.P' + i))
+            cmd = 'link(\'' + i + '\', '
+            cmd += 'self.P' + i + ', '
+            cmd += 'self.R' + i + ', '
+            
+            if 'q' in self.syms['P' + i]:
+                cmd += '\'prismatic\''
+            else:
+                cmd += '\'rotary\''
+            cmd += ')'
+            self.links.append(eval(cmd))
+        
+        for l in self.links:
+            print 'link ' + l.name + ' is ' + l.type
+                
         
     def eval_syms(self):
+        # TODO: use regex for all of this
+        
+        # eval syms
         for k, v in self.syms.iteritems():
+            tmp = v
             for key, _ in self._d.iteritems():
-                v = str(v).replace( key, "self._d['" + key + "']")
-            if v[0] == '[':
-                v = str(v).replace('\n', ',').replace("u'", '').replace("'", '')
-                v = 'array(' + str(v) + ', float)'
-            self._d[k] = eval(v)
+                tmp = str(tmp).replace( key, 'self._d[\'' + key + '\']')
+                if 'u\'' + key + '\'' in tmp:
+                    tmp = tmp.replace('u\'' + key + '\'', key)
+                    #something like this would be awesome: tmp = re.sub(r'u\'(.*)\'', tmp, tmp)
+            
+            if tmp[0] == '[' and k[0] == 'P':
+                tmp = 'array([' + tmp + '], float).T'
+
+            self._d[k] = eval(tmp)
         self.sync_d()
     
     def sync_d(self):
@@ -101,22 +136,20 @@ class robot(object):
         self.eval_syms()
         self.build_lists()
     
-    def forwardkin(self, params=None):
-        if params == None:
-            params = self.joint_params
+    def forwardkin(self):
         
         self.R0T = eye(3,3)
         self.P0T = zeros((3,1))
         
         # make R0T
-        for R in self.rotations:
-            self.R0T = dot(self.R0T, R)
+        for link in self.links:
+            self.R0T = dot(self.R0T, link.R)
 
         # make P0T
         tmp = eye(3,3)
-        for R, P in zip(self.rotations, self.positions):
-            self.P0T += dot(tmp, P)
-            tmp = dot(tmp, R)
+        for link in self.links:
+            self.P0T += dot(tmp, link.P)
+            tmp = dot(tmp, link.R)
         
         #print str(R0T)
         #print str(P0T)
@@ -124,35 +157,47 @@ class robot(object):
     def render(self):
         i=0
         glPushMatrix()
-        for R, P in zip(self.rotations, self.positions):
+        for link in self.links:
+            R = link.R
+            P = link.P
+            
             #if i ==0:
             #    print str(R)+' '+str(P)
             i=i+1
-            glColor3f(1,1.0/len(self.rotations)*i,1.0/len(self.rotations)*i)
+            glColor3f( 1, 1.0/len(self.links)*i ,1.0/len(self.links)*i)
             
             glPushMatrix()
             glTranslate(P[0],P[1],P[2])
+            
             #draw joint
-            if array_equal(R,matrix(eye(3))): #prismatic
+            if link.is_prismatic():
                 draw_prismatic_joint(0, 0, 0, P[0], P[1], P[2])
                 print "eye matrix"
-            else: #rotational
+            else:
                 draw_rotational_joint(0, 0, 0, 10, 30)
                 print "rot matrix"
             
             
             #load matrix
-            tm=matrix([[1,0,0,0],[0,1,0,0],[0,0,1,0],[P[0],P[1],P[2],1]])
+            tm=matrix([[1,0,0,0],
+                       [0,1,0,0],
+                       [0,0,1,0],
+                       [P[0],P[1],P[2],1]])
+                       
             rm=zeros_resize(R,4)
             currentMatrix=glGetFloatv(GL_PROJECTION_MATRIX)
             print currentMatrix
             #print rm
             
-            double_matrix=[rm[0,0],rm[0,1],rm[0,2],rm[0,3],rm[1,0],rm[1,1],rm[1,2],rm[1,3],rm[2,0],rm[2,1],rm[2,2],rm[2,3],rm[3,0],rm[3,1],rm[3,2],rm[3,3]]
+            double_matrix=[ rm[0,0],rm[0,1],rm[0,2],rm[0,3],
+                            rm[1,0],rm[1,1],rm[1,2],rm[1,3],
+                            rm[2,0],rm[2,1],rm[2,2],rm[2,3],
+                            rm[3,0],rm[3,1],rm[3,2],rm[3,3] ]
+            
             glLoadMatrixf(double_matrix)
             
         #pop all joints off
-        for i in range(len(self.rotations)):
+        for i in range(len(self.links)):
             glPopMatrix()
         glPopMatrix()
 
@@ -184,3 +229,4 @@ class room(object):
                 glVertex3f((i+1)*scale,0,(j+1)*scale)
                 glVertex3f(i*scale,0,(j+1)*scale)
                 glEnd()
+\
