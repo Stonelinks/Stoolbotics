@@ -9,15 +9,12 @@ import Image
 import numpy
 from numpy import *
 import os
-import ConfigParser
 
 from tools.display import *
 from config import *
 from objects import *
 
 def timestep():
-    global angleY
-    angleY += 1
     glutPostRedisplay()
 
 # Mouse motion callback routine.
@@ -103,12 +100,10 @@ def draw():
     draw_axes('1')
     
     glColor3f(1,0.2,0.2)
-    #draw_rotational_joint(0, 0, 0, 10, 50)
-    draw_prismatic_joint(0, 0, 0, 40, 20, 10)
     
-    #robot.forwardkin()
-    #robot.timestep()
-    #robot.render()
+    robot.forwardkin()
+    robot.timestep()
+    robot.render()
     glColor3f(0.0, 0.0, 0.0)
     #glBegin(GL_LINE_STRIP)
     #for t in numpy.arange(0, 20 * PI, float(PI / 20.0)): 

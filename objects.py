@@ -7,6 +7,8 @@ from OpenGL.GLUT import *
 
 import json, sys
 
+from tools.display import *
+
 class robot(object):
     def __init__(self, d, x=0, y=0, z=0):
         
@@ -128,26 +130,26 @@ class robot(object):
             i=i+1
             glColor3f(1,1.0/len(self.rotations)*i,1.0/len(self.rotations)*i)
             
-            #draw P
-            glBegin(GL_LINES)
-            glVertex3f(0,0,0)
-            glVertex3f(P[0],P[1],P[2])
-            glEnd()
-            glTranslatef(P[0],P[1],P[2])
+            glPushMatrix()
+            glTranslate(P[0],P[1],P[2])
             #draw joint
             if array_equal(R,matrix(eye(3))): #prismatic
+                draw_prismatic_joint(0, 0, 0, P[0], P[1], P[2])
                 print "eye matrix"
             else: #rotational
-                
+                draw_rotational_joint(0, 0, 0, 10, 30)
                 print "rot matrix"
             
+            
             #load matrix
-            glPushMatrix()
+            tm=matrix([[1,0,0,0],[0,1,0,0],[0,0,1,0],[P[0],P[1],P[2],1]])
             rm=zeros_resize(R,4)
+            currentMatrix=glGetFloatv(GL_PROJECTION_MATRIX)
+            print currentMatrix
             #print rm
-            double_matrix=[[rm[0,0],rm[0,1],rm[0,2],rm[0,3]],[rm[1,0],rm[1,1],rm[1,2],rm[1,3]],[rm[2,0],rm[2,1],rm[2,2],rm[2,3]],[rm[3,0],rm[3,1],rm[3,2],rm[3,3]]]
+            
+            double_matrix=[rm[0,0],rm[0,1],rm[0,2],rm[0,3],rm[1,0],rm[1,1],rm[1,2],rm[1,3],rm[2,0],rm[2,1],rm[2,2],rm[2,3],rm[3,0],rm[3,1],rm[3,2],rm[3,3]]
             glLoadMatrixf(double_matrix)
-            #print double_matrix
             
         #pop all joints off
         for i in range(len(self.rotations)):

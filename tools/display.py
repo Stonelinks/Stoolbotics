@@ -45,29 +45,29 @@ def draw_rotational_joint_endCap(r, sides):
 def draw_prismatic_joint(cx, cy, cz, l, w, h):
     glBegin(GL_QUAD_STRIP)
     #Quads 1 2 3 4
-    glVertex3f(cx+l/2, cy-w/2, cz-h/2)   #V2
-    glVertex3f(cx-l/2, cy-w/2, cz-h/2)   #V1
-    glVertex3f(cx+l/2, cy-w/2, cz+h/2)   #V4
-    glVertex3f(cx-l/2, cy-w/2, cz+h/2)   #V3
-    glVertex3f(cx+l/2, cy+w/2, cz+h/2)   #V6
-    glVertex3f(cx-l/2, cy+w/2, cz+h/2)   #V5
-    glVertex3f(cx+l/2, cy+w/2, cz-h/2)   #V8
-    glVertex3f(cx-l/2, cy+w/2, cz-h/2)   #V7
-    glVertex3f(cx+l/2, cy-w/2, cz-h/2)   #V2
-    glVertex3f(cx-l/2, cy-w/2, cz-h/2)   #V1
+    glVertex3f(cx+l, cy-w/2, cz-h/2)   #V2
+    glVertex3f(cx, cy-w/2, cz-h/2)   #V1
+    glVertex3f(cx+l, cy-w/2, cz+h/2)   #V4
+    glVertex3f(cx, cy-w/2, cz+h/2)   #V3
+    glVertex3f(cx+l, cy+w/2, cz+h/2)   #V6
+    glVertex3f(cx, cy+w/2, cz+h/2)   #V5
+    glVertex3f(cx+l, cy+w/2, cz-h/2)   #V8
+    glVertex3f(cx, cy+w/2, cz-h/2)   #V7
+    glVertex3f(cx+l, cy-w/2, cz-h/2)   #V2
+    glVertex3f(cx, cy-w/2, cz-h/2)   #V1
     glEnd()
     
     #Quad 5
     glBegin(GL_QUADS)
-    glVertex3f(cx+l/2, cy+w/2, cz-h/2)   #V8
-    glVertex3f(cx+l/2, cy+w/2, cz+h/2)   #V6
-    glVertex3f(cx+l/2, cy-w/2, cz+h/2)   #V4
-    glVertex3f(cx+l/2, cy-w/2, cz-h/2)   #V2
+    glVertex3f(cx+l, cy+w/2, cz-h/2)   #V8
+    glVertex3f(cx+l, cy+w/2, cz+h/2)   #V6
+    glVertex3f(cx+l, cy-w/2, cz+h/2)   #V4
+    glVertex3f(cx+l, cy-w/2, cz-h/2)   #V2
     #Quad 6
-    glVertex3f(cx-l/2, cy+w/2, cz-h/2)   #V7
-    glVertex3f(cx-l/2, cy+w/2, cz+h/2)   #V5
-    glVertex3f(cx-l/2, cy-w/2, cz+h/2)   #V3
-    glVertex3f(cx-l/2, cy-w/2, cz-h/2)   #V1
+    glVertex3f(cx, cy+w/2, cz-h/2)   #V7
+    glVertex3f(cx, cy+w/2, cz+h/2)   #V5
+    glVertex3f(cx, cy-w/2, cz+h/2)   #V3
+    glVertex3f(cx, cy-w/2, cz-h/2)   #V1
     glEnd()
     
 def text_at_pos( x, y, z, text, font=GLUT_BITMAP_TIMES_ROMAN_24):
