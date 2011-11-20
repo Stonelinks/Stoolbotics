@@ -11,13 +11,18 @@ import copy as realcopy
 from tools.display import *
 
 class link():
-  def __init__(self, name, pos, rot, type):
+  def __init__(self, name, pos, rot, type, param):
       self.name = name
       self.pos = pos
       self.P = pos
       self.rot = rot
       self.R = rot
       self.type = type
+      self.param = param
+      self.parameter = param
+  
+  def __str__(self):
+      return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.param)
   
   def is_prismatic(self):
       return self.type == 'prismatic'
@@ -44,7 +49,10 @@ class robot(object):
         self.syms = {}
         for k, v in d.iteritems():
             if k[0] in ['q', 'R', 'P']:
-                self.syms[k] = v
+                if k[0] == 'q':
+                    self.syms[k] = 'float(' + v + ')'
+                else:
+                    self.syms[k] = v
             locals()[k] = v
 
         # convert into something useful
@@ -54,7 +62,7 @@ class robot(object):
                 self._d[k] = int(v)
                 continue
             elif k[0] == 'q':
-                self._d[k] = eval(v)
+                self._d[k] = eval('float(' + v + ')')
                 continue
             elif k[0] == 'l':
                 self._d[k] = float(v)
@@ -86,12 +94,12 @@ class robot(object):
             self.joint_geoms.append(eval('self.l' + str(i)))
         
         self.links = []
-        
         indexes = []
         for i in range(0, self.N):
             indexes.append(str(i) + str(i + 1))
         indexes.append(str(self.N) + 'T')
         
+        c = 1
         for i in indexes:
             cmd = 'link(\'' + i + '\', '
             cmd += 'self.P' + i + ', '
@@ -101,12 +109,15 @@ class robot(object):
                 cmd += '\'prismatic\''
             else:
                 cmd += '\'rotary\''
-            cmd += ')'
-            self.links.append(eval(cmd))
-        
-        for l in self.links:
-            print 'link ' + l.name + ' is ' + l.type
-                
+
+            cmd += ', '
+            q = 'self.q' + str(c)
+            try:
+                m = eval(cmd + q + ')')
+            except AttributeError:
+                m = eval(cmd + 'None' + ')')
+            self.links.append(m)
+            c += 1
         
     def eval_syms(self):
         # TODO: use regex for all of this
