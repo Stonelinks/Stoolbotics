@@ -157,6 +157,8 @@ class robot(object):
     def render(self):
         i=0
         glPushMatrix()
+        H=asmatrix(eye(4))
+        currentMatrix=reshape(asmatrix(glGetFloatv(GL_PROJECTION_MATRIX)),(4,4))
         for link in self.links:
             R = link.R
             P = link.P
@@ -174,25 +176,23 @@ class robot(object):
                 draw_prismatic_joint(0, 0, 0, P[0], P[1], P[2])
                 print "eye matrix"
             else:
-                draw_rotational_joint(0, 0, 0, 10, 30)
+                draw_rotational_joint(0, 0, 0, 10, 20)
                 print "rot matrix"
-            
+            glRotate(
             
             #load matrix
-            tm=matrix([[1,0,0,0],
-                       [0,1,0,0],
-                       [0,0,1,0],
-                       [P[0],P[1],P[2],1]])
-                       
-            rm=zeros_resize(R,4)
-            currentMatrix=glGetFloatv(GL_PROJECTION_MATRIX)
-            print currentMatrix
-            #print rm
-            
-            double_matrix=[ rm[0,0],rm[0,1],rm[0,2],rm[0,3],
-                            rm[1,0],rm[1,1],rm[1,2],rm[1,3],
-                            rm[2,0],rm[2,1],rm[2,2],rm[2,3],
-                            rm[3,0],rm[3,1],rm[3,2],rm[3,3] ]
+            #rot_m=zeros_resize(R, 4)
+            #rot_m[0,3]=P[0]
+            #rot_m[1,3]=P[1]
+            #rot_m[2,3]=P[2]
+            #rot_m[3,3]=1
+            #H=H*rot_m
+            #tm=H*currentMatrix
+            #print tm
+            #double_matrix=[ tm[0,0],tm[0,1],tm[0,2],tm[0,3],
+            #                tm[1,0],tm[1,1],tm[1,2],tm[1,3],
+            #                tm[2,0],tm[2,1],tm[2,2],tm[2,3],
+            #                tm[3,0],tm[3,1],tm[3,2],tm[3,3] ]
             
             glLoadMatrixf(double_matrix)
             
@@ -224,9 +224,9 @@ class room(object):
                 else:
                     glColor3f(0.0, 0.0, 1.0);
                 glBegin(GL_QUADS)
-                glVertex3f(i*scale,0,j*scale)
-                glVertex3f((i+1)*scale,0,j*scale)
-                glVertex3f((i+1)*scale,0,(j+1)*scale)
-                glVertex3f(i*scale,0,(j+1)*scale)
+                glVertex3f(i*scale,j*scale, 0)
+                glVertex3f((i+1)*scale,j*scale, 0)
+                glVertex3f((i+1)*scale,(j+1)*scale, 0)
+                glVertex3f(i*scale,(j+1)*scale, 0)
                 glEnd()
 \

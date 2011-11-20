@@ -27,12 +27,12 @@ class point():
     text_at_pos(self.x + 1, self.y + 1, self.z + 1, name, GLUT_BITMAP_TIMES_ROMAN_10)
 
 def draw_rotational_joint(cx, cy, cz, r, l): #draws cylinder along z axis
-    glTranslate(0,0,-l/2)
-    draw_rotational_joint_endCap(r,l/3)
+    #glTranslate(0,0,-l/2)
+    draw_rotational_joint_endCap(r,r)
     gluCylinder(gluNewQuadric(), r, r, l, l/3, 1)
     glTranslate(0,0,l)
-    draw_rotational_joint_endCap(r,l/3)
-    glTranslate(0,0,-l/2)
+    draw_rotational_joint_endCap(r,r)
+    glTranslate(0,0,-l)
 
 def draw_rotational_joint_endCap(r, sides):
     glBegin(GL_TRIANGLE_FAN)

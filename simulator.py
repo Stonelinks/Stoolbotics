@@ -40,10 +40,10 @@ def mouseDragged(x,y):
     oldMouseDraggedY=y
     angleY+=changeX
     angleX+=changeY
-    if (angleX<0):
-        angleX=0
-    if (angleX>180):
+    if (angleX<180):
         angleX=180
+    if (angleX>360):
+        angleX=360
     glutPostRedisplay()
 
 #The mouse callback routine.
@@ -90,6 +90,7 @@ def draw():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glPushMatrix()
     #looking at x/y plane - down z axis
+    
     glTranslatef(0.0, 0.0, -30.0)
     glRotatef(angleY, 0.0, 1.0, 0.0)
     glRotatef(angleX, 1.0, 0.0, 0.0)
