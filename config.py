@@ -5,9 +5,11 @@ oldMouseDraggedY=0
 angleY = 0
 angleX = 60
 scale=7
-PI = 3.14159265
 R = 20.0
 mouseMiddlePressed=False
 msh = None
 room = None
 robot = None
+
+globals()['PI'] = 3.14159265
+globals()['pi'] = PI
