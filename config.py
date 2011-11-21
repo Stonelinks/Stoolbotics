@@ -13,4 +13,3 @@ robot = None
 
 globals()['PI'] = 3.14159265
 globals()['pi'] = PI
-

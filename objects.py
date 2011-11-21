@@ -67,7 +67,11 @@ class robot(object):
             except:
                 pass
                 
-        # convert into something useful
+        x = [ 1, 0, 0 ]
+        y = [ 0, 1, 0 ]
+        z = [ 0, 0, 1 ]
+
+                
         self._d = {}
         for k, v in d.iteritems():
             if k[0] == 'N':
@@ -79,7 +83,9 @@ class robot(object):
             elif k[0] == 'l':
                 self._d[k] = float(v)
                 continue
-                
+            elif k[0] == 'h' and v[0] != '[': #used axis shorthand
+                v = eval('str(' + v + ')')
+
             # it is a vector
             if v[0] == '[':
                 
@@ -137,6 +143,10 @@ class robot(object):
     def eval_syms(self):
         # TODO: use regex for all of this
 
+        x = array([[1], [0], [0] ], float)
+        y = array([[0], [1], [0] ], float)
+        z = array([[0], [0], [1] ], float)
+
         # eval syms
         for k, v in self.syms.iteritems():
             tmp = v
@@ -146,9 +156,10 @@ class robot(object):
                     tmp = tmp.replace('u\'' + key + '\'', key)
                     #something like this would be awesome: tmp = re.sub(r'u\'(.*)\'', tmp, tmp)
             
-            if tmp[0] == '[' and k[0] == 'P':
+            if k[0] == 'P' and tmp[0] == '[':
                 tmp = 'array([' + tmp + '], float).T'
-
+            elif k[0] == 'h' and v[0] != '[': #axis shorthand
+                tmp = v
             self._d[k] = eval(tmp)
         self.sync_d()
     
