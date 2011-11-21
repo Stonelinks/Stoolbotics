@@ -190,28 +190,40 @@ class robot(object):
         
 
     def render(self):
-        i=0
         glPushMatrix()
+        glTranslate(0,0,1)
         H=asmatrix(eye(4))
         currentMatrix=reshape(asmatrix(glGetFloatv(GL_PROJECTION_MATRIX)),(4,4))
-        for link in self.links:
+        for numLink in range(len(self.links)):
+            link=self.links[numLink]
             R = link.R
             P = link.P
+            h = link.h
             
-            i+=1
-            glColor3f( 1, 1.0/len(self.links)*i ,1.0/len(self.links)*i)
             
+            glColor3f( 0,0,0)
             glPushMatrix()
+            glBegin(GL_LINES)
+            glVertex3f(0,0,0)
+            glVertex3f(P[0],P[1],P[2])
+            glEnd()
             glTranslate(P[0],P[1],P[2])
             
+            glColor3f( 1, 1.0/len(self.links)*numLink ,1.0/len(self.links)*numLink)
             #draw joint
-            if link.is_prismatic():
+            print link
+            if link.is_prismatic(): #prismatic joint
                 draw_prismatic_joint(0, 0, 0, P[0], P[1], P[2])
-                print "eye matrix"
-            else:
-                draw_rotational_joint(0, 0, 0, 10, 20)
-                print "rot matrix"
-            #glRotate(
+            elif (R == eye(3)).all(): #link - no joint
+                pass
+            else: #rotation joint
+                glPushMatrix()
+                draw_rotational_joint(h*10, h*-10, 10)
+                glPopMatrix()
+                
+                glRotate(link.q, link.h[0], link.h[1], link.h[2])
+                
+                
             
             #load matrix
             #rot_m=zeros_resize(R, 4)
@@ -227,39 +239,45 @@ class robot(object):
             #                tm[2,0],tm[2,1],tm[2,2],tm[2,3],
             #                tm[3,0],tm[3,1],tm[3,2],tm[3,3] ]
             
-            glLoadMatrixf(double_matrix)
+            #glLoadMatrixf(double_matrix)
             
         #pop all joints off
-        for i in range(len(self.links)):
+        draw_axes(10,'T')
+        for matPop in range(len(self.links)):
             glPopMatrix()
         glPopMatrix()
 
 class room(object):
-    def __init__(self, _length=0, _width=0, _height=0):
+    def __init__(self, _length=0, _width=0, _height=0, outLined=True):
         self.length=_length
         self.width=_width
         self.height=_height
-
+        self.outLined=outLined
+        
     def render(self):
-        glColor3f(0,0,0)
-        glBegin(GL_LINES)
-        glVertex3f(0,0,0)
-        glVertex3f(scale,0,0)
-        glVertex3f(0,0,0)
-        glVertex3f(0,scale,0)
-        glVertex3f(0,0,0)
-        glVertex3f(0,0,scale)
+        startL=-self.length/scale/2
+        endL=self.length/scale/2
+        startW=-self.width/scale/2
+        endW=self.width/scale/2
+        if (self.outLined):
+            glBegin(GL_LINES)
+            for j in range(startW, endW+1):
+                glVertex3f(startL*scale,j*scale, 0)
+                glVertex3f(endL*scale,j*scale, 0)
+            for i in range (startL, endL+1):
+                glVertex3f(i*scale,startW*scale, 0)
+                glVertex3f(i*scale,endW*scale, 0)
+        else:
+            glBegin(GL_QUADS)
+            for i in range(startW, endW):
+                for j in range (startL, endL):
+                    if ((i+j)%2 ==0):
+                        glColor3f(0.0, 1.0, 0.0);
+                    else:
+                        glColor3f(0.0, 0.0, 1.0);
+                    
+                    glVertex3f(i*scale,j*scale, 0)
+                    glVertex3f((i+1)*scale,j*scale, 0)
+                    glVertex3f((i+1)*scale,(j+1)*scale, 0)
+                    glVertex3f(i*scale,(j+1)*scale, 0)
         glEnd()
-        for i in range(-self.width/scale/2, self.width/scale/2):            
-            for j in range (-self.length/scale/2, self.length/scale/2):
-                if ((i+j)%2 ==0):
-                    glColor3f(0.0, 1.0, 0.0);
-                else:
-                    glColor3f(0.0, 0.0, 1.0);
-                glBegin(GL_QUADS)
-                glVertex3f(i*scale,j*scale, 0)
-                glVertex3f((i+1)*scale,j*scale, 0)
-                glVertex3f((i+1)*scale,(j+1)*scale, 0)
-                glVertex3f(i*scale,(j+1)*scale, 0)
-                glEnd()
-\

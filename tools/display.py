@@ -26,13 +26,33 @@ class point():
     name += " (" + str(round(self.x, 3)) + ", " + str(round(self.y, 3)) + ", " + str(round(self.z, 3)) + ")"
     text_at_pos(self.x + 1, self.y + 1, self.z + 1, name, GLUT_BITMAP_TIMES_ROMAN_10)
 
-def draw_rotational_joint(cx, cy, cz, r, l): #draws cylinder along z axis
-    #glTranslate(0,0,-l/2)
+def draw_rotational_joint(startP, endP, r): #draws cylinder from sP to eP
+    glPushMatrix()
+
+    #This is the default direction for the cylinders to face in OpenGL
+    z=[0,0,1]
+    #Get diff between two points you want cylinder along
+    print startP
+    print endP
+    print startP[2][0]
+    p=startP-endP
+    print p
+    print z
+    #Get CROSS product (the axis of rotation)
+    t = cross(z , p)
+    #Get angle. LENGTH is magnitude of the vector
+    length=sqrt(dot(p,p))
+    angle = 180 / PI * acos(dot(z, p) / length)
+    glTranslate(endP[0],endP[1],endP[2])
+    glRotate(angle,t[0],t[1],t[2])
+    quad=gluNewQuadric
+    gluQuadricOrientation(quad,GLU_OUTSIDE);
+    gluCylinder(quad, r, r, length, length/3, 1);
+    
     draw_rotational_joint_endCap(r,r)
-    gluCylinder(gluNewQuadric(), r, r, l, l/3, 1)
-    glTranslate(0,0,l)
+    glTranslate(0,0,length)
     draw_rotational_joint_endCap(r,r)
-    glTranslate(0,0,-l)
+    glPopMatrix()
 
 def draw_rotational_joint_endCap(r, sides):
     glBegin(GL_TRIANGLE_FAN)
@@ -78,10 +98,10 @@ def drawBitmapString(text, font=GLUT_BITMAP_TIMES_ROMAN_24):
     for c in text:
         glutBitmapCharacter(font, ord(c))
         
-def draw_axes(number=''):
-    axes_l = 15
-    glBegin(GL_LINES)
+def draw_axes(axes_l = 10, number=''):
     
+    glBegin(GL_LINES)
+    glColor3f(0,0,0)
     # x axis
     glVertex3f(0, 0, 0)
     glVertex3f(axes_l, 0, 0)
@@ -171,7 +191,7 @@ class gl_window():
         glRotatef(-45, 1.0, 0.0, 0.0)
         glRotatef(-45, 0.0, 0.0, 1.0)
         
-        self.draw_axes()
+        self.draw_axes(10)
         
         if self.step == 0:
             # step 2

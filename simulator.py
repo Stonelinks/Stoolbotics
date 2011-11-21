@@ -15,6 +15,8 @@ from config import *
 from objects import *
 
 def timestep():
+    robot.forwardkin()
+    robot.timestep()
     glutPostRedisplay()
 
 # Mouse motion callback routine.
@@ -77,8 +79,23 @@ def mouseControl(button, state, x, y):
         print "LEFT UP"
 
 def keyboard(key, x, y):
+    global zoom
     if key == chr(27):
         sys.exit(0)
+    elif key == 'p':
+        glutIdleFunc(timestep)
+    elif key == 's':
+        glutIdleFunc(None)
+    elif key == '+':
+        zoom=zoom-.1
+        resize()
+        glutPostRedisplay()
+        print "Zoom ="+str(zoom)
+    elif key == '-':
+        zoom=zoom+.1
+        print "Zoom ="+str(zoom)
+        resize()
+        glutPostRedisplay()
     elif key == 's':
         s = glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE)
         img = Image.new('RGB', (width, height))
@@ -88,28 +105,21 @@ def keyboard(key, x, y):
 
 def draw():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    
     glPushMatrix()
     #looking at x/y plane - down z axis
     
     glTranslatef(0.0, 0.0, -30.0)
     glRotatef(angleY, 0.0, 1.0, 0.0)
     glRotatef(angleX, 1.0, 0.0, 0.0)
-  #  glTranslatef(0.0, 0.0, 60.0)
+    
     room.render()
     
     glColor3f(0,0,0)
-    draw_axes('1')
+    draw_axes(20,'1')
     
-    glColor3f(1,0.2,0.2)
-    
-    robot.forwardkin()
-    robot.timestep()
     robot.render()
     glColor3f(0.0, 0.0, 0.0)
-    #glBegin(GL_LINE_STRIP)
-    #for t in numpy.arange(0, 20 * PI, float(PI / 20.0)): 
-    #    glVertex3f(R * cos(t), t, R * sin(t))
-    #glEnd()
     
     glPopMatrix()
 
@@ -164,17 +174,18 @@ def create_robot(filename):
     r = json.loads(open(filename).read(), object_hook=lambda d: robot(d))
     return r
     
-def resize(_w, _h):
+def resize(_w = width, _h = height):
     width = _w
     height = _h
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    glOrtho (-width/scale, width/scale, -height/scale, height/scale, -100.0, 100.0)
+    glOrtho (-zoom*width/scale, zoom*width/scale, -zoom*height/scale, zoom*height/scale, -100.0, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
-def main():   
+def main():
+    os.chdir(os.path.dirname(sys.argv[0]))
     global width, height
     
     glutInit()
