@@ -11,18 +11,23 @@ import copy as realcopy
 from tools.display import *
 
 class link():
-    def __init__(self, name, pos, rot, type, param):
+    def __init__(self, name, pos, rot, type, param, axis):
         self.name = name
         self.pos = pos
         self.P = pos
         self.rot = rot
         self.R = rot
         self.type = type
+
         self.param = param
         self.parameter = param
-    
+        self.q = param
+        
+        self.axis = axis
+        self.h = axis
+        
     def __str__(self):
-        return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.param)
+        return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.q) + ", h: " + str(self.h) 
     
     def is_prismatic(self):
         return self.type == 'prismatic'
@@ -44,7 +49,7 @@ class robot(object):
             d = self.d
         
         globals()['t'] = 0
-        
+
         # establish local vars, pick out syms
         self.syms = {}
         for k, v in d.iteritems():
@@ -59,7 +64,9 @@ class robot(object):
         for k, v in d.iteritems():
             try:
                 locals()[k] = eval(v)
-
+            except:
+                pass
+                
         # convert into something useful
         self._d = {}
         for k, v in d.iteritems():
@@ -115,19 +122,21 @@ class robot(object):
                 cmd += '\'prismatic\''
             else:
                 cmd += '\'rotary\''
-
             cmd += ', '
             q = 'self.q' + str(c)
-            try:
-                m = eval(cmd + q + ')')
-            except AttributeError:
-                m = eval(cmd + 'None' + ')')
+
+            cmd2 = ', '
+            cmd2 += 'self.h' + str(c)
+            if c > self.N:
+                m = eval(cmd + 'None, None )')
+            else:
+                m = eval(cmd + q + cmd2 + ')')
             self.links.append(m)
             c += 1
         
     def eval_syms(self):
         # TODO: use regex for all of this
-        
+
         # eval syms
         for k, v in self.syms.iteritems():
             tmp = v
@@ -191,7 +200,7 @@ class robot(object):
             else:
                 draw_rotational_joint(0, 0, 0, 10, 20)
                 print "rot matrix"
-            glRotate(
+            #glRotate(
             
             #load matrix
             #rot_m=zeros_resize(R, 4)
