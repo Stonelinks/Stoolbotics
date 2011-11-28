@@ -42,6 +42,7 @@ def mouseDragged(x,y):
     oldMouseDraggedY=y
     angleY+=changeX
     angleX+=changeY
+    print "Angle x/y = "+str(angleX)+"/"+str(angleY)
     if (angleX<180):
         angleX=180
     if (angleX>360):
@@ -109,7 +110,7 @@ def draw():
     glPushMatrix()
     #looking at x/y plane - down z axis
     
-    glTranslatef(0.0, 0.0, -30.0)
+    glTranslatef(0.0, -30.0, 0.0)
     glRotatef(angleY, 0.0, 1.0, 0.0)
     glRotatef(angleX, 1.0, 0.0, 0.0)
     
@@ -155,7 +156,7 @@ def setup():
     #glVertexPointer(3, GL_FLOAT, 0, vertices)
     #glNormalPointer(GL_FLOAT, 0, normals)
     global room
-    room = room(100,100,100)
+    room = room(100,100,100, False)
     global robot
     robot = create_robot('robots/sample.json')
     robot.forwardkin()

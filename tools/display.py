@@ -32,12 +32,12 @@ def draw_rotational_joint(startP, endP, r): #draws cylinder from sP to eP
     #This is the default direction for the cylinders to face in OpenGL
     z=[0,0,1]
     #Get diff between two points you want cylinder along
-    print startP
-    print endP
-    print startP[2][0]
     p=startP-endP
-    print p
-    print z
+    
+    
+    p=[p[0][0], p[1][0], p[2][0]]
+    
+    
     #Get CROSS product (the axis of rotation)
     t = cross(z , p)
     #Get angle. LENGTH is magnitude of the vector
@@ -45,14 +45,14 @@ def draw_rotational_joint(startP, endP, r): #draws cylinder from sP to eP
     angle = 180 / PI * acos(dot(z, p) / length)
     glTranslate(endP[0],endP[1],endP[2])
     glRotate(angle,t[0],t[1],t[2])
-    quad=gluNewQuadric
-    gluQuadricOrientation(quad,GLU_OUTSIDE);
-    gluCylinder(quad, r, r, length, length/3, 1);
-    
-    draw_rotational_joint_endCap(r,r)
+    quad=gluNewQuadric()
+    gluQuadricOrientation(quad, GLU_OUTSIDE);
+    gluCylinder(quad, r, r, length, r*2, 1);
+    draw_rotational_joint_endCap(r,r*2)
     glTranslate(0,0,length)
-    draw_rotational_joint_endCap(r,r)
+    draw_rotational_joint_endCap(r,r*2)
     glPopMatrix()
+    gluDeleteQuadric(quad)
 
 def draw_rotational_joint_endCap(r, sides):
     glBegin(GL_TRIANGLE_FAN)

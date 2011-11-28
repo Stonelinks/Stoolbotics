@@ -211,7 +211,6 @@ class robot(object):
             
             glColor3f( 1, 1.0/len(self.links)*numLink ,1.0/len(self.links)*numLink)
             #draw joint
-            print link
             if link.is_prismatic(): #prismatic joint
                 draw_prismatic_joint(0, 0, 0, P[0], P[1], P[2])
             elif (R == eye(3)).all(): #link - no joint
