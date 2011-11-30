@@ -56,6 +56,13 @@ def mouseControl(button, state, x, y):
     global oldMouseDraggedY
     #y = height - y; # Correct from mouse to OpenGL co-ordinates.
     print 'X='+ str(x) +' Y='+str(y)
+    if (button == 3):# Zoom in
+        zoom_in()
+        return
+    elif (button ==4) : # Zoom out
+        zoom_out()
+        return
+        
     if ( x < 0 or x > width or y < 0 or y > height ):
         return
     if (button == GLUT_LEFT_BUTTON and state == GLUT_DOWN):
@@ -79,8 +86,22 @@ def mouseControl(button, state, x, y):
     elif (button == GLUT_LEFT_BUTTON and state == GLUT_UP):
         print "LEFT UP"
 
-def keyboard(key, x, y):
+def zoom_out():
     global zoom
+    zoom=zoom+.1
+    print "Zoom ="+str(zoom)
+    resize()
+    glutPostRedisplay()
+    
+def zoom_in():
+    global zoom
+    if (zoom>.1):
+        zoom=zoom-.1
+    print "Zoom ="+str(zoom)
+    resize()
+    glutPostRedisplay()
+    
+def keyboard(key, x, y):
     if key == chr(27):
         sys.exit(0)
     elif key == 'p':
@@ -88,15 +109,9 @@ def keyboard(key, x, y):
     elif key == 's':
         glutIdleFunc(None)
     elif key == '+':
-        zoom=zoom-.1
-        resize()
-        glutPostRedisplay()
-        print "Zoom ="+str(zoom)
+        zoom_in()
     elif key == '-':
-        zoom=zoom+.1
-        print "Zoom ="+str(zoom)
-        resize()
-        glutPostRedisplay()
+        zoom_out()
     elif key == 's':
         s = glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE)
         img = Image.new('RGB', (width, height))

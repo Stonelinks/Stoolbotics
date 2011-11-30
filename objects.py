@@ -27,7 +27,7 @@ class link():
         self.h = axis
         
     def __str__(self):
-        return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.q) + ", h: " + str(self.h) 
+        return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.q) + ", h: " + str(self.h) + ", p: " + str(self.P)
     
     def is_prismatic(self):
         return self.type == 'prismatic'
@@ -199,44 +199,25 @@ class robot(object):
             R = link.R
             P = link.P
             h = link.h
-            
-            
             glColor3f( 0,0,0)
-            glPushMatrix()
-            glBegin(GL_LINES)
-            glVertex3f(0,0,0)
-            glVertex3f(P[0],P[1],P[2])
-            glEnd()
-            glTranslate(P[0],P[1],P[2])
             
-            glColor3f( 1, 1.0/len(self.links)*numLink ,1.0/len(self.links)*numLink)
+            glPushMatrix()
+            #glBegin(GL_LINES)
+            #glVertex3f(0,0,0)
+            #glVertex3f(P[0],P[1],P[2])
+            #glEnd()
+            
             #draw joint
             if link.is_prismatic(): #prismatic joint
-                draw_prismatic_joint(0, 0, 0, P[0], P[1], P[2])
+                print link
+                draw_prismatic_joint([0,0,0],P, 10)
+                glTranslate(P[0],P[1],P[2])
             elif (R == eye(3)).all(): #link - no joint
                 pass
             else: #rotation joint
-                glPushMatrix()
-                draw_rotational_joint(h*10, h*-10, 10)
-                glPopMatrix()
-                
+                glTranslate(P[0],P[1],P[2])
+                draw_rotational_joint(h*10, h*-10, 10, link.q)
                 glRotate(link.q, link.h[0], link.h[1], link.h[2])
-                
-                
-            
-            #load matrix
-            #rot_m=zeros_resize(R, 4)
-            #rot_m[0,3]=P[0]
-            #rot_m[1,3]=P[1]
-            #rot_m[2,3]=P[2]
-            #rot_m[3,3]=1
-            #H=H*rot_m
-            #tm=H*currentMatrix
-            #print tm
-            #double_matrix=[ tm[0,0],tm[0,1],tm[0,2],tm[0,3],
-            #                tm[1,0],tm[1,1],tm[1,2],tm[1,3],
-            #                tm[2,0],tm[2,1],tm[2,2],tm[2,3],
-            #                tm[3,0],tm[3,1],tm[3,2],tm[3,3] ]
             
             #glLoadMatrixf(double_matrix)
             
