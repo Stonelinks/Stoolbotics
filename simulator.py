@@ -41,11 +41,11 @@ def mouseDragged(x,y):
     oldMouseDraggedY=y
     angleY+=changeX
     angleX+=changeY
-    print "Angle x/y = "+str(angleX)+"/"+str(angleY)
-    if (angleX<180):
-        angleX=180
-    if (angleX>360):
-        angleX=360
+    print "Angle x/y = " + str(angleX)+"/"+str(angleY)
+    if (angleX < 180):
+        angleX = 180
+    if (angleX > 360):
+        angleX = 360
     glutPostRedisplay()
 
 #The mouse callback routine.
@@ -54,11 +54,11 @@ def mouseControl(button, state, x, y):
     global oldMouseDraggedX
     global oldMouseDraggedY
     #y = height - y; # Correct from mouse to OpenGL co-ordinates.
-    print 'X='+ str(x) +' Y='+str(y)
+    print 'X = ' + str(x) +' Y = ' + str(y)
     if (button == 3):# Zoom in
         zoom_in()
         return
-    elif (button ==4) : # Zoom out
+    elif (button == 4): # Zoom out
         zoom_out()
         return
         
@@ -66,21 +66,21 @@ def mouseControl(button, state, x, y):
         return
     if (button == GLUT_LEFT_BUTTON and state == GLUT_DOWN):
         print "LEFT Down"
-    elif (button==GLUT_MIDDLE_BUTTON and state == GLUT_DOWN):
-        mouseMiddlePressed=True
-        oldMouseDraggedX=x
-        oldMouseDraggedY=y
+    elif (button == GLUT_MIDDLE_BUTTON and state == GLUT_DOWN):
+        mouseMiddlePressed = True
+        oldMouseDraggedX = x
+        oldMouseDraggedY = y
         print "Middle Down"
-    elif (button==GLUT_MIDDLE_BUTTON and state == GLUT_UP):
-        mouseMiddlePressed=False
+    elif (button == GLUT_MIDDLE_BUTTON and state == GLUT_UP):
+        mouseMiddlePressed = False
         print "Middle Up"
-    elif (button==GLUT_RIGHT_BUTTON and state == GLUT_DOWN):
-        mouseMiddlePressed=True
-        oldMouseDraggedX=x
-        oldMouseDraggedY=y
+    elif (button == GLUT_RIGHT_BUTTON and state == GLUT_DOWN):
+        mouseMiddlePressed = True
+        oldMouseDraggedX = x
+        oldMouseDraggedY = y
         print "Middle Down"
-    elif (button==GLUT_RIGHT_BUTTON and state == GLUT_UP):
-        mouseMiddlePressed=False
+    elif (button == GLUT_RIGHT_BUTTON and state == GLUT_UP):
+        mouseMiddlePressed = False
         print "Middle Up"
     elif (button == GLUT_LEFT_BUTTON and state == GLUT_UP):
         print "LEFT UP"
@@ -131,7 +131,7 @@ def draw():
     room.render()
     
     glColor3f(0, 0, 0)
-    draw_axes(20,'1')
+    display.draw_axes(20,'1')
     
     robot.render()
     glColor3f(0.0, 0.0, 0.0)
@@ -143,7 +143,7 @@ def draw():
     glTranslatef(90.0, -75.0, 0.0)
     glRotatef(angleY, 0.0, 1.0, 0.0)
     glRotatef(angleX, 1.0, 0.0, 0.0)
-    draw_axes(18,'')
+    display.draw_axes(18,'')
     glPopMatrix()
 
     glutSwapBuffers()

@@ -5,10 +5,8 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import json, sys, re, math, pprint
-import copy as realcopy
-
-from tools.display import *
+import json, sys, re, math
+import tools.display as display
 
 class link():
     def __init__(self, name, pos, rot, type, param, axis):
@@ -197,8 +195,8 @@ class robot(object):
     def render(self):
         glPushMatrix()
         glTranslate(0,0,1)
-        H=asmatrix(eye(4))
-        currentMatrix=reshape(asmatrix(glGetFloatv(GL_PROJECTION_MATRIX)),(4,4))
+        H = asmatrix(eye(4))
+        currentMatrix = reshape(asmatrix(glGetFloatv(GL_PROJECTION_MATRIX)),(4,4))
         for numLink in range(len(self.links)):
             link=self.links[numLink]
             R = link.R
@@ -214,20 +212,19 @@ class robot(object):
             
             #draw joint
             if link.is_prismatic(): #prismatic joint
-                print link
-                draw_prismatic_joint([0,0,0],P, 10)
+                display.draw_prismatic_joint([0,0,0],P, 10)
                 glTranslate(P[0],P[1],P[2])
             elif (R == eye(3)).all(): #link - no joint
                 pass
             else: #rotation joint
-                glTranslate(P[0],P[1],P[2])
-                draw_rotational_joint(h*10, h*-10, 10, link.q)
+                glTranslate(P[0], P[1], P[2])
+                display.draw_rotational_joint(h*10, h*-10, 10, link.q)
                 glRotate(link.q, link.h[0], link.h[1], link.h[2])
             
             #glLoadMatrixf(double_matrix)
             
         #pop all joints off
-        draw_axes(10,'T')
+        display.draw_axes(10,'T')
         for matPop in range(len(self.links)):
             glPopMatrix()
         glPopMatrix()
@@ -257,9 +254,9 @@ class room(object):
             for i in range(startW, endW):
                 for j in range (startL, endL):
                     if ((i+j)%2 ==0):
-                        glColor3f(0.0, 1.0, 0.0);
+                        glColor3f(0.4, 0.4, 0.4);
                     else:
-                        glColor3f(0.0, 0.0, 1.0);
+                        glColor3f(0.3, 0.3, 0.3);
                     
                     glVertex3f(i*scale,j*scale, 0)
                     glVertex3f((i+1)*scale,j*scale, 0)

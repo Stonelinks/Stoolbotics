@@ -60,7 +60,7 @@ def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder fro
     glPopMatrix()
 
 def draw_rotational_joint_endCap(r, sides):
-    glColor(0,1,1)
+    glColor(0, 1, 1)
     glBegin(GL_TRIANGLE_FAN)
     glVertex3f(0, r/2, 0)
     for angle in arange(0, 2*PI, 2*PI/sides):
@@ -69,6 +69,7 @@ def draw_rotational_joint_endCap(r, sides):
     glEnd()
     
     glColor(0, 0, 0)
+    glLineWidth(1.5)
     glBegin(GL_LINE_LOOP)
     for angle in arange(0, 2*PI, 2*PI/sides):
         glVertex3f(cos(angle)*r, sin(angle)*r, 0)
@@ -82,6 +83,7 @@ def draw_rotational_joint_endCap(r, sides):
     glVertex3f(r, 0, 0)
     glVertex3f(r-r*.5, -r*.5, 0)
     glEnd()
+    glLineWidth(1.0)
 
 def draw_prismatic_joint(startP, endP, size):
     glPushMatrix()
@@ -139,51 +141,56 @@ def text_at_pos(x, y, z, text, font=GLUT_BITMAP_TIMES_ROMAN_24):
     glRasterPos3f(x, y, z)
     draw_text(text, font)
 
-def draw_text(text, font=GLUT_BITMAP_TIMES_ROMAN_24):
+def draw_text(text, font=GLUT_BITMAP_TIMES_ROMAN_24, color=[0.0, 0.0, 0.0]):
+    glColor3f(color[0], color[1], color[2])
     for c in text:
         glutBitmapCharacter(font, ord(c))
 
 def draw_axes(axes_l = 10, number=''):
     
+    glLineWidth(8.0)
     glBegin(GL_LINES)
-    glColor3f(0,0,0)
 
-    # x axis
+    # x axis, red
+    glColor3f(1, 0, 0)
     glVertex3f(0, 0, 0)
     glVertex3f(axes_l, 0, 0)
     
-    glVertex3f(axes_l, 0, 0)
-    glVertex3f(axes_l-(axes_l/5), (axes_l/5), 0)
+    #glVertex3f(axes_l, 0, 0)
+    #glVertex3f(axes_l-(axes_l/5), (axes_l/5), 0)
     
-    glVertex3f(axes_l, 0, 0)
-    glVertex3f(axes_l-(axes_l/5), -(axes_l/5), 0)
+    #glVertex3f(axes_l, 0, 0)
+    #glVertex3f(axes_l-(axes_l/5), -(axes_l/5), 0)
     
-    # y axis
+    # y axis, green
+    glColor3f(0, 1, 0)
     glVertex3f(0, 0, 0)
     glVertex3f(0, axes_l, 0)
     
-    glVertex3f(0, axes_l, 0)
-    glVertex3f(0, axes_l-(axes_l/5), (axes_l/5))
+    #glVertex3f(0, axes_l, 0)
+    #glVertex3f(0, axes_l-(axes_l/5), (axes_l/5))
 
-    glVertex3f(0, axes_l, 0)
-    glVertex3f(0, axes_l-(axes_l/5), -(axes_l/5))
+    #glVertex3f(0, axes_l, 0)
+    #glVertex3f(0, axes_l-(axes_l/5), -(axes_l/5))
 
     # z axis
+    glColor3f(0, 0, 1)
     glVertex3f(0, 0, 0)
     glVertex3f(0, 0, axes_l)
 
-    glVertex3f(0, 0, axes_l)
-    glVertex3f(0, (axes_l/5), axes_l-(axes_l/5))
+    #glVertex3f(0, 0, axes_l)
+    #glVertex3f(0, (axes_l/5), axes_l-(axes_l/5))
 
-    glVertex3f(0, 0, axes_l)
-    glVertex3f(0, -(axes_l/5), axes_l-(axes_l/5))
+    #glVertex3f(0, 0, axes_l)
+    #glVertex3f(0, -(axes_l/5), axes_l-(axes_l/5))
     
     glEnd()
     
     text_at_pos(axes_l + 1, 0, 0, 'X' + number)
     text_at_pos(0, axes_l + 1, 0, 'Y' + number)
     text_at_pos(0, 0, axes_l + 1, 'Z' + number)
-    
+    glLineWidth(1.0)
+
 def screendump(self, filename="screendump"):
     s = glReadPixels(0, 0, self.w, self.h, GL_RGB, GL_UNSIGNED_BYTE)
     img = Image.new('RGB', (self.w, self.h))
