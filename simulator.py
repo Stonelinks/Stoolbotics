@@ -13,9 +13,12 @@ import os
 from config import *
 from objects import *
 
+tscale = .2
+
 def timestep():
+    global tscale
     robot.forwardkin()
-    robot.timestep()
+    robot.timestep(tscale)
     glutPostRedisplay()
 
 # Mouse motion callback routine.
@@ -35,12 +38,12 @@ def mouseDragged(x,y):
     if ( x < 0 or x > width or y < 0 or y > height ):
         return
 
-    changeX=x-oldMouseDraggedX
-    changeY=y-oldMouseDraggedY
-    oldMouseDraggedX=x
-    oldMouseDraggedY=y
-    angleY+=changeX
-    angleX+=changeY
+    changeX = x - oldMouseDraggedX
+    changeY = y - oldMouseDraggedY
+    oldMouseDraggedX = x
+    oldMouseDraggedY = y
+    angleY += changeX
+    angleX += changeY
     print "Angle x/y = " + str(angleX)+"/"+str(angleY)
     if (angleX < 180):
         angleX = 180
@@ -62,7 +65,7 @@ def mouseControl(button, state, x, y):
         zoom_out()
         return
         
-    if ( x < 0 or x > width or y < 0 or y > height ):
+    if (x < 0 or x > width or y < 0 or y > height):
         return
     if (button == GLUT_LEFT_BUTTON and state == GLUT_DOWN):
         print "LEFT Down"
@@ -87,16 +90,16 @@ def mouseControl(button, state, x, y):
 
 def zoom_out():
     global zoom
-    zoom=zoom+.1
-    print "Zoom ="+str(zoom)
+    zoom=zoom + .1
+    print "Zoom = " + str(zoom)
     resize()
     glutPostRedisplay()
     
 def zoom_in():
     global zoom
-    if (zoom>.1):
-        zoom=zoom-.1
-    print "Zoom ="+str(zoom)
+    if (zoom > 0.1):
+        zoom = zoom - .1
+    print "Zoom = " + str(zoom)
     resize()
     glutPostRedisplay()
     
@@ -111,6 +114,13 @@ def keyboard(key, x, y):
         zoom_in()
     elif key == '-':
         zoom_out()
+    elif key == 'f':
+        global tscale
+        tscale += .01
+    elif key == 'd':
+        global tscale
+        tscale -= .01
+        
     elif key == 's':
         s = glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE)
         img = Image.new('RGB', (width, height))
@@ -133,8 +143,21 @@ def draw():
     glColor3f(0, 0, 0)
     display.draw_axes(20,'1')
     
-    robot.render()
+    #robot.render()
+    
+    glPointSize(10)
+    glLineWidth(2)
     glColor3f(0.0, 0.0, 0.0)
+    glBegin(GL_LINE_STRIP)
+    for vert in robot.verts:
+        glVertex3f(vert[0], vert[1], vert[2])
+    glEnd()
+    glBegin(GL_POINTS)
+    for vert in robot.verts:
+        glVertex3f(vert[0], vert[1], vert[2])
+    glEnd()
+
+    
     
     glPopMatrix()
 

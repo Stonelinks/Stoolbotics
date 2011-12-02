@@ -5,7 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import json, sys, re, math
+import json, sys, re, math, time
 import tools.display as display
 
 class link():
@@ -23,6 +23,8 @@ class link():
         
         self.axis = axis
         self.h = axis
+        
+        self.location = [ 0.0, 0.0, 0.0 ]
         
     def __str__(self):
         return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.q) + ", h: " + str(self.h) + ", p: " + str(self.P)
@@ -44,12 +46,14 @@ class robot(object):
         
         self.trace = []
         self.trace_enabled = True
+        
+        self.verts = []
 
     def init_params(self, d=None):
         if d is None:
             d = self.d
         
-        globals()['t'] = 0
+        globals()['t'] = 0.0
 
         # establish local vars, pick out syms
         self.syms = {}
@@ -68,10 +72,9 @@ class robot(object):
             except:
                 pass
                 
-        x = [1, 0, 0 ]
-        y = [0, 1, 0 ]
-        z = [0, 0, 1 ]
-
+        x = [1, 0, 0]
+        y = [0, 1, 0]
+        z = [0, 0, 1]
                 
         self._d = {}
         for k, v in d.iteritems():
@@ -168,10 +171,11 @@ class robot(object):
         for k, v in self._d.iteritems():
             setattr(self, k, v)
 
-    def timestep(self):
-        globals()['t'] += 1
+    def timestep(self, scale = 1.0):
+        globals()['t'] += scale
         self.eval_syms()
         self.build_lists()
+        time.sleep(.01)
     
     # get any arbitrary rotation matrix, e.g. self.R(0,3) will give you R03
     def R(self, base_index = 0, final_index = 'T'):
@@ -187,6 +191,7 @@ class robot(object):
     def forwardkin(self):
         self.R0T = eye(3, 3)
         self.P0T = zeros((3, 1))
+        self.verts = []
         
         # make R0T
         for link in self.links:
@@ -197,13 +202,9 @@ class robot(object):
         for link in self.links:
             self.P0T += dot(tmp, link.P)
             tmp = dot(tmp, link.R)
-
-        # TODO: actually calculate tool position
-        indexes = []
-        for i in range(0, self.N):
-            indexes.append(str(i) + str(i + 1))
-        indexes.append(str(self.N) + 'T')
-
+            
+            # TODO - put this in link class
+            self.verts.append((self.P0T[0][0], self.P0T[1][0], self.P0T[2][0]))
 
     def print_vars(self):
         print "=========== begin dump of robot vars ============"
@@ -223,7 +224,7 @@ class robot(object):
             R = link.R
             P = link.P
             h = link.h
-            glColor3f( 0,0,0)
+            glColor3f(0.0, 0.0, 0.0)
             
             glPushMatrix()
             #glBegin(GL_LINES)
@@ -231,13 +232,13 @@ class robot(object):
             #glVertex3f(P[0],P[1],P[2])
             #glEnd()
             
-            #draw joint
-            if link.is_prismatic(): #prismatic joint
+            # draw joint
+            if link.is_prismatic(): # prismatic joint
                 display.draw_prismatic_joint([[0],[0],[0]], P, 10)
                 glTranslate(P[0], P[1], P[2])
-            elif (R == eye(3)).all(): #link - no joint
+            elif (R == eye(3)).all(): # link - no joint
                 pass
-            else: #rotation joint
+            else: # rotation joint
                 glTranslate(P[0], P[1], P[2])
                 display.draw_rotational_joint(h*10, -h*10, 10, link.q)
                 glRotate(link.q, link.h[0], link.h[1], link.h[2])

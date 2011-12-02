@@ -122,12 +122,12 @@ def draw_prismatic_joint(startP, endP, size):
     v7 = (-size/2, size/2, 0)
     v8 = (size/2, size/2, 0)
 
-    q1234 = [ v2, v1, v4, v3, v6, v5, v8, v7, v2, v1 ]
+    q1234 = [v2, v1, v4, v3, v6, v5, v8, v7, v2, v1]
     q56 = [v8, v6, v4, v2, v7, v5, v3, v1]
     
-    outline = [ (v1, v2), (v2, v8), (v8, v7), (v7, v1) ]
-    outline += [ (v1, v3), (v2, v4), (v7, v5), (v8, v6) ]
-    outline += [ (v5, v6), (v6, v4), (v4, v3), (v3, v5) ]
+    outline = [(v1, v2), (v2, v8), (v8, v7), (v7, v1)]
+    outline += [(v1, v3), (v2, v4), (v7, v5), (v8, v6)]
+    outline += [(v5, v6), (v6, v4), (v4, v3), (v3, v5)]
     
     #Quads 1 2 3 4
     glBegin(GL_QUAD_STRIP)
@@ -153,15 +153,12 @@ def draw_prismatic_joint(startP, endP, size):
     glLineWidth(1.0)
     
     glPopMatrix()
-    
-    
-    
+
 def text_at_pos(x, y, z, text, font=GLUT_BITMAP_TIMES_ROMAN_24):
     glRasterPos3f(x, y, z)
     draw_text(text, font)
 
-def draw_text(text, font=GLUT_BITMAP_TIMES_ROMAN_24, color=[0.0, 0.0, 0.0]):
-    glColor3f(color[0], color[1], color[2])
+def draw_text(text, font=GLUT_BITMAP_TIMES_ROMAN_24):
     for c in text:
         glutBitmapCharacter(font, ord(c))
 
@@ -205,6 +202,7 @@ def draw_axes(axes_l = 10, number=''):
     
     glEnd()
     
+    glColor3f(0, 0, 0)
     text_at_pos(axes_l + 1, 0, 0, 'X' + number)
     text_at_pos(0, axes_l + 1, 0, 'Y' + number)
     text_at_pos(0, 0, axes_l + 1, 'Z' + number)
