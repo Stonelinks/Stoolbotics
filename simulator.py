@@ -99,8 +99,27 @@ def zoom_in():
     print "Zoom ="+str(zoom)
     resize()
     glutPostRedisplay()
-    
+
+def keyboard_special(key, x, y):
+    if key == GLUT_KEY_RIGHT:
+        global transX
+        transX= transX+5
+        glutPostRedisplay()
+    elif key == GLUT_KEY_LEFT:
+        global transX
+        transX= transX-5
+        glutPostRedisplay()
+    elif key == GLUT_KEY_DOWN:
+        global transY
+        transY= transY-5
+        glutPostRedisplay()
+    elif key == GLUT_KEY_UP:
+        global transY
+        transY= transY+5
+        glutPostRedisplay()
+
 def keyboard(key, x, y):
+    print key
     if key == chr(27):
         sys.exit(0)
     elif key == 'p':
@@ -123,8 +142,7 @@ def draw():
     
     glPushMatrix()
     #looking at x/y plane - down z axis
-    
-    glTranslatef(0.0, -30.0, 0.0)
+    glTranslatef(transX, transY, transZ)
     glRotatef(angleY, 0.0, 1.0, 0.0)
     glRotatef(angleX, 1.0, 0.0, 0.0)
     
@@ -212,6 +230,7 @@ def main():
     setup()
     glutDisplayFunc(draw)
     glutKeyboardFunc(keyboard)
+    glutSpecialFunc(keyboard_special)
     glutMouseFunc(mouseControl)
     glutPassiveMotionFunc(mouseMotion)
     glutMotionFunc(mouseDragged)
