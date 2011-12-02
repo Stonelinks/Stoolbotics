@@ -5,7 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import json, sys, re, math
+import json, sys, re, math, pprint
 import copy as realcopy
 
 from tools.display import *
@@ -67,9 +67,9 @@ class robot(object):
             except:
                 pass
                 
-        x = [ 1, 0, 0 ]
-        y = [ 0, 1, 0 ]
-        z = [ 0, 0, 1 ]
+        x = [1, 0, 0 ]
+        y = [0, 1, 0 ]
+        z = [0, 0, 1 ]
 
                 
         self._d = {}
@@ -168,13 +168,11 @@ class robot(object):
             setattr(self, k, v)
 
     def timestep(self):
-        global t
-        t+=1
+        globals()['t'] += 1
         self.eval_syms()
         self.build_lists()
     
     def forwardkin(self):
-        
         self.R0T = eye(3,3)
         self.P0T = zeros((3,1))
         
@@ -187,7 +185,14 @@ class robot(object):
         for link in self.links:
             self.P0T += dot(tmp, link.P)
             tmp = dot(tmp, link.R)
-        
+
+    def print_vars(self):
+        print "=========== begin dump of robot vars ============"
+        for k, v in self._d.iteritems():
+            sys.stdout.write(str(k) + ' = ')
+            print(v)
+            print '\n'
+        print "=========== end =============="
 
     def render(self):
         glPushMatrix()

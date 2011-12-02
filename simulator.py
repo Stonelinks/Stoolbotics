@@ -10,7 +10,6 @@ import numpy
 from numpy import *
 import os
 
-from tools.display import *
 from config import *
 from objects import *
 
@@ -131,12 +130,20 @@ def draw():
     
     room.render()
     
-    glColor3f(0,0,0)
+    glColor3f(0, 0, 0)
     draw_axes(20,'1')
     
     robot.render()
     glColor3f(0.0, 0.0, 0.0)
     
+    glPopMatrix()
+
+    # reference axis
+    glPushMatrix()
+    glTranslatef(90.0, -75.0, 0.0)
+    glRotatef(angleY, 0.0, 1.0, 0.0)
+    glRotatef(angleX, 1.0, 0.0, 0.0)
+    draw_axes(18,'')
     glPopMatrix()
 
     glutSwapBuffers()
@@ -176,15 +183,7 @@ def setup():
     robot = create_robot('robots/sample.json')
     robot.forwardkin()
     robot.timestep()
-    print 'N = ' + str(robot.N)
-    print 'q1 = ' + str(robot.q1)
-    print 'P01 = ' + str(robot.P01)
-    print 'R01 = ' + str(robot.R01)
-    print 'P12 = ' + repr(robot.P12)
-    print 'R12 = ' + str(robot.R01)
-    print 'P23 = ' + repr(robot.P23)
-    print 'R23 = ' + str(robot.R23)
-    print 'P3T = ' + repr(robot.P3T)
+    robot.print_vars()
 
 def create_robot(filename):
     r = json.loads(open(filename).read(), object_hook=lambda d: robot(d))
@@ -201,7 +200,6 @@ def resize(_w = width, _h = height):
     glLoadIdentity()
 
 def main():
-    os.chdir(os.path.dirname(sys.argv[0]))
     global width, height
     
     glutInit()
@@ -213,7 +211,6 @@ def main():
 
     setup()
     glutDisplayFunc(draw)
-    #glutIdleFunc(timestep)
     glutKeyboardFunc(keyboard)
     glutMouseFunc(mouseControl)
     glutPassiveMotionFunc(mouseMotion)
