@@ -88,54 +88,73 @@ def draw_rotational_joint_endCap(r, sides):
 def draw_prismatic_joint(startP, endP, size):
     glPushMatrix()
 
-    #This is the default direction for the rectangular-prism to face in OpenGL - z axis
-    z=[0, 0, 1]
-    #Get diff between two points you want rectangular-prism along
-    p=startP-endP
+    # This is the default direction for the rectangular-prism to face in OpenGL - z axis
+    z = [0, 0, 1]
     
-    p=[p[0][0], p[1][0], p[2][0]] # TODO: FIX! because it's broken.... UGH!!    
-    #Get CROSS product (the axis of rotation)
+    # Get diff between two points you want rectangular-prism along
+    p = []
+    for v1, v2 in zip(startP, endP):
+        p.append(v1[0] - v2[0])
+    
+    # Get CROSS product (the axis of rotation)
     t = cross(z, p)
-    #Get angle. LENGTH is magnitude of the vector
+
+    # Get angle. LENGTH is magnitude of the vector
     length = sqrt(dot(p, p))
     angle = 180 / PI * acos(dot(z, p) / length)
-    #glTranslate(endP[0],endP[1],endP[2])
+    # glTranslate(endP[0],endP[1],endP[2])
     glRotate(angle, t[0], t[1], t[2])
     
     if (length < 5):
         length = 5
     length =- length
     glColor(1, 0, 1)
-    glBegin(GL_QUAD_STRIP)
+    
+    def quickv(v):
+        glVertex3f(v[0], v[1], v[2])
+    
+    v1 = (-size/2, -size/2, 0)
+    v2 = (size/2, -size/2, 0)
+    v3 = (-size/2, -size/2, length)
+    v4 = (size/2, -size/2, length)
+    v5 = (-size/2, size/2, length)
+    v6 = (size/2, size/2, length)
+    v7 = (-size/2, size/2, 0)
+    v8 = (size/2, size/2, 0)
 
+    q1234 = [ v2, v1, v4, v3, v6, v5, v8, v7, v2, v1 ]
+    q56 = [v8, v6, v4, v2, v7, v5, v3, v1]
+    
+    outline = [ (v1, v2), (v2, v8), (v8, v7), (v7, v1) ]
+    outline += [ (v1, v3), (v2, v4), (v7, v5), (v8, v6) ]
+    outline += [ (v5, v6), (v6, v4), (v4, v3), (v3, v5) ]
+    
     #Quads 1 2 3 4
-    glVertex3f(size/2, -size/2, 0)   #V2
-    glVertex3f(-size/2, -size/2, 0)   #V1
-    glVertex3f(size/2, -size/2, length)   #V4
-    glVertex3f(-size/2, -size/2, length)   #V3
-    glVertex3f(size/2, size/2, length)   #V6
-    glVertex3f(-size/2, size/2, length)   #V5
-    glVertex3f(size/2, size/2, 0)   #V8
-    glVertex3f(-size/2, size/2, 0)   #V7
-    glVertex3f(size/2, -size/2, 0)   #V2
-    glVertex3f(-size/2, -size/2, 0)   #V1
+    glBegin(GL_QUAD_STRIP)
+    for v in q1234:
+        quickv(v)
     glEnd()
     
-    #Quad 5
+    #Quad 5 & 6
     glBegin(GL_QUADS)
-    glVertex3f(size/2, size/2, 0)   #V8
-    glVertex3f(size/2, size/2, length)   #V6
-    glVertex3f(size/2, -size/2, length)   #V4
-    glVertex3f(size/2, -size/2, 0)   #V2
-
-    #Quad 6
-    glVertex3f(-size/2, size/2, 0)   #V7
-    glVertex3f(-size/2, size/2, length)   #V5
-    glVertex3f(-size/2, -size/2, length)   #V3
-    glVertex3f(-size/2, -size/2, 0)   #V1
+    for v in q56:
+        quickv(v)
     glEnd()
+    
+    # outline
+    glLineWidth(1.5)
+    glColor(0, 0, 0)
+    glBegin(GL_LINES)
+    for line in outline:
+        quickv(line[0])
+        quickv(line[1])
+    
+    glEnd()
+    glLineWidth(1.0)
     
     glPopMatrix()
+    
+    
     
 def text_at_pos(x, y, z, text, font=GLUT_BITMAP_TIMES_ROMAN_24):
     glRasterPos3f(x, y, z)

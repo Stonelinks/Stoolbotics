@@ -41,6 +41,9 @@ class robot(object):
         self.x = x
         self.y = y
         self.z = z
+        
+        self.trace = []
+        self.trace_enabled = True
 
     def init_params(self, d=None):
         if d is None:
@@ -170,19 +173,37 @@ class robot(object):
         self.eval_syms()
         self.build_lists()
     
+    # get any arbitrary rotation matrix, e.g. self.R(0,3) will give you R03
+    def R(self, base_index = 0, final_index = 'T'):
+        if final_index == 'T':
+            n = self.N
+        else:
+            n = final_index
+        R = eye(3, 3)
+        for i in range(base_index, n):
+            R = dot(R, self.links[i].R)
+        return R
+    
     def forwardkin(self):
-        self.R0T = eye(3,3)
-        self.P0T = zeros((3,1))
+        self.R0T = eye(3, 3)
+        self.P0T = zeros((3, 1))
         
         # make R0T
         for link in self.links:
             self.R0T = dot(self.R0T, link.R)
-
+        
         # make P0T
         tmp = eye(3,3)
         for link in self.links:
             self.P0T += dot(tmp, link.P)
             tmp = dot(tmp, link.R)
+
+        # TODO: actually calculate tool position
+        indexes = []
+        for i in range(0, self.N):
+            indexes.append(str(i) + str(i + 1))
+        indexes.append(str(self.N) + 'T')
+
 
     def print_vars(self):
         print "=========== begin dump of robot vars ============"
@@ -194,11 +215,11 @@ class robot(object):
 
     def render(self):
         glPushMatrix()
-        glTranslate(0,0,1)
+        glTranslate(0, 0, 1)
         H = asmatrix(eye(4))
         currentMatrix = reshape(asmatrix(glGetFloatv(GL_PROJECTION_MATRIX)),(4,4))
         for numLink in range(len(self.links)):
-            link=self.links[numLink]
+            link = self.links[numLink]
             R = link.R
             P = link.P
             h = link.h
@@ -212,14 +233,15 @@ class robot(object):
             
             #draw joint
             if link.is_prismatic(): #prismatic joint
-                display.draw_prismatic_joint([0,0,0],P, 10)
-                glTranslate(P[0],P[1],P[2])
+                display.draw_prismatic_joint([[0],[0],[0]], P, 10)
+                glTranslate(P[0], P[1], P[2])
             elif (R == eye(3)).all(): #link - no joint
                 pass
             else: #rotation joint
                 glTranslate(P[0], P[1], P[2])
-                display.draw_rotational_joint(h*10, h*-10, 10, link.q)
+                display.draw_rotational_joint(h*10, -h*10, 10, link.q)
                 glRotate(link.q, link.h[0], link.h[1], link.h[2])
+                
             
             #glLoadMatrixf(double_matrix)
             
@@ -227,6 +249,7 @@ class robot(object):
         display.draw_axes(10,'T')
         for matPop in range(len(self.links)):
             glPopMatrix()
+        
         glPopMatrix()
 
 class room(object):
