@@ -1,37 +1,38 @@
-TODO (not necessarily in order):
+TODO:
+- (x) Specification of a robot arm VIA config file
+    - (x) easy way to symbolically express arm parameters
+    - (x) parameters should be first class variables for robot objects
 
-x specification of a robot arm VIA matricies, somehow
-  x robots matricies in json?
-  - ini files
-  
-- drawing of that arm in world
-  - joints:
-    - rotary = cylinder
-    - prismatic = rectangular prisim
-  - links between joints = lines for now
-  - frames:
-    - coordinate axis
-    - somehow need to anchor a frame to a link or joint
-  - world:
-    - floor
-    - lighting?
+- (x) Drawing of that arm in world
+    - (x) joints (params = axis, type, angle/displacement):
+        - (x) rotary = cylinder
+        - (x) prismatic = rectangular prisim
+    - (x) links between joints = lines for now
+    - (x) frames:
+        - (x) coordinate axis
+        - need to anchor a frame to a link or joint
+    - (x) world:
+        - (x) floor
+        - lighting
 
-- port wen's matlab stuff to python
-  - basic things:
-    x hat
-    x rot (euler-rodriguez)
-    - trans
-  - subproblems for inverse kinematics
-  - jacobian (?)
+- (x) Port some of Prof. Wen's matlab to python:
+    - (x) basic things:
+        - (x) hat
+        - (x) rot (euler-rodriguez)
+        - Note: cross and dot product covered by numpy
+    - homogeneous matrices
+    - subproblems for inverse kinematics
+    - jacobian (?)
 
-x forward kinematics solver
-  - give it any robot and joint angles, find end position in world
+- (x) General forward kinematics solver - given any robot and joint angles, find end position in world
 
-- write proposal
+- scripting environment
+    - load and run user facing script
+    - write examples (inverse kinematics, etc)
 
-- research feasability of making a movie from pyopengl
-  - initial research shows this will be difficult:
-    - direct rendering: save screenshots to disk, use something like ffmpeg
-    - deferred: keep screenshots in RAM, dump to disk, use ffmpeg or something
-  - if not possible, come up with a good way of saving & replaying things within software
-  
+- (x) write proposal
+
+- movie making
+    - implement record - write to a file 
+    - implement play / pause / rewind etc
+    - implement animated GIFs (deffered rendering?)
