@@ -1,4 +1,5 @@
 TODO:
+
 - (x) Specification of a robot arm VIA config file
     - (x) easy way to symbolically express arm parameters
     - (x) parameters should be first class variables for robot objects
