@@ -141,12 +141,13 @@ def keyboard(key, x, y):
         global tscale
         tscale -= .01
         
-    elif key == 's':
-        s = glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE)
+    elif key == 'y':
+        global width, height
+        s = glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE)
         img = Image.new('RGB', (width, height))
         img.fromstring(s)
         img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
-        img2.save("screendump.jpg")
+        img2.save("screendump.png")
 
 def draw():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

@@ -185,13 +185,13 @@ def draw_axes(axes_l = 10, number=''):
     glEnd()
     
     glColor3f(0, 0, 0)
+    glLineWidth(1.0)
     
     offset = axes_l/7
     
     text_at_pos(offset + axes_l, 0, 0, 'X' + number)
     text_at_pos(0, offset + axes_l, 0, 'Y' + number)
     text_at_pos(0, 0, offset + axes_l, 'Z' + number)
-    glLineWidth(1.0)
 
 def screendump(self, filename="screendump"):
     s = glReadPixels(0, 0, self.w, self.h, GL_RGB, GL_UNSIGNED_BYTE)
