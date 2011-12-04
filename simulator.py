@@ -69,6 +69,7 @@ def mouseControl(button, state, x, y):
         return
     if (button == GLUT_LEFT_BUTTON and state == GLUT_DOWN):
         print "LEFT Down"
+        print "LEFT Down"
     elif (button == GLUT_MIDDLE_BUTTON and state == GLUT_DOWN):
         mouseMiddlePressed = True
         oldMouseDraggedX = x
@@ -181,10 +182,13 @@ def draw():
 
     # reference axis
     glPushMatrix()
-    glTranslatef(90.0, -75.0, 0.0)
+    global zoom
+    print zoom
+    glTranslatef(zoom*55.0, zoom*-50.0, 80.0)
+
     glRotatef(angleY, 0.0, 1.0, 0.0)
     glRotatef(angleX, 1.0, 0.0, 0.0)
-    display.draw_axes(18,'')
+    display.draw_axes(zoom*13,'')
     glPopMatrix()
 
     glutSwapBuffers()

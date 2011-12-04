@@ -11,20 +11,20 @@ import numpy
 from tools import *
 
 class point():
-  def __init__(self, x, y, z, label=""):
-    self.x = x
-    self.y = y
-    self.z = z
-    self.label = label
+    def __init__(self, x, y, z, label=""):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.label = label
 
-  def draw(self):
-    glPointSize(5)
-    glBegin(GL_POINTS)
-    glVertex3f(self.x, self.y, self.z)
-    glEnd()
-    name = self.label
-    name += " (" + str(round(self.x, 3)) + ", " + str(round(self.y, 3)) + ", " + str(round(self.z, 3)) + ")"
-    text_at_pos(self.x + 1, self.y + 1, self.z + 1, name, GLUT_BITMAP_TIMES_ROMAN_10)
+    def draw(self):
+        glPointSize(5)
+        glBegin(GL_POINTS)
+        glVertex3f(self.x, self.y, self.z)
+        glEnd()
+        name = self.label
+        name += " (" + str(round(self.x, 3)) + ", " + str(round(self.y, 3)) + ", " + str(round(self.z, 3)) + ")"
+        text_at_pos(self.x + 1, self.y + 1, self.z + 1, name, GLUT_BITMAP_TIMES_ROMAN_10)
 
 def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder from sP to eP
     glPushMatrix()
@@ -172,40 +172,25 @@ def draw_axes(axes_l = 10, number=''):
     glVertex3f(0, 0, 0)
     glVertex3f(axes_l, 0, 0)
     
-    #glVertex3f(axes_l, 0, 0)
-    #glVertex3f(axes_l-(axes_l/5), (axes_l/5), 0)
-    
-    #glVertex3f(axes_l, 0, 0)
-    #glVertex3f(axes_l-(axes_l/5), -(axes_l/5), 0)
-    
     # y axis, green
     glColor3f(0, 1, 0)
     glVertex3f(0, 0, 0)
     glVertex3f(0, axes_l, 0)
     
-    #glVertex3f(0, axes_l, 0)
-    #glVertex3f(0, axes_l-(axes_l/5), (axes_l/5))
-
-    #glVertex3f(0, axes_l, 0)
-    #glVertex3f(0, axes_l-(axes_l/5), -(axes_l/5))
-
     # z axis
     glColor3f(0, 0, 1)
     glVertex3f(0, 0, 0)
     glVertex3f(0, 0, axes_l)
 
-    #glVertex3f(0, 0, axes_l)
-    #glVertex3f(0, (axes_l/5), axes_l-(axes_l/5))
-
-    #glVertex3f(0, 0, axes_l)
-    #glVertex3f(0, -(axes_l/5), axes_l-(axes_l/5))
-    
     glEnd()
     
     glColor3f(0, 0, 0)
-    text_at_pos(axes_l + 1, 0, 0, 'X' + number)
-    text_at_pos(0, axes_l + 1, 0, 'Y' + number)
-    text_at_pos(0, 0, axes_l + 1, 'Z' + number)
+    
+    offset = axes_l/7
+    
+    text_at_pos(offset + axes_l, 0, 0, 'X' + number)
+    text_at_pos(0, offset + axes_l, 0, 'Y' + number)
+    text_at_pos(0, 0, offset + axes_l, 'Z' + number)
     glLineWidth(1.0)
 
 def screendump(self, filename="screendump"):
