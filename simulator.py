@@ -9,190 +9,213 @@ import Image
 import numpy
 from numpy import *
 import os
+import json
+import config
+import objects
+import tools.display as display
 
-from config import *
-from objects import *
-
-tscale = .2
-
-def timestep():
-    global tscale
-    robot.forwardkin()
-    robot.timestep(tscale)
-    glutPostRedisplay()
-
-# Mouse motion callback routine.
-def mouseMotion(x,y):
-    return
-    #y=height-y
-    #glutPostRedisplay()
-
-def mouseDragged(x,y):
-    global angleX
-    global angleY
-    global oldMouseDraggedX
-    global oldMouseDraggedY
-
-    if(mouseMiddlePressed == False):
-        return
-    if ( x < 0 or x > width or y < 0 or y > height ):
-        return
-
-    changeX = x - oldMouseDraggedX
-    changeY = y - oldMouseDraggedY
-    oldMouseDraggedX = x
-    oldMouseDraggedY = y
-    angleY += changeX
-    angleX += changeY
-    print "Angle x/y = " + str(angleX)+"/"+str(angleY)
-    if (angleX < 180):
-        angleX = 180
-    if (angleX > 360):
-        angleX = 360
-    glutPostRedisplay()
-
-#The mouse callback routine.
-def mouseControl(button, state, x, y):
-    global mouseMiddlePressed
-    global oldMouseDraggedX
-    global oldMouseDraggedY
-    #y = height - y; # Correct from mouse to OpenGL co-ordinates.
-    print 'X = ' + str(x) +' Y = ' + str(y)
-    if (button == 3):# Zoom in
-        zoom_in()
-        return
-    elif (button == 4): # Zoom out
-        zoom_out()
-        return
+class mouse():
+    def __init__(self):
+        self.x = None
+        self.y = None
         
-    if (x < 0 or x > width or y < 0 or y > height):
-        return
-    if (button == GLUT_LEFT_BUTTON and state == GLUT_DOWN):
-        print "LEFT Down"
-        print "LEFT Down"
-    elif (button == GLUT_MIDDLE_BUTTON and state == GLUT_DOWN):
-        mouseMiddlePressed = True
-        oldMouseDraggedX = x
-        oldMouseDraggedY = y
-        print "Middle Down"
-    elif (button == GLUT_MIDDLE_BUTTON and state == GLUT_UP):
-        mouseMiddlePressed = False
-        print "Middle Up"
-    elif (button == GLUT_RIGHT_BUTTON and state == GLUT_DOWN):
-        mouseMiddlePressed = True
-        oldMouseDraggedX = x
-        oldMouseDraggedY = y
-        print "Middle Down"
-    elif (button == GLUT_RIGHT_BUTTON and state == GLUT_UP):
-        mouseMiddlePressed = False
-        print "Middle Up"
-    elif (button == GLUT_LEFT_BUTTON and state == GLUT_UP):
-        print "LEFT UP"
-
-def zoom_out():
-    global zoom
-    zoom=zoom + .1
-    print "Zoom = " + str(zoom)
-    resize()
-    glutPostRedisplay()
-    
-def zoom_in():
-    global zoom
-    if (zoom > 0.1):
-        zoom = zoom - .1
-    print "Zoom = " + str(zoom)
-    resize()
-    glutPostRedisplay()
-
-def keyboard_special(key, x, y):
-    if key == GLUT_KEY_RIGHT:
-        global transX
-        transX= transX+5
-        glutPostRedisplay()
-    elif key == GLUT_KEY_LEFT:
-        global transX
-        transX= transX-5
-        glutPostRedisplay()
-    elif key == GLUT_KEY_DOWN:
-        global transY
-        transY= transY-5
-        glutPostRedisplay()
-    elif key == GLUT_KEY_UP:
-        global transY
-        transY= transY+5
-        glutPostRedisplay()
-
-def keyboard(key, x, y):
-    print key
-    if key == chr(27):
-        sys.exit(0)
-    elif key == 'p':
-        glutIdleFunc(timestep)
-    elif key == 's':
-        glutIdleFunc(None)
-    elif key == '+':
-        zoom_in()
-    elif key == '-':
-        zoom_out()
-    elif key == 'f':
-        global tscale
-        tscale += .01
-    elif key == 'd':
-        global tscale
-        tscale -= .01
+        self.up = False
+        self.down = False
+        self.oldMouseDraggedX = None
+        self.oldMouseDraggedY = None
+        self.middlePressed = False
+        self.rightPressed = False
+        self.leftPressed = False
         
-    elif key == 'y':
-        global width, height
-        s = glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE)
-        img = Image.new('RGB', (width, height))
-        img.fromstring(s)
-        img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
-        img2.save("screendump.png")
+class simulator():
+    def __init__(self, robot, room):
+        self.robot = robot
+        self.room = room
+        self.mouse = mouse()
 
-def draw():
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    
-    glPushMatrix()
-    #looking at x/y plane - down z axis
-    glTranslatef(transX, transY, transZ)
-    glRotatef(angleY, 0.0, 1.0, 0.0)
-    glRotatef(angleX, 1.0, 0.0, 0.0)
-    
-    room.render()
-    
-    glColor3f(0, 0, 0)
-    display.draw_axes(20,'1')
-    
-    #robot.render()
-    
-    glPointSize(10)
-    glLineWidth(2)
-    glColor3f(0.0, 0.0, 0.0)
-    glBegin(GL_LINE_STRIP)
-    for vert in robot.verts:
-        glVertex3f(vert[0], vert[1], vert[2])
-    glEnd()
-    glBegin(GL_POINTS)
-    for vert in robot.verts:
-        glVertex3f(vert[0], vert[1], vert[2])
-    glEnd()
+        self.width = 800
+        self.height = 600
 
+        self.angleY = -135
+        self.angleX = 245
+
+        self.transX = 0
+        self.transY = -30.0
+        self.transZ = 0
+
+        self.tscale = .2
+        self.scale = 10
+        self.room.scale = self.scale
+        self.zoom = 1.6
+
+        #self.R = 20.0
+
+        self.robot.forwardkin()
+        self.robot.timestep()
+        self.robot.print_vars()
+        
+    def timestep(self):
+        self.robot.forwardkin()
+        self.robot.timestep(self.tscale)
+        glutPostRedisplay()
     
-    
-    glPopMatrix()
+    def _updateMouse(self, x, y):
+        self.mouse.x = x
+        self.mouse.y = y
 
-    # reference axis
-    glPushMatrix()
-    global zoom
-    print zoom
-    glTranslatef(zoom*55.0, zoom*-50.0, 80.0)
+    # Mouse motion callback routine.
+    def mouseMotion(self, x, y):
+        self._updateMouse(x, y)
 
-    glRotatef(angleY, 0.0, 1.0, 0.0)
-    glRotatef(angleX, 1.0, 0.0, 0.0)
-    display.draw_axes(zoom*13,'')
-    glPopMatrix()
+    def mouseDragged(self, x, y):
+        self._updateMouse(x, y)
 
-    glutSwapBuffers()
+        changeX = x - self.mouse.oldMouseDraggedX
+        changeY = y - self.mouse.oldMouseDraggedY
+
+        self.mouse.oldMouseDraggedX = x
+        self.mouse.oldMouseDraggedY = y
+
+        # why are these mixed up? it breaks without it
+        self.angleX += changeY
+        self.angleY -= changeX
+        
+        print "Angle (x, y) = (" + str(self.angleX) + ", " + str(self.angleY) + ")"
+        if (self.angleX < 180):
+            self.angleX = 180
+        if (self.angleX > 360):
+            self.angleX = 360
+        glutPostRedisplay()
+
+    #The mouse callback routine.
+    def mouseControl(self, button, state, x, y):
+        self._updateMouse(x, y)
+        print 'X = ' + str(x) +' Y = ' + str(y)
+        if (button == 3):# Zoom in
+            self.camera_zoom('in')
+            return
+        elif (button == 4): # Zoom out
+            self.camera_zoom('out')
+            return
+        
+        # clear mouse object
+        self.mouse.leftPressed = False
+        self.mouse.middlePressed = False
+        self.mouse.rightPressed = False
+        self.up = False
+        self.down = False
+        
+        m = self.mouse
+        s  = ''
+        if state == GLUT_DOWN:
+            m.down = True
+            s = 'down'
+        else:
+            m.up = True
+            s = 'up'
+        if button == GLUT_LEFT_BUTTON:
+            m.leftPressed = True
+            print "LEFT " + s
+        if button == GLUT_MIDDLE_BUTTON:
+            m.middlePressed = True
+            print "MIDDLE " + s
+        if button == GLUT_RIGHT_BUTTON:
+            m.rightPressed = True
+            print "RIGHT " + s
+
+        if (m.middlePressed or m.rightPressed) and m.down:
+            m.oldMouseDraggedX = x
+            m.oldMouseDraggedY = y
+
+    def camera_zoom(self, what = 'in'):
+        if what == 'in':
+            if (self.zoom > 0.1):
+                self.zoom -= 0.1
+        elif what == 'out':
+            self.zoom += 0.1
+        print "Zoom = " + str(self.zoom)
+        self.resize(self.width, self.height)
+        glutPostRedisplay()
+
+    def keyboard_special(self, key, x, y):
+        self._updateMouse(x, y)
+        amount = 5
+        if key == GLUT_KEY_RIGHT:
+            self.transX += amount
+            glutPostRedisplay()
+        elif key == GLUT_KEY_LEFT:
+            self.transX -= amount
+            glutPostRedisplay()
+        elif key == GLUT_KEY_DOWN:
+            self.transY -= amount
+            glutPostRedisplay()
+        elif key == GLUT_KEY_UP:
+            self.transY += amount
+            glutPostRedisplay()
+
+    def keyboard(self, key, x, y):
+        self._updateMouse(x, y)
+        print "keypress = " + key
+        if key == chr(27):
+            sys.exit(0)
+        elif key == 'p':
+            glutIdleFunc(self.timestep)
+        elif key == 's':
+            glutIdleFunc(None)
+        elif key == '+':
+            self.camera_zoom('in')
+        elif key == '-':
+            self.camera_zoom('out')
+        elif key == 'f':
+            self.tscale += .01
+        elif key == 'd':
+            self.tscale -= .01
+        elif key == 'y':
+            s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
+            img = Image.new('RGB', (self.width, self.height))
+            img.fromstring(s)
+            img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
+            img2.save("screendump.png")
+
+    def draw(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        
+        glPushMatrix()
+        #looking at x/y plane - down z axis
+        glTranslatef(self.transX, self.transY, self.transZ)
+        glRotatef(self.angleY, 0.0, 1.0, 0.0)
+        glRotatef(self.angleX, 1.0, 0.0, 0.0)
+        
+        self.room.render()
+        
+        glColor3f(0, 0, 0)
+        display.draw_axes(20, '1')
+        
+        self.robot.render()
+        glPopMatrix()
+
+        # reference axis
+        glPushMatrix()
+        glTranslatef(self.zoom*55.0, self.zoom*-50.0, 80.0)
+
+        glRotatef(self.angleY, 0.0, 1.0, 0.0)
+        glRotatef(self.angleX, 1.0, 0.0, 0.0)
+        display.draw_axes(self.zoom*13, '')
+        glPopMatrix()
+
+        glutSwapBuffers()
+
+    def resize(self, w, h):
+        self.width = w
+        self.height = h
+        glViewport(0, 0, w, h)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        new_w = self.zoom*h/self.scale
+        new_h = self.zoom*w/self.scale
+        glOrtho (-new_w, new_w, -new_h, new_h, -1000.0, 1000.0)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
 
 def setup():
     glClearColor(1.0, 1.0, 1.0, 0.0)
@@ -200,10 +223,10 @@ def setup():
     #glEnable(GL_LIGHTING)
 
     # Light property vectors.
-    lightAmb = [ 0.0, 0.0, 0.0, 1.0 ]
-    lightDifAndSpec = [ 1.0, 1.0, 1.0, 1.0 ]
-    lightPos = [ 0.0, 1.5, 3.0, 1.0 ]
-    globAmb = [ 0.2, 0.2, 0.2, 1.0 ]
+    lightAmb = [0.0, 0.0, 0.0, 1.0]
+    lightDifAndSpec = [1.0, 1.0, 1.0, 1.0]
+    lightPos = [0.0, 1.5, 3.0, 1.0]
+    globAmb = [0.2, 0.2, 0.2, 1.0]
 
     # Light properties.
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb)
@@ -223,47 +246,50 @@ def setup():
     # Specify locations for the position and normal arrays.
     #glVertexPointer(3, GL_FLOAT, 0, vertices)
     #glNormalPointer(GL_FLOAT, 0, normals)
-    global room
-    room = room(100,100,100, False)
-    global robot
-    robot = create_robot('robots/sample.json')
-    robot.forwardkin()
-    robot.timestep()
-    robot.print_vars()
 
 def create_robot(filename):
-    r = json.loads(open(filename).read(), object_hook=lambda d: robot(d))
+    r = json.loads(open(filename).read(), object_hook=lambda d: objects.robot(d))
     return r
-    
-def resize(_w = width, _h = height):
-    width = _w
-    height = _h
-    glViewport(0, 0, width, height)
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    glOrtho (-zoom*width/scale, zoom*width/scale, -zoom*height/scale, zoom*height/scale, -100.0, 100.0)
-    glMatrixMode(GL_MODELVIEW)
-    glLoadIdentity()
 
 def main():
-    global width, height
-    
+
+    room = objects.room(100, 100, 100, False)
+    robot = create_robot('robots/sample.json')
+    s = simulator(robot, room)
+
     glutInit()
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
-    glutInitWindowSize(width , height)
+    glutInitWindowSize(s.width, s.height)
     glutInitWindowPosition(100, 100) 
 
     glutCreateWindow(sys.argv[0])
 
     setup()
-    glutDisplayFunc(draw)
-    glutKeyboardFunc(keyboard)
-    glutSpecialFunc(keyboard_special)
-    glutMouseFunc(mouseControl)
-    glutPassiveMotionFunc(mouseMotion)
-    glutMotionFunc(mouseDragged)
-    glutReshapeFunc(resize);  
+    
+    
+    # mock callback functions that transfer to the simulator
+    def _draw():
+        s.draw()
+    def _mouseMotion(x, y):
+        s.mouseMotion(x, y)
+    def _mouseDragged(x, y):
+        s.mouseDragged(x, y)
+    def _mouseControl(button, state, x, y):
+        s.mouseControl(button, state, x, y)
+    def _keyboard_special(key, x, y):
+        s.keyboard_special(key, x, y)
+    def _keyboard(key, x, y):
+        s.keyboard(key, x, y)
+    def _resize(w, h):
+        s.resize(w, h)
 
+    glutDisplayFunc(_draw)
+    glutKeyboardFunc(_keyboard)
+    glutSpecialFunc(_keyboard_special)
+    glutMouseFunc(_mouseControl)
+    glutPassiveMotionFunc(_mouseMotion)
+    glutMotionFunc(_mouseDragged)
+    glutReshapeFunc(_resize);  
     glutMainLoop()
     return 0
 

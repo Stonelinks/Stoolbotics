@@ -199,13 +199,18 @@ class robot(object):
         
         # make P0T
         tmp = eye(3,3)
+        p = None
         for link in self.links:
             self.P0T += dot(tmp, link.P)
             tmp = dot(tmp, link.R)
             
             # TODO - put this in link class
-            self.verts.append((self.P0T[0][0], self.P0T[1][0], self.P0T[2][0]))
-
+            p = (self.P0T[0][0], self.P0T[1][0], self.P0T[2][0])
+            self.verts.append(p)
+        if self.trace_enabled:
+            print p
+            self.trace.append(p)
+        
     def print_vars(self):
         print "=========== begin dump of robot vars ============"
         for k, v in self._d.iteritems():
@@ -215,6 +220,33 @@ class robot(object):
         print "=========== end =============="
 
     def render(self):
+
+        glPointSize(10)
+        glLineWidth(2)
+        glColor3f(0.0, 0.0, 0.0)
+        glBegin(GL_LINE_STRIP)
+        for vert in self.verts:
+            glVertex3f(vert[0], vert[1], vert[2])
+        glEnd()
+        glBegin(GL_POINTS)
+        for vert in self.verts:
+            glVertex3f(vert[0], vert[1], vert[2])
+        glEnd()
+
+        if self.trace_enabled:
+            glColor3f(0.0, 0.0, 0.2)
+            glPointSize(3)
+            glBegin(GL_POINTS)
+            for vert in self.trace:
+                glVertex3f(vert[0], vert[1], vert[2])
+            glEnd()
+            glBegin(GL_LINE_STRIP)
+            for vert in self.trace:
+                glVertex3f(vert[0], vert[1], vert[2])
+            glEnd()
+
+        return
+
         glPushMatrix()
         glTranslate(0, 0, 1)
         H = asmatrix(eye(4))
@@ -254,36 +286,43 @@ class robot(object):
         glPopMatrix()
 
 class room(object):
-    def __init__(self, _length=0, _width=0, _height=0, outLined=True):
-        self.length=_length
-        self.width=_width
-        self.height=_height
-        self.outLined=outLined
+    def __init__(self, length=0, width=0, height=0, outLined=True):
+        self.length = length
+        self.width = width
+        self.height = height
+        self.outLined = outLined
+        
+        # this gets set by the simulator
+        self.scale = None
         
     def render(self):
-        startL=-self.length/scale/2
-        endL=self.length/scale/2
-        startW=-self.width/scale/2
-        endW=self.width/scale/2
+        s = self.scale
+        l = self.length
+        
+        startL =- l/s/2
+        endL = l/s/2
+        startW =- self.width/s/2
+        endW = self.width/s/2
         if (self.outLined):
             glBegin(GL_LINES)
-            for j in range(startW, endW+1):
-                glVertex3f(startL*scale,j*scale, 0)
-                glVertex3f(endL*scale,j*scale, 0)
+            for j in range(startW, endW + 1):
+                glVertex3f(startL*s, j*s, 0)
+                glVertex3f(endL*s, j*s, 0)
             for i in range (startL, endL+1):
-                glVertex3f(i*scale,startW*scale, 0)
-                glVertex3f(i*scale,endW*scale, 0)
+                glVertex3f(i*s, startW*s, 0)
+                glVertex3f(i*s, endW*s, 0)
         else:
             glBegin(GL_QUADS)
             for i in range(startW, endW):
-                for j in range (startL, endL):
-                    if ((i+j)%2 ==0):
+                for j in range(startL, endL):
+                    if ((i + j) % 2 == 0):
                         glColor3f(0.4, 0.4, 0.4);
                     else:
                         glColor3f(0.3, 0.3, 0.3);
                     
-                    glVertex3f(i*scale,j*scale, 0)
-                    glVertex3f((i+1)*scale,j*scale, 0)
-                    glVertex3f((i+1)*scale,(j+1)*scale, 0)
-                    glVertex3f(i*scale,(j+1)*scale, 0)
+                    glVertex3f(i*s, j*s, 0)
+                    glVertex3f((i + 1)*s, j*s, 0)
+                    glVertex3f((i + 1)*s, (j + 1)*s, 0)
+                    glVertex3f(i*s, (j + 1)*s, 0)
         glEnd()
+
