@@ -9,43 +9,51 @@ import json, sys, re, math, time
 import tools.display as display
 
 class link():
-    def __init__(self, name, pos, rot, type, param, axis):
+    def __init__(self, name, parent):
         self.name = name
-        self.pos = pos
-        self.P = pos
-        self.rot = rot
-        self.R = rot
-        self.type = type
+        self.parent = parent
+        self.index = int(name[0])
+        
+        self.pos = eval('parent.P' + name)
+        self.P = self.pos
 
-        self.param = param
-        self.parameter = param
-        self.q = param
+        self.rot = eval('parent.R' + name)
+        self.R = self.rot
+
+        if 'q' in parent.syms['P' + name]:
+            self.type = 'prismatic'
+        else:
+            self.type = 'rotary'
+
+        if self.index >= parent.N:
+            self.q = None
+            self.h = None
+        else:
+            n = str(self.index + 1)
+            self.q = eval('parent.q' + n)
+            self.h = eval('parent.h' + n)
+            
+        self.param = self.q
+        self.parameter = self.param
         
-        self.axis = axis
-        self.h = axis
-        
-        self.location = [ 0.0, 0.0, 0.0 ]
+        self.axis = self.h
         
     def __str__(self):
         return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.q) + ", h: " + str(self.h) + ", p: " + str(self.P)
     
     def is_prismatic(self):
         return self.type == 'prismatic'
-
+    
+    def location(self):
+        return self.parent.verts[self.index]
+    
 class robot(object):
-    def __init__(self, d, x=0, y=0, z=0):
-        
-        # make initial params class variables
-        # also adds lists
+    def __init__(self, d):
         self.init_params(d)
-        
-        # origin
-        self.x = x
-        self.y = y
-        self.z = z
         
         self.trace = []
         self.trace_enabled = True
+        self.ghosts_enabled = False
         
         self.verts = []
 
@@ -103,7 +111,6 @@ class robot(object):
         
         # eval syms
         self.eval_syms()
-        
         self.build_lists()
         
     def build_lists(self):
@@ -124,24 +131,8 @@ class robot(object):
         
         c = 1
         for i in indexes:
-            cmd = 'link(\'' + i + '\', '
-            cmd += 'self.P' + i + ', '
-            cmd += 'self.R' + i + ', '
-            
-            if 'q' in self.syms['P' + i]:
-                cmd += '\'prismatic\''
-            else:
-                cmd += '\'rotary\''
-            cmd += ', '
-            q = 'self.q' + str(c)
-
-            cmd2 = ', '
-            cmd2 += 'self.h' + str(c)
-            if c > self.N:
-                m = eval(cmd + 'None, None )')
-            else:
-                m = eval(cmd + q + cmd2 + ')')
-            self.links.append(m)
+            l = eval('link(\'' + i + '\', self)')
+            self.links.append(l)
             c += 1
         
     def eval_syms(self):
@@ -223,20 +214,19 @@ class robot(object):
         glLineWidth(2)
         glColor3f(0.0, 0.0, 0.0)
         glBegin(GL_LINE_STRIP)
-        for vert in self.verts:
+        for link in self.links:
+            vert = link.location()
             glVertex3f(vert[0], vert[1], vert[2])
         glEnd()
         glBegin(GL_POINTS)
-        for vert in self.verts:
+        for link in self.links:
+            vert = link.location()
             glVertex3f(vert[0], vert[1], vert[2])
         glEnd()
 
-        if self.trace_enabled:
-          
-            # only save the last 300 points
-            self.trace = self.trace[-300:]
 
-            # arm ghosts
+        return
+        if self.ghosts_enabled:
             glColor3f(0.3, 0.3, 0.3)
             glPointSize(3)
             for verts in self.trace:
@@ -251,6 +241,10 @@ class robot(object):
                 for vert in verts:
                     glVertex3f(vert[0], vert[1], vert[2])
                 glEnd()
+
+        if self.trace_enabled:
+            # only save the last 300 points
+            self.trace = self.trace[-300:]
 
             # saved tool positions
             glColor3f(1.0, 0.0, 0.0)
