@@ -48,8 +48,6 @@ class simulator():
         self.room.scale = self.scale
         self.zoom = 1.6
 
-        #self.R = 20.0
-
         self.robot.forwardkin()
         self.robot.timestep()
         self.robot.print_vars()
@@ -80,7 +78,7 @@ class simulator():
         self.angleX += changeY
         self.angleY -= changeX
         
-        print "Angle (x, y) = (" + str(self.angleX) + ", " + str(self.angleY) + ")"
+        print "Angle = (" + str(self.angleX) + ", " + str(self.angleY) + ")"
         if (self.angleX < 180):
             self.angleX = 180
         if (self.angleX > 360):
@@ -196,7 +194,7 @@ class simulator():
 
         # reference axis
         glPushMatrix()
-        glTranslatef(self.zoom*55.0, self.zoom*-50.0, 80.0)
+        glTranslatef(self.zoom*55.0, self.zoom*-50.0, 800.0)
 
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
         glRotatef(self.angleX, 1.0, 0.0, 0.0)
@@ -252,8 +250,7 @@ def create_robot(filename):
     return r
 
 def main():
-
-    room = objects.room(100, 100, 100, False)
+    room = objects.room(200, 200, 200, False)
     robot = create_robot('robots/sample.json')
     s = simulator(robot, room)
 
@@ -265,8 +262,7 @@ def main():
     glutCreateWindow(sys.argv[0])
 
     setup()
-    
-    
+
     # mock callback functions that transfer to the simulator
     def _draw():
         s.draw()

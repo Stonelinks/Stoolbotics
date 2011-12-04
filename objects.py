@@ -208,8 +208,7 @@ class robot(object):
             p = (self.P0T[0][0], self.P0T[1][0], self.P0T[2][0])
             self.verts.append(p)
         if self.trace_enabled:
-            print p
-            self.trace.append(p)
+            self.trace.append(self.verts)
         
     def print_vars(self):
         print "=========== begin dump of robot vars ============"
@@ -220,7 +219,6 @@ class robot(object):
         print "=========== end =============="
 
     def render(self):
-
         glPointSize(10)
         glLineWidth(2)
         glColor3f(0.0, 0.0, 0.0)
@@ -234,14 +232,31 @@ class robot(object):
         glEnd()
 
         if self.trace_enabled:
-            glColor3f(0.0, 0.0, 0.2)
+          
+            # only save the last 300 points
+            self.trace = self.trace[-300:]
+
+            # arm ghosts
+            glColor3f(0.3, 0.3, 0.3)
             glPointSize(3)
-            glBegin(GL_POINTS)
-            for vert in self.trace:
-                glVertex3f(vert[0], vert[1], vert[2])
-            glEnd()
+            for verts in self.trace:
+                glBegin(GL_POINTS)
+                for vert in verts:
+                    glVertex3f(vert[0], vert[1], vert[2])
+                glEnd()
+
+            glColor3f(0.8, 0.8, 0.8)
+            for verts in self.trace:
+                glBegin(GL_LINE_STRIP)
+                for vert in verts:
+                    glVertex3f(vert[0], vert[1], vert[2])
+                glEnd()
+
+            # saved tool positions
+            glColor3f(1.0, 0.0, 0.0)
             glBegin(GL_LINE_STRIP)
-            for vert in self.trace:
+            for verts in self.trace:
+                vert = verts[-1:][0]
                 glVertex3f(vert[0], vert[1], vert[2])
             glEnd()
 
@@ -299,16 +314,16 @@ class room(object):
         s = self.scale
         l = self.length
         
-        startL =- l/s/2
-        endL = l/s/2
-        startW =- self.width/s/2
-        endW = self.width/s/2
+        startL =- (l/s)/2
+        endL = (l/s)/2
+        startW =- (self.width/s)/2
+        endW = (self.width/s)/2
         if (self.outLined):
             glBegin(GL_LINES)
             for j in range(startW, endW + 1):
                 glVertex3f(startL*s, j*s, 0)
                 glVertex3f(endL*s, j*s, 0)
-            for i in range (startL, endL+1):
+            for i in range (startL, endL + 1):
                 glVertex3f(i*s, startW*s, 0)
                 glVertex3f(i*s, endW*s, 0)
         else:
@@ -320,9 +335,16 @@ class room(object):
                     else:
                         glColor3f(0.3, 0.3, 0.3);
                     
-                    glVertex3f(i*s, j*s, 0)
-                    glVertex3f((i + 1)*s, j*s, 0)
-                    glVertex3f((i + 1)*s, (j + 1)*s, 0)
-                    glVertex3f(i*s, (j + 1)*s, 0)
+                    x0 = i*s
+                    y0 = j*s
+                    x1 = (i + 1)*s
+                    y1 = (j + 1)*s
+                    
+                    glVertex3f(x0, y0, 0)
+                    glVertex3f(x1, y0, 0)
+                    glVertex3f(x1, y1, 0)
+                    glVertex3f(x0, y1, 0)
+                    
+                    # todo: draw other walls to make a room
         glEnd()
 
