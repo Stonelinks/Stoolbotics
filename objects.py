@@ -237,6 +237,7 @@ class robot(object):
                 display.draw_axes(20, str(link.index))
             else:
                 display.draw_axes(20, 'T')
+            
             # draw joint
             if link.is_prismatic(): # prismatic joint
                 display.draw_prismatic_joint([[0],[0],[0]], P, 10)

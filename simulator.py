@@ -203,8 +203,11 @@ class simulator():
         glViewport(0, 0, w, h)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        new_w = self.zoom*h/self.scale
-        new_h = self.zoom*w/self.scale
+        new_w = self.zoom*w/self.scale
+        new_h = self.zoom*h/self.scale
+        
+        
+            
         glOrtho (-new_w, new_w, -new_h, new_h, -500.0, 500.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
