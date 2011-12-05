@@ -58,6 +58,8 @@ class simulator():
         glutPostRedisplay()
     
     def _updateMouse(self, x, y):
+        self.mouse.oldMouseDraggedX = self.mouse.x
+        self.mouse.oldMouseDraggedY = self.mouse.y
         self.mouse.x = x
         self.mouse.y = y
 
@@ -70,9 +72,6 @@ class simulator():
 
         changeX = x - self.mouse.oldMouseDraggedX
         changeY = y - self.mouse.oldMouseDraggedY
-
-        self.mouse.oldMouseDraggedX = x
-        self.mouse.oldMouseDraggedY = y
 
         # why are these mixed up? it breaks without it
         self.angleX += changeY
@@ -187,14 +186,14 @@ class simulator():
         self.room.render()
         
         glColor3f(0, 0, 0)
-        display.draw_axes(20, '1')
+        #display.draw_axes(20, '1')
         
         self.robot.render()
         glPopMatrix()
 
         # reference axis
         glPushMatrix()
-        glTranslatef(self.zoom*55.0, self.zoom*-50.0, 800.0)
+        glTranslatef(self.zoom*40.0, self.zoom*-55.0, 800.0)
 
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
         glRotatef(self.angleX, 1.0, 0.0, 0.0)

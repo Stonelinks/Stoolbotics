@@ -29,26 +29,24 @@ class point():
 def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder from sP to eP
     glPushMatrix()
 
-    #This is the default direction for the cylinders to face in OpenGL - z axis
-    z=[ 0, 0, 1 ]
-    #Get diff between two points you want cylinder along
-    p = startP - endP
-    p = [ p[0][0], p[1][0], p[2][0] ] # TODO: FIX! because it's broken.... UGH!!
+    # This is the default direction for the cylinders to face in OpenGL - z axis
+    z = [0.0, 0.0, 1.0]
+    
+    # Get diff between two points you want cylinder along
+    p = array(startP - endP, float).transpose()[0]
 
-    #Get CROSS product (the axis of rotation)
-    t = cross(z , p)
+    # Get CROSS product (the axis of rotation)
+    t = cross(z, p)
 
     #Get angle. LENGTH is magnitude of the vector
     length = sqrt(dot(p, p))
     angle = 180 / PI * acos(dot(z, p) / length)
-    glTranslate(endP[0], endP[1], endP[2])
-    glRotate(angle,t[0], t[1], t[2])
-    if (link_rotation != 0):
-        glRotate(link_rotation + 90, 0, 0, 1)
+    glRotate(angle, t[0], t[1], t[2])
+    glRotate(link_rotation + 90, 0, 0, 1)
     
     glColor(0, 1, 1)
-    sides = r*2
-    
+    sides = r*5
+    glTranslate(0, 0, -length/2)
     quad = gluNewQuadric()
     gluQuadricOrientation(quad, GLU_OUTSIDE);
     gluCylinder(quad, r, r, length, sides, 1);
@@ -74,14 +72,18 @@ def draw_rotational_joint_endCap(r, sides):
     for angle in arange(0, 2*PI, 2*PI/sides):
         glVertex3f(cos(angle)*r, sin(angle)*r, 0)
     glEnd()
-    
+
+    def arrow(z):
+        glVertex3f(0, 0, z)
+        glVertex3f(r, 0, z)
+        glVertex3f(r, 0, z)
+        glVertex3f(r-r*.5, r*.5, z)
+        glVertex3f(r, 0, z)
+        glVertex3f(r-r*.5, -r*.5, z)
+
     glBegin(GL_LINES)
-    glVertex3f(0, 0, 0)
-    glVertex3f(r, 0, 0)
-    glVertex3f(r, 0, 0)
-    glVertex3f(r-r*.5, r*.5, 0)
-    glVertex3f(r, 0, 0)
-    glVertex3f(r-r*.5, -r*.5, 0)
+    arrow(0.1)
+    arrow(-0.1)
     glEnd()
     glLineWidth(1.0)
 
@@ -89,12 +91,10 @@ def draw_prismatic_joint(startP, endP, size):
     glPushMatrix()
 
     # This is the default direction for the rectangular-prism to face in OpenGL - z axis
-    z = [0, 0, 1]
+    z = [0.0, 0.0, -1.0]
     
     # Get diff between two points you want rectangular-prism along
-    p = []
-    for v1, v2 in zip(startP, endP):
-        p.append(v1[0] - v2[0])
+    p = array(startP - endP, float).transpose()[0]
     
     # Get CROSS product (the axis of rotation)
     t = cross(z, p)

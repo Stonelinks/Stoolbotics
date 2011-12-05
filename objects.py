@@ -210,25 +210,41 @@ class robot(object):
         print "=========== end =============="
 
     def render(self):
-        glPointSize(10)
+        for link in self.links:
+            R = link.R
+            P = link.P
+            h = link.h
+            glColor3f(0.0, 0.0, 0.0)
+
+            glPushMatrix()
+            glLineWidth(15)
+            glBegin(GL_LINES)
+            glVertex3f(0,0,0)
+            glVertex3f(P[0],P[1],P[2])
+            glEnd()
+
+            glTranslate(P[0], P[1], P[2])
+            
+            # draw joint
+            if link.is_prismatic(): # prismatic joint
+                display.draw_prismatic_joint([[0],[0],[0]], P, 10)
+            elif (R == eye(3)).all(): # link - no joint
+                pass
+            else: # rotation joint
+                display.draw_rotational_joint(h*10, -h*10, 8, link.q * 180 / PI)
+                glRotate(link.q * 180 / PI, link.h[0], link.h[1], link.h[2])
+        # pop all joints off
+        for matPop in self.links:
+            glPopMatrix()
+
         glLineWidth(2)
-        glColor3f(0.0, 0.0, 0.0)
-        glBegin(GL_LINE_STRIP)
-        for link in self.links:
-            vert = link.location()
-            glVertex3f(vert[0], vert[1], vert[2])
-        glEnd()
-        glBegin(GL_POINTS)
-        for link in self.links:
-            vert = link.location()
-            glVertex3f(vert[0], vert[1], vert[2])
-        glEnd()
+        glPointSize(10)
+        # only save the last 300 points
+        #self.trace = self.trace[-300:]
 
-
-        return
         if self.ghosts_enabled:
             glColor3f(0.3, 0.3, 0.3)
-            glPointSize(3)
+            glPointSize(8)
             for verts in self.trace:
                 glBegin(GL_POINTS)
                 for vert in verts:
@@ -241,11 +257,8 @@ class robot(object):
                 for vert in verts:
                     glVertex3f(vert[0], vert[1], vert[2])
                 glEnd()
-
+        
         if self.trace_enabled:
-            # only save the last 300 points
-            self.trace = self.trace[-300:]
-
             # saved tool positions
             glColor3f(1.0, 0.0, 0.0)
             glBegin(GL_LINE_STRIP)
@@ -253,46 +266,6 @@ class robot(object):
                 vert = verts[-1:][0]
                 glVertex3f(vert[0], vert[1], vert[2])
             glEnd()
-
-        return
-
-        glPushMatrix()
-        glTranslate(0, 0, 1)
-        H = asmatrix(eye(4))
-        currentMatrix = reshape(asmatrix(glGetFloatv(GL_PROJECTION_MATRIX)),(4,4))
-        for numLink in range(len(self.links)):
-            link = self.links[numLink]
-            R = link.R
-            P = link.P
-            h = link.h
-            glColor3f(0.0, 0.0, 0.0)
-            
-            glPushMatrix()
-            #glBegin(GL_LINES)
-            #glVertex3f(0,0,0)
-            #glVertex3f(P[0],P[1],P[2])
-            #glEnd()
-            
-            # draw joint
-            if link.is_prismatic(): # prismatic joint
-                display.draw_prismatic_joint([[0],[0],[0]], P, 10)
-                glTranslate(P[0], P[1], P[2])
-            elif (R == eye(3)).all(): # link - no joint
-                pass
-            else: # rotation joint
-                glTranslate(P[0], P[1], P[2])
-                display.draw_rotational_joint(h*10, -h*10, 10, link.q)
-                glRotate(link.q, link.h[0], link.h[1], link.h[2])
-                
-            
-            #glLoadMatrixf(double_matrix)
-            
-        #pop all joints off
-        display.draw_axes(10,'T')
-        for matPop in range(len(self.links)):
-            glPopMatrix()
-        
-        glPopMatrix()
 
 class room(object):
     def __init__(self, length=0, width=0, height=0, outLined=True):
