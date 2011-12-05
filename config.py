@@ -1,4 +1,4 @@
-robot_file = 'sample.json'
+robot_file = 'omni.json'
 
 
 
