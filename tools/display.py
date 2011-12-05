@@ -4,12 +4,11 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 from config import *
-from math import *
-import sys
-import Image
-import numpy
-from tools import *
 
+
+import sys, Image, numpy, math
+
+import tools
 import material
 
 class point():
@@ -35,18 +34,22 @@ def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder fro
     z = [0.0, 0.0, 1.0]
     
     # Get diff between two points you want cylinder along
-    p = array(startP - endP, float).transpose()[0]
+    p = numpy.array(startP - endP, float).transpose()[0]
 
     # Get CROSS product (the axis of rotation)
-    t = cross(z, p)
+    t = numpy.cross(z, p)
 
     #Get angle. LENGTH is magnitude of the vector
-    length = sqrt(dot(p, p))
-    angle = 180 / PI * acos(dot(z, p) / length)
+    length = math.sqrt(numpy.dot(p, p))
+    angle = 180 / PI * math.acos(numpy.dot(z, p) / length)
     glRotate(angle, t[0], t[1], t[2])
     glRotate(link_rotation + 90, 0, 0, 1)
     
-    material.blue()
+    if enable_lighting:
+        material.blue()
+    else:
+        glColor3f(0, 1.0, 1.0)
+    
     sides = r*5
     glTranslate(0, 0, -length/2)
     quad = gluNewQuadric()
@@ -60,19 +63,25 @@ def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder fro
     glPopMatrix()
 
 def draw_rotational_joint_endCap(r, sides):
-    material.blue()
+    if enable_lighting:
+        material.blue()
+    else:
+        glColor3f(0, 1.0, 1.0)
     glBegin(GL_TRIANGLE_FAN)
     glVertex3f(0, r/2, 0)
-    for angle in arange(0, 2*PI, 2*PI/sides):
-        glVertex3f(cos(angle)*r, sin(angle)*r,0)
+    for angle in numpy.arange(0, 2*PI, 2*PI/sides):
+        glVertex3f(math.cos(angle)*r, math.sin(angle)*r,0)
     glVertex3f(r, 0, 0)
     glEnd()
-    
-    material.black()
+
+    if enable_lighting:
+        material.black()
+    else:
+        glColor3f(0, 0, 0)
     glLineWidth(1.5)
     glBegin(GL_LINE_LOOP)
-    for angle in arange(0, 2*PI, 2*PI/sides):
-        glVertex3f(cos(angle)*r, sin(angle)*r, 0)
+    for angle in numpy.arange(0, 2*PI, 2*PI/sides):
+        glVertex3f(math.cos(angle)*r, math.sin(angle)*r, 0)
     glEnd()
 
     def arrow(z):
@@ -96,21 +105,26 @@ def draw_prismatic_joint(startP, endP, size):
     z = [0.0, 0.0, -1.0]
     
     # Get diff between two points you want rectangular-prism along
-    p = array(startP - endP, float).transpose()[0]
+    p = numpy.array(startP - endP, float).transpose()[0]
     
     # Get CROSS product (the axis of rotation)
-    t = cross(z, p)
+    t = numpy.cross(z, p)
 
     # Get angle. LENGTH is magnitude of the vector
-    length = sqrt(dot(p, p))
-    angle = 180 / PI * acos(dot(z, p) / length)
+    length = math.sqrt(numpy.dot(p, p))
+    angle = 180 / PI * math.acos(numpy.dot(z, p) / length)
     # glTranslate(endP[0],endP[1],endP[2])
     glRotate(angle, t[0], t[1], t[2])
     
     if (length < 5):
         length = 5
     length =- length
-    material.magenta()
+
+
+    if enable_lighting:
+        material.magenta()
+    else:
+        glColor3f(1.0, 0.0, 1.0)
 
     def quickv(v):
         glVertex3f(v[0], v[1], v[2])
@@ -145,7 +159,12 @@ def draw_prismatic_joint(startP, endP, size):
     
     # outline
     glLineWidth(1.5)
-    material.black()
+
+    if enable_lighting:
+        material.black()
+    else:
+        glColor3f(0, 0, 0)
+
     glBegin(GL_LINES)
     for line in outline:
         quickv(line[0])
@@ -157,6 +176,10 @@ def draw_prismatic_joint(startP, endP, size):
     glPopMatrix()
 
 def text_at_pos(x, y, z, text, font=GLUT_BITMAP_TIMES_ROMAN_24):
+    if enable_lighting:
+        material.black()
+    else:
+        glColor3f(0, 0, 0)
     glRasterPos3f(x, y, z)
     draw_text(text, font)
 
@@ -169,17 +192,29 @@ def draw_axes(axes_l = 10, number=''):
     glBegin(GL_LINES)
 
     # x axis, red
-    material.red()
+
+    if enable_lighting:
+        material.red()
+    else:
+        glColor3f(1.0, 0, 0)
     glVertex3f(0, 0, 0)
     glVertex3f(axes_l, 0, 0)
     
     # y axis, green
-    material.green()
+
+    if enable_lighting:
+        material.green()
+    else:
+        glColor3f(0, 1.0, 0)
     glVertex3f(0, 0, 0)
     glVertex3f(0, axes_l, 0)
     
     # z axis
-    material.blue()
+
+    if enable_lighting:
+        material.blue()
+    else:
+        glColor3f(0, 0, 1.0)
     glVertex3f(0, 0, 0)
     glVertex3f(0, 0, axes_l)
 

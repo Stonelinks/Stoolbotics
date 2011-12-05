@@ -3,14 +3,9 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-from math import *
-import sys
-import Image
-import numpy
-from numpy import *
-import os
-import json
+import sys, os, json, Image, numpy
 import config
+
 import objects
 import tools.display as display
 
@@ -215,28 +210,29 @@ class simulator():
         glLoadIdentity()
 
 def setup():
+    if config.enable_lighting:
+        ambient = [1.0, 1.0, 1.0, 1.0]
+        #diffuse = [1.0, 1.0, 1.0, 1.0]
+        #specular = [1.0, 1.0, 1.0, 1.0]
+        #position = [0.0, 0.0, -200.0, 0.0]
 
-    ambient = [1.0, 1.0, 1.0, 1.0]
-    #diffuse = [1.0, 1.0, 1.0, 1.0]
-    #specular = [1.0, 1.0, 1.0, 1.0]
-    #position = [0.0, 0.0, -200.0, 0.0]
+        lmodel_ambient = [0.2, 0.2, 0.2, 1.0]
+        local_view = [0.0]
 
-    lmodel_ambient = [0.2, 0.2, 0.2, 1.0]
-    local_view = [0.0]
+        glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
+        #glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
+        #glLightfv(GL_LIGHT0, GL_POSITION, position)
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient)
+        glLightModelfv(GL_LIGHT_MODEL_LOCAL_VIEWER, local_view)
 
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
-    #glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
-    #glLightfv(GL_LIGHT0, GL_POSITION, position)
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient)
-    glLightModelfv(GL_LIGHT_MODEL_LOCAL_VIEWER, local_view)
+        #glFrontFace(GL_CW)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+        #glEnable(GL_AUTO_NORMAL)
+        #glEnable(GL_NORMALIZE)
 
-    glClearColor(1.0, 1.0, 1.0, 0.0)
-    #glFrontFace(GL_CW)
-    glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)
-    #glEnable(GL_AUTO_NORMAL)
-    #glEnable(GL_NORMALIZE)
     glEnable(GL_DEPTH_TEST) 
+    glClearColor(1.0, 1.0, 1.0, 0.0)
 
     # Enable two vertex arrays: position and normal.
     glEnableClientState(GL_VERTEX_ARRAY)

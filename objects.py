@@ -1,13 +1,16 @@
-from config import *
+
 from numpy import *
-from tools.tools import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import json, sys, re, math, time
 import tools.display as display
 import tools.material as material
+from tools.tools import *
+import config
+from config import *
+
+import json, sys, re, math, time
 
 class link():
     def __init__(self, name, parent):
@@ -53,8 +56,8 @@ class robot(object):
         self.init_params(d)
         
         self.trace = []
-        self.trace_enabled = True
-        self.ghosts_enabled = False
+        self.trace_enabled = config.enable_trace
+        self.ghosts_enabled = config.enable_ghost
         
         self.verts = []
 
@@ -215,7 +218,11 @@ class robot(object):
             R = link.R
             P = link.P
             h = link.h
-            material.black()
+            
+            if config.enable_lighting:
+                material.black()
+            else:
+                glColor3f(0, 0, 0)
 
             glPushMatrix()
             glLineWidth(15)
@@ -232,10 +239,20 @@ class robot(object):
             elif (R == eye(3)).all(): # link - no joint
                 pass
             else: # rotation joint
-                material.green()
+                    
+                if config.enable_lighting:
+                    material.green()
+                else:
+                    glColor3f(0, 0.6, 0)
                 display.draw_rotational_joint(h*10, -h*10, 8, link.q * 180 / PI)
-                material.grey()
+
+                if config.enable_lighting:
+                    material.grey()
+                else:
+                    glColor3f(0.3, 0.3, 0.3)
+                
                 glRotate(link.q * 180 / PI, link.h[0], link.h[1], link.h[2])
+
         # pop all joints off
         for matPop in self.links:
             glPopMatrix()
@@ -243,10 +260,15 @@ class robot(object):
         glLineWidth(5)
         glPointSize(10)
         # only save the last 300 points
-        #self.trace = self.trace[-300:]
+        self.trace = self.trace[-config.max_trace:]
 
         if self.ghosts_enabled:
-            material.grey()
+            
+            if config.enable_lighting:
+                material.grey()
+            else:
+                glColor3f(0.3, 0.3, 0.3)
+            
             glPointSize(8)
             for verts in self.trace:
                 glBegin(GL_POINTS)
@@ -254,7 +276,11 @@ class robot(object):
                     glVertex3f(vert[0], vert[1], vert[2])
                 glEnd()
 
-            material.black()
+            if config.enable_lighting:
+                material.black()
+            else:
+                glColor3f(0, 0, 0)
+            
             for verts in self.trace:
                 glBegin(GL_LINE_STRIP)
                 for vert in verts:
@@ -263,7 +289,11 @@ class robot(object):
         
         if self.trace_enabled:
             # saved tool positions
-            material.red()
+
+            if config.enable_lighting:
+                material.red()
+            else:
+                glColor3f(1.0, 0.0, 0)
             glBegin(GL_LINE_STRIP)
             for verts in self.trace:
                 vert = verts[-1:][0]
@@ -301,9 +331,15 @@ class room(object):
             for i in range(startW, endW):
                 for j in range(startL, endL):
                     if ((i + j) % 2 == 0):
-                        material.darkgrey()
+                        if config.enable_lighting:
+                            material.grey()
+                        else:
+                            glColor3f(0.3, 0.3, 0.3)
                     else:
-                        material.grey()
+                        if config.enable_lighting:
+                            material.darkgrey()
+                        else:
+                            glColor3f(0.6, 0.6, 0.6)
                     x0 = i*s
                     y0 = j*s
                     x1 = (i + 1)*s
