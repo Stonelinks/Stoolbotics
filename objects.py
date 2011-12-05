@@ -233,6 +233,10 @@ class robot(object):
 
             glTranslate(P[0], P[1], P[2])
             
+            if config.enable_axis and link.index != self.N:
+                display.draw_axes(20, str(link.index))
+            else:
+                display.draw_axes(20, 'T')
             # draw joint
             if link.is_prismatic(): # prismatic joint
                 display.draw_prismatic_joint([[0],[0],[0]], P, 10)
@@ -271,7 +275,7 @@ class robot(object):
             
             glPointSize(8)
             for verts, i in zip(self.trace, range(len(self.trace))):
-                if i % config.ghost_interval == 0:
+                if i % config.ghost_interval == 1:
                     glBegin(GL_POINTS)
                     for vert in verts:
                             glVertex3f(vert[0], vert[1], vert[2])
@@ -283,7 +287,7 @@ class robot(object):
                 glColor3f(0.7, 0.7, 0.7)
             
             for verts, i in zip(self.trace, range(len(self.trace))):
-                if i % config.ghost_interval == 0:
+                if i % config.ghost_interval == 1:
                     glBegin(GL_LINE_STRIP)
                     for vert in verts:
                             glVertex3f(vert[0], vert[1], vert[2])

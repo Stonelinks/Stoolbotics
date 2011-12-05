@@ -244,7 +244,7 @@ def create_robot(filename):
 
 def main():
     room = objects.room(200, 200, 200, False)
-    robot = create_robot('robots/sample.json')
+    robot = create_robot('robots/' + config.robot_file)
     s = simulator(robot, room)
 
     glutInit()
@@ -256,7 +256,7 @@ def main():
 
     setup()
 
-    # mock callback functions that transfer to the simulator
+    # mock callback functions that transfer to the simulator object
     def _draw():
         s.draw()
     def _mouseMotion(x, y):

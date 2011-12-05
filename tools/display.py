@@ -188,7 +188,7 @@ def draw_text(text, font=GLUT_BITMAP_TIMES_ROMAN_24):
         glutBitmapCharacter(font, ord(c))
 
 def draw_axes(axes_l = 10, number=''):
-    
+    glLineWidth(5.0)
     glBegin(GL_LINES)
 
     # x axis, red
