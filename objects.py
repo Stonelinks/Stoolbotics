@@ -259,33 +259,35 @@ class robot(object):
 
         glLineWidth(5)
         glPointSize(10)
-        # only save the last 300 points
+        
+        # only save the last whatever points
         self.trace = self.trace[-config.max_trace:]
 
         if self.ghosts_enabled:
-            
             if config.enable_lighting:
                 material.grey()
             else:
-                glColor3f(0.3, 0.3, 0.3)
+                glColor3f(0.4, 0.4, 0.4)
             
             glPointSize(8)
-            for verts in self.trace:
-                glBegin(GL_POINTS)
-                for vert in verts:
-                    glVertex3f(vert[0], vert[1], vert[2])
-                glEnd()
+            for verts, i in zip(self.trace, range(len(self.trace))):
+                if i % config.ghost_interval == 0:
+                    glBegin(GL_POINTS)
+                    for vert in verts:
+                            glVertex3f(vert[0], vert[1], vert[2])
+                    glEnd()
 
             if config.enable_lighting:
-                material.black()
+                material.grey()
             else:
-                glColor3f(0, 0, 0)
+                glColor3f(0.7, 0.7, 0.7)
             
-            for verts in self.trace:
-                glBegin(GL_LINE_STRIP)
-                for vert in verts:
-                    glVertex3f(vert[0], vert[1], vert[2])
-                glEnd()
+            for verts, i in zip(self.trace, range(len(self.trace))):
+                if i % config.ghost_interval == 0:
+                    glBegin(GL_LINE_STRIP)
+                    for vert in verts:
+                            glVertex3f(vert[0], vert[1], vert[2])
+                    glEnd()
         
         if self.trace_enabled:
             # saved tool positions
