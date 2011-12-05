@@ -3,7 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import sys, os, json, Image, numpy
+import sys, os, json, Image, numpy, math
 import config
 
 import objects
@@ -28,15 +28,15 @@ class simulator():
         self.room = room
         self.mouse = mouse()
 
-        self.width = 800
+        self.width = 1000
         self.height = 600
 
         self.angleY = -135
         self.angleX = 245
 
-        self.transX = 0
+        self.transX = 30.0
         self.transY = -30.0
-        self.transZ = 0
+        self.transZ = 25.0
 
         self.tscale = .2
         self.scale = 10
@@ -46,6 +46,12 @@ class simulator():
         self.robot.forwardkin()
         self.robot.timestep()
         self.robot.print_vars()
+        
+        self.text = ['Interact by typing commands or using the mouse!', 'Welcome to stoolbotics!']
+        self.text += " "
+        
+        self.cmd = ''
+        self.cmd_selection = -1
         
     def timestep(self):
         self.robot.forwardkin()
@@ -64,15 +70,17 @@ class simulator():
 
     def mouseDragged(self, x, y):
         self._updateMouse(x, y)
-
-        changeX = x - self.mouse.oldMouseDraggedX
-        changeY = y - self.mouse.oldMouseDraggedY
+        
+        v1 = math.sin(self.angleX * config.pi / 180 )
+        v2 = math.cos(self.angleY * config.pi / 180 )
+        changeX = v1*(x - self.mouse.oldMouseDraggedX)
+        changeY = v2*(y - self.mouse.oldMouseDraggedY)
 
         # why are these mixed up? it breaks without it
         self.angleX += changeY
         self.angleY -= changeX
         
-        print "Angle = (" + str(self.angleX) + ", " + str(self.angleY) + ")"
+        self.screenprint("Angle = (" + str(round(self.angleX, 2)) + ", " + str(round(self.angleY, 2)) + ")")
         if (self.angleX < 180):
             self.angleX = 180
         if (self.angleX > 360):
@@ -134,23 +142,49 @@ class simulator():
         amount = 5
         if key == GLUT_KEY_RIGHT:
             self.transX += amount
-            glutPostRedisplay()
         elif key == GLUT_KEY_LEFT:
             self.transX -= amount
-            glutPostRedisplay()
         elif key == GLUT_KEY_DOWN:
+            if not self.cmd_selection == -1:
+                self.cmd_selection += 1
+            if self.cmd_selection == -1:
+                self.cmd = self.text[-1] = ""
             self.transY -= amount
-            glutPostRedisplay()
         elif key == GLUT_KEY_UP:
+            if not -self.cmd_selection == len(self.text):
+                self.cmd_selection -= 1
             self.transY += amount
-            glutPostRedisplay()
+        self.cmd = self.text[-1] = self.text[self.cmd_selection]
+        glutPostRedisplay()
+
+    def handle_cmd(self, cmd):
+        pass
 
     def keyboard(self, key, x, y):
         self._updateMouse(x, y)
-        print "keypress = " + key
-        if key == chr(27):
+        
+        esc = chr(27)
+        backspace = chr(8)
+        carriagereturn = chr(13)
+        newline = chr(10)
+
+        
+        if key in [carriagereturn, newline]:
+            self.text.append(" ")
+            self.handle_cmd(self.cmd)
+            self.cmd = ''
+            print "enter pressed"
+        elif key == backspace:
+            self.cmd = self.cmd[:-1]
+        elif key == esc:
             sys.exit(0)
-        elif key == 'p':
+        else:
+            self.cmd += key
+        self.text[-1] = self.cmd
+        
+        glutPostRedisplay()
+        return
+        if key == 'p':
             glutIdleFunc(self.timestep)
         elif key == 's':
             glutIdleFunc(None)
@@ -168,13 +202,18 @@ class simulator():
             img.fromstring(s)
             img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
             img2.save("screendump.png")
-
+        
+        
+    def screenprint(self, text):
+        self.text.append(text)
+    
     def draw(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         
         glPushMatrix()
         #looking at x/y plane - down z axis
         glTranslatef(self.transX, self.transY, self.transZ)
+        
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
         glRotatef(self.angleX, 1.0, 0.0, 0.0)
         
@@ -193,8 +232,58 @@ class simulator():
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
         glRotatef(self.angleX, 1.0, 0.0, 0.0)
         display.draw_axes(self.zoom*13, '')
+        
         glPopMatrix()
 
+        glPushMatrix()
+        glTranslatef(-self.zoom*.094*self.width, -self.zoom*.094*self.height, 400.0)
+        
+        glColor4f(0.5, 0.5, 1.0, 0.4)
+        
+        x0 = y0 = self.zoom*-3 # bottom left corner
+        x1 = self.zoom*70 # width
+        y1 = self.zoom*110 # height
+        
+        glBegin(GL_QUADS)
+        glVertex3f(x0, y0, -1)
+        glVertex3f(x1, y0, -1)
+        glVertex3f(x1, y1, -1)
+        glVertex3f(x0, y1, -1)
+        glEnd()
+        
+        glColor4f(0.0, 0.0, 0.0, 1.0)
+        
+        self.text = self.text[-36:]
+        
+        prompt = ">> "
+        for i in range(len(self.text)):
+            if self.text[i][:len(prompt)] != prompt:
+                self.text[i] = prompt + self.text[i]
+        
+        i = 0
+        max_line_chr = 38
+        for text in reversed(self.text):
+            if len(text) <= max_line_chr:
+                glPushMatrix()
+                display.text_at_pos(0, self.zoom*i*3, 0, text, font=GLUT_BITMAP_9_BY_15)
+                glPopMatrix()
+                i += 1
+            else:
+                tmp = []
+                for j in range(0, len(text), max_line_chr):
+                    segment = text[j:j + max_line_chr]
+                    n = max_line_chr - len(segment)
+                    for _ in range(n):
+                        segment += ' '
+                    tmp.append(segment)
+                tmp.reverse()
+                for c in tmp:
+                    glPushMatrix()
+                    display.text_at_pos(0, self.zoom*i*3, 0, c, font=GLUT_BITMAP_9_BY_15)
+                    glPopMatrix()
+                    i += 1
+        glPopMatrix()
+        
         glutSwapBuffers()
 
     def resize(self, w, h):
@@ -205,9 +294,7 @@ class simulator():
         glLoadIdentity()
         new_w = self.zoom*w/self.scale
         new_h = self.zoom*h/self.scale
-        
-        
-            
+
         glOrtho (-new_w, new_w, -new_h, new_h, -500.0, 500.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
@@ -234,7 +321,9 @@ def setup():
         #glEnable(GL_AUTO_NORMAL)
         #glEnable(GL_NORMALIZE)
 
-    glEnable(GL_DEPTH_TEST) 
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glEnable(GL_DEPTH_TEST)
     glClearColor(1.0, 1.0, 1.0, 0.0)
 
     # Enable two vertex arrays: position and normal.
