@@ -10,6 +10,8 @@ import Image
 import numpy
 from tools import *
 
+import material
+
 class point():
     def __init__(self, x, y, z, label=""):
         self.x = x
@@ -44,7 +46,7 @@ def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder fro
     glRotate(angle, t[0], t[1], t[2])
     glRotate(link_rotation + 90, 0, 0, 1)
     
-    glColor(0, 1, 1)
+    material.blue()
     sides = r*5
     glTranslate(0, 0, -length/2)
     quad = gluNewQuadric()
@@ -58,7 +60,7 @@ def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder fro
     glPopMatrix()
 
 def draw_rotational_joint_endCap(r, sides):
-    glColor(0, 1, 1)
+    material.blue()
     glBegin(GL_TRIANGLE_FAN)
     glVertex3f(0, r/2, 0)
     for angle in arange(0, 2*PI, 2*PI/sides):
@@ -66,7 +68,7 @@ def draw_rotational_joint_endCap(r, sides):
     glVertex3f(r, 0, 0)
     glEnd()
     
-    glColor(0, 0, 0)
+    material.black()
     glLineWidth(1.5)
     glBegin(GL_LINE_LOOP)
     for angle in arange(0, 2*PI, 2*PI/sides):
@@ -108,8 +110,8 @@ def draw_prismatic_joint(startP, endP, size):
     if (length < 5):
         length = 5
     length =- length
-    glColor(1, 0, 1)
-    
+    material.magenta()
+
     def quickv(v):
         glVertex3f(v[0], v[1], v[2])
     
@@ -143,7 +145,7 @@ def draw_prismatic_joint(startP, endP, size):
     
     # outline
     glLineWidth(1.5)
-    glColor(0, 0, 0)
+    material.black()
     glBegin(GL_LINES)
     for line in outline:
         quickv(line[0])
@@ -164,27 +166,25 @@ def draw_text(text, font=GLUT_BITMAP_TIMES_ROMAN_24):
 
 def draw_axes(axes_l = 10, number=''):
     
-    glLineWidth(8.0)
     glBegin(GL_LINES)
 
     # x axis, red
-    glColor3f(1, 0, 0)
+    material.red()
     glVertex3f(0, 0, 0)
     glVertex3f(axes_l, 0, 0)
     
     # y axis, green
-    glColor3f(0, 1, 0)
+    material.green()
     glVertex3f(0, 0, 0)
     glVertex3f(0, axes_l, 0)
     
     # z axis
-    glColor3f(0, 0, 1)
+    material.blue()
     glVertex3f(0, 0, 0)
     glVertex3f(0, 0, axes_l)
 
     glEnd()
     
-    glColor3f(0, 0, 0)
     glLineWidth(1.0)
     
     offset = axes_l/7

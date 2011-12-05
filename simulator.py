@@ -193,7 +193,7 @@ class simulator():
 
         # reference axis
         glPushMatrix()
-        glTranslatef(self.zoom*40.0, self.zoom*-55.0, 800.0)
+        glTranslatef(self.zoom*40.0, self.zoom*-55.0, 400.0)
 
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
         glRotatef(self.angleX, 1.0, 0.0, 0.0)
@@ -210,39 +210,37 @@ class simulator():
         glLoadIdentity()
         new_w = self.zoom*h/self.scale
         new_h = self.zoom*w/self.scale
-        glOrtho (-new_w, new_w, -new_h, new_h, -1000.0, 1000.0)
+        glOrtho (-new_w, new_w, -new_h, new_h, -500.0, 500.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
 def setup():
+
+    ambient = [1.0, 1.0, 1.0, 1.0]
+    #diffuse = [1.0, 1.0, 1.0, 1.0]
+    #specular = [1.0, 1.0, 1.0, 1.0]
+    #position = [0.0, 0.0, -200.0, 0.0]
+
+    lmodel_ambient = [0.2, 0.2, 0.2, 1.0]
+    local_view = [0.0]
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient)
+    #glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse)
+    #glLightfv(GL_LIGHT0, GL_POSITION, position)
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient)
+    glLightModelfv(GL_LIGHT_MODEL_LOCAL_VIEWER, local_view)
+
     glClearColor(1.0, 1.0, 1.0, 0.0)
-    glEnable(GL_DEPTH_TEST)
-    #glEnable(GL_LIGHTING)
-
-    # Light property vectors.
-    lightAmb = [0.0, 0.0, 0.0, 1.0]
-    lightDifAndSpec = [1.0, 1.0, 1.0, 1.0]
-    lightPos = [0.0, 1.5, 3.0, 1.0]
-    globAmb = [0.2, 0.2, 0.2, 1.0]
-
-    # Light properties.
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb)
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec)
-    glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec)
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
-
-    #glEnable(GL_LIGHT0) # Enable particular light source.
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb) # Global ambient light.
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE) # Enable two-sided lighting.
-    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE) # Enable local viewpoint.
+    #glFrontFace(GL_CW)
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
+    #glEnable(GL_AUTO_NORMAL)
+    #glEnable(GL_NORMALIZE)
+    glEnable(GL_DEPTH_TEST) 
 
     # Enable two vertex arrays: position and normal.
     glEnableClientState(GL_VERTEX_ARRAY)
     glEnableClientState(GL_NORMAL_ARRAY)
-
-    # Specify locations for the position and normal arrays.
-    #glVertexPointer(3, GL_FLOAT, 0, vertices)
-    #glNormalPointer(GL_FLOAT, 0, normals)
 
 def create_robot(filename):
     r = json.loads(open(filename).read(), object_hook=lambda d: objects.robot(d))
