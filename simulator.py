@@ -69,7 +69,8 @@ class simulator():
         self.aux_msg = ''
 
         # final setup
-        self.t = self.robot.timestep()
+        self.robot.t = self.t
+        self.robot.timestep()
         self.robot.print_vars()
         self.welcome()
         
@@ -96,6 +97,7 @@ class simulator():
         self.command_print('')
         
     def timestep(self):
+        self.robot.t = self.t
         if self.state == 'record':
             l = [str(self.t)]
             for link in self.robot.links:
@@ -103,7 +105,8 @@ class simulator():
                     l.append(str(link.q))
             self.file_pointer.write( ', '.join(l) + '\n')
             self.robot.forwardkin()
-            self.t += self.robot.timestep(self.tscale)
+            self.t += self.tscale
+            self.robot.timestep(self.tscale)
         elif self.state == 'playback':
             self.playback_index += 1 #int(self.playback_index + self.tscale)
             try:
@@ -117,7 +120,8 @@ class simulator():
                 pass
         else:
             self.robot.forwardkin()
-            self.t += self.robot.timestep(self.tscale)
+            self.t += self.tscale
+            self.robot.timestep(self.tscale)
         glutPostRedisplay()
     
     def _updateMouse(self, x, y):
@@ -259,6 +263,7 @@ class simulator():
                         glutIdleFunc(self.timestep)
                     except:
                         self.response_print('there was an error opening ' + cmd_arr[1] + ' for playback')
+                self.robot.trace = []
             elif cmd == 'stop':
                 if self.state == 'record':
                     self.response_print('stopping the recording')
@@ -267,6 +272,7 @@ class simulator():
                     except:
                         pass
                 glutIdleFunc(None)
+                self.state = 'halted'
             elif cmd == 'rewind':
                 pass
             elif cmd == 'status':
@@ -275,7 +281,7 @@ class simulator():
                 else:
                     self.response_print('the simulator is currently in this state: ' + self.state)
             elif cmd == 'record':
-                  file  = cmd_arr[1]
+                  file  = cmd_arr[1] + '.csv'
                   try:
                       self.file_pointer = open(file, 'a')
                       self.state = 'record'
@@ -598,6 +604,8 @@ def setup():
         #glEnable(GL_NORMALIZE)
 
     glEnable(GL_BLEND)
+    glEnable(GL_POLYGON_SMOOTH)
+    glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_DEPTH_TEST)
     glClearColor(1.0, 1.0, 1.0, 0.0)

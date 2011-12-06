@@ -49,19 +49,17 @@ class link():
     
 class robot(object):
     def __init__(self, d):
-        self.init_params(d)
-        
         self.trace = []
-        
-        config.enable_ghost
-        
         self.verts = []
+        self.t = 0.0
+
+        self.init_params(d)
 
     def init_params(self, d=None):
         if d is None:
             d = self.d
         
-        globals()['t'] = 0.0
+        t = self.t
 
         # establish local vars, pick out syms
         self.syms = {}
@@ -137,7 +135,9 @@ class robot(object):
         
     def eval_syms(self):
         # TODO: use regex for all of this
-
+        
+        t = self.t
+        
         x = array([[1], [0], [0] ], float)
         y = array([[0], [1], [0] ], float)
         z = array([[0], [0], [1] ], float)
@@ -163,10 +163,9 @@ class robot(object):
             setattr(self, k, v)
 
     def timestep(self, scale = 1.0):
-        globals()['t'] += scale
+        self.t += scale
         self.eval_syms()
         self.build_lists()
-        return globals()['t']
     
     # get any arbitrary rotation matrix, e.g. self.R(0,3) will give you R03
     def R(self, base_index = 0, final_index = 'T'):
@@ -181,7 +180,7 @@ class robot(object):
     
     # force the robot to be at this timestep and joint angles
     def to_pos(self, time, angles):
-        globals()['t'] = time
+        self.t = time
         for i in range(len(self.links)):
             try:
                 self.links[i].q = float(angles[i])
