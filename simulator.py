@@ -336,6 +336,11 @@ class simulator():
                     config.enable_axis = False
                 self.draw()
                 glutPostRedisplay()
+            elif cmd == 'eval':
+                try:
+                    self.response_print(str(eval('self.' + cmd_arr[1])))
+                except:
+                    self.response_print("error evaluating command")
             elif cmd == 'quit' or cmd == 'exit':
                 sys.exit(0)
             elif cmd == 'hide':
@@ -370,17 +375,6 @@ class simulator():
                         self.response_print("  " + desc)
                     except:
                         self.response_print("couldn't find command")
-            elif cmd == 'dump':
-                if len(cmd_arr) == 1:
-                    for k, v in self.robot._d.iteritems():
-                        self.response_print(k + " = " + str(v))
-                else:
-                    try:
-                        var = cmd_arr[1]
-                        val = self.robot._d[var]
-                        self.response_print(var + " = " + str(val))
-                    except:
-                        self.response_print("couldn't find that variable")
             elif cmd == 'screendump':
                 cs1, cs2 = self.aux_msg_enabled, self.hide_cli
                 self.aux_msg_enabled, self.hide_cli = False, True

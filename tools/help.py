@@ -32,14 +32,14 @@ d = {
   'ghost' : { 'reference' : 'ghost <on/off>', 
              'description' : 'turn robot ghost on/off.'
             },
+  'eval' : { 'reference' : 'eval <expression>', 
+             'description' : 'return some variable from the simulator. e.g. \'eval robot.P01\'.'
+            },
   'screendump' : { 'reference' : 'screendump', 
              'description' : 'take a picture of the current screen.'
             },
   'hide' : { 'reference' : 'hide', 
              'description' : 'hides this terminal.'
-            },
-  'dump' : { 'reference' : 'dump <param (optional)>', 
-             'description' : 'dumps the robot\'s numerical data. if param is provided, will dump only that.'
             },
   'status' : { 'reference' : 'status', 
              'description' : 'tells you what the simulator is currently doing.'
