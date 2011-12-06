@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+import sys
+sys.path += ['.']
+from ctypes import util
+try:
+    from OpenGL.platform import win32
+except AttributeError:
+    pass
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
