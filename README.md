@@ -52,4 +52,4 @@ TODO:
     - implement record - write to a file 
     - implement play / pause / rewind
 
-- windows support / installer
+- (x) windows support / installer
