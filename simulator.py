@@ -8,6 +8,7 @@ import config
 
 import objects
 import tools.display as display
+import tools.help as help
 
 class mouse():
     def __init__(self):
@@ -65,7 +66,7 @@ class simulator():
         self.response_print('Interact by typing commands or by using the mouse.')
         self.response_print('')
         self.response_print('')
-        self.response_print('For a list of commands, type \'list\'')
+        self.response_print('For a list of commands, type \'help\'')
         self.response_print('')
         self.response_print('')
         self.response_print('For help with a specific command you can type \'help <command name>\'')
@@ -200,10 +201,8 @@ class simulator():
         if cmd == '':
             return
         elif cmd == 'play':
-            self.response_print('starting simulation')
             glutIdleFunc(self.timestep)
         elif cmd == 'stop':
-            self.response_print('stopping simulation')
             glutIdleFunc(None)
         elif cmd == 'hide':
             self.response_print('hiding this command window')
@@ -211,11 +210,6 @@ class simulator():
             self.hide_cli = True
             self.aux_msg = 'terminal is hidden. press \'t\' to get it back.'
             self.aux_msg_enabled = True
-        elif '+' in cmd or '-' in cmd:
-            for _ in range(cmd.count('+')):
-                self.camera_zoom('in')
-            for _ in range(cmd.count('-')):
-                self.camera_zoom('out')
         elif cmd == 'skew':
             self.response_print('entering skew mode:')
             self.response_print(' arrow keys to to translate')
@@ -224,10 +218,22 @@ class simulator():
             self.response_print(' \'t\' to quit skew mode')
             self.response_print('')
             self.skew_mode = True
-        elif cmd == 'f':
-            self.tscale += .01
-        elif cmd == 'd':
-            self.tscale -= .01
+        elif cmd.split(' ')[0] == 'help':
+            if len(cmd.split(' ')) == 1:
+                self.response_print("available commands")
+                for k, _ in help.d.iteritems():
+                    self.response_print("  " + k)
+                self.response_print("")
+                self.response_print("type \'help <command>\' to get help on an individual command")
+            else:
+                helpcmd = help.d[cmd.split(' ')[1]]
+                self.response_print("")
+                self.response_print("syntax:")
+                self.response_print("  " + helpcmd['reference'])
+                self.response_print("")
+                self.response_print("description:")
+                self.response_print("  " + helpcmd['description'])
+                self.response_print("")
         elif cmd == 'screendump':
             cs1, cs2 = self.aux_msg_enabled, self.hide_cli
             self.aux_msg_enabled, self.hide_cli = False, True
@@ -468,7 +474,7 @@ def main():
     glutInitWindowSize(s.width, s.height)
     glutInitWindowPosition(100, 100) 
 
-    glutCreateWindow(sys.argv[0])
+    glutCreateWindow('stoolbotics simulator')
 
     setup()
 
