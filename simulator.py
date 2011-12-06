@@ -56,10 +56,12 @@ class simulator():
         self.aux_msg_enabled = False
         self.aux_msg = ''
         
-        self.robot.forwardkin()
         self.robot.timestep()
         self.robot.print_vars()
         
+        self.welcome()
+        
+    def welcome(self):
         self.response_print('Welcome to stoolbotics!')
         self.response_print('')
         self.response_print('')
@@ -290,13 +292,15 @@ class simulator():
                 self.response_print("type \'help <command>\' to get help on an individual command")
             else:
                 try:
-                    helpcmd = help.d[cmd.split(' ')[1]]
+                    helpcmd = help.d[cmd_arr[1]]
+                    ref = helpcmd['reference']
+                    desc = helpcmd['description']
                     self.response_print("")
                     self.response_print("syntax:")
-                    self.response_print("  " + helpcmd['reference'])
+                    self.response_print("  " + ref)
                     self.response_print("")
                     self.response_print("description:")
-                    self.response_print("  " + helpcmd['description'])
+                    self.response_print("  " + desc)
                     self.response_print("")
                 except:
                     self.response_print("")
@@ -312,17 +316,14 @@ class simulator():
                 self.response_print("")
             else:
                 try:
-                    helpcmd = help.d[cmd.split(' ')[1]]
+                    var = cmd_arr[1]
+                    val = self.robot._d[var]
                     self.response_print("")
-                    self.response_print("syntax:")
-                    self.response_print("  " + helpcmd['reference'])
-                    self.response_print("")
-                    self.response_print("description:")
-                    self.response_print("  " + helpcmd['description'])
+                    self.response_print(var + " = " + str(val))
                     self.response_print("")
                 except:
                     self.response_print("")
-                    self.response_print("couldn't find command")
+                    self.response_print("couldn't find that variable")
                     self.response_print("")
         elif cmd == 'screendump':
             cs1, cs2 = self.aux_msg_enabled, self.hide_cli
