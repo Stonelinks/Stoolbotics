@@ -36,9 +36,6 @@ class link():
             self.q = eval('parent.q' + n)
             self.h = eval('parent.h' + n)
             
-        self.param = self.q
-        self.parameter = self.param
-        
         self.axis = self.h
         
     def __str__(self):
@@ -182,6 +179,15 @@ class robot(object):
             R = dot(R, self.links[i].R)
         return R
     
+    # force the robot to be at this timestep and joint angles
+    def to_pos(self, time, angles):
+        globals()['t'] = time
+        for i in range(len(self.links)):
+            try:
+                self.links[i].q = float(angles[i])
+            except:
+                self.links[i].q = None
+        
     def forwardkin(self):
         self.R0T = eye(3, 3)
         self.P0T = zeros((3, 1))

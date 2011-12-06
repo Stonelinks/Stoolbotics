@@ -3,7 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import sys, os, json, Image, numpy, math, time
+import sys, os, json, Image, numpy, math, time, csv
 import config
 
 import objects
@@ -43,7 +43,7 @@ class simulator():
         
         # time
         self.tscale = .2
-        self.t = 0
+        self.t = 0.0
         
         # modes
         self.skew_mode = False
@@ -66,7 +66,9 @@ class simulator():
         self.welcome()
         
         self.file_pointer = None
+        self.file = None
         self.state = ''
+        self.playback_index = 0
         
     def welcome(self):
         self.response_print('Welcome to stoolbotics!')
@@ -92,8 +94,21 @@ class simulator():
                 if not (str(link.index) == str(self.robot.N)): # last link has no param
                     l.append(str(link.q))
             self.file_pointer.write( ', '.join(l) + '\n')
-        self.robot.forwardkin()
-        self.t = self.robot.timestep(self.tscale)
+            self.robot.forwardkin()
+            self.t += self.robot.timestep(self.tscale)
+        elif self.state == 'playback':
+            self.playback_index += 1 #int(self.playback_index + self.tscale)
+            try:
+                self.t  = float(self.file[self.playback_index][0])
+                self.robot.to_pos(self.t, self.file[self.playback_index][1:])
+                self.robot.eval_syms()
+                self.robot.build_lists()
+                self.robot.forwardkin()
+            except IndexError:
+                self.response_print('reached end of playback')
+        else:
+            self.robot.forwardkin()
+            self.t += self.robot.timestep(self.tscale)
         glutPostRedisplay()
     
     def _updateMouse(self, x, y):
@@ -220,14 +235,28 @@ class simulator():
         else:
             self.response_print('')
             if cmd == 'play':
-                glutIdleFunc(self.timestep)
+                if len(cmd_arr) == 1:
+                    glutIdleFunc(self.timestep)
+                elif len(cmd_arr) == 2:
+                    try:
+                        self.file = []
+                        for row in csv.reader(open(cmd_arr[1], 'r')):
+                            self.file.append(row)
+                        self.t = float(self.file[0][0])
+                        self.playback_index = 0
+                        self.robot.to_pos(self.t, self.file[0][1:])
+                        self.response_print('openened ' + cmd_arr[1] + ' for playback')
+                        self.state = 'playback'
+                        glutIdleFunc(self.timestep)
+                    except:
+                        self.response_print('there was an error opening ' + cmd_arr[1] + ' for playback')
             elif cmd == 'stop':
-                  if self.state == 'record':
-                      self.response_print('stopping the recording to ' + file)
-                      try:
-                          self.file_pointer.close()
-                      except:
-                          pass
+                if self.state == 'record':
+                    self.response_print('stopping the recording')
+                    try:
+                        self.file_pointer.close()
+                    except:
+                        pass
                 glutIdleFunc(None)
             elif cmd == 'rewind':
                 pass
@@ -450,10 +479,12 @@ class simulator():
         #display.draw_axes(20, '1')
         
         self.robot.render()
+        
         glPopMatrix()
 
         # reference axis
         glPushMatrix()
+        
         glTranslatef(self.zoom*40.0, self.zoom*-55.0, 400.0)
 
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
@@ -471,9 +502,9 @@ class simulator():
             glPopMatrix()
             glPopMatrix()
 
-        
         if not self.hide_cli:
             self.render_cli()
+        
         glutSwapBuffers()
 
     def render_cli(self):
