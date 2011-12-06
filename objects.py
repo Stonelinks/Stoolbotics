@@ -232,10 +232,11 @@ class robot(object):
 
             glTranslate(P[0], P[1], P[2])
             
-            if config.enable_axis and link.index != self.N:
-                display.draw_axes(20, str(link.index))
-            else:
-                display.draw_axes(20, 'T')
+            if config.enable_axis:
+                if link.index != self.N:
+                    display.draw_axes(20, str(link.index))
+                else:
+                    display.draw_axes(20, 'T')
             
             # draw joint
             if link.is_prismatic(): # prismatic joint

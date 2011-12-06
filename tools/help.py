@@ -20,13 +20,16 @@ d = {
   'load' : { 'reference' : 'load <robot file>', 
              'description' : 'loads a robot file into the simulator.'
             },
+  'list' : { 'reference' : 'list', 
+             'description' : 'lists robots that can be loaded into the simulator.'
+            },
   'axis' : { 'reference' : 'axis <on/off>', 
              'description' : 'turn robot axis on/off.'
             },
   'trace' : { 'reference' : 'trace <on/off>', 
              'description' : 'turn robot traces on/off.'
             },
-  'ghost' : { 'reference' : 'ghost', 
+  'ghost' : { 'reference' : 'ghost <on/off>', 
              'description' : 'turn robot ghost on/off.'
             },
   'screendump' : { 'reference' : 'screendump', 
@@ -34,5 +37,8 @@ d = {
             },
   'hide' : { 'reference' : 'hide', 
              'description' : 'hides this terminal.'
+            },
+  'exit' : { 'reference' : 'exit or quit', 
+             'description' : 'closes the simulator.'
             }
 }
