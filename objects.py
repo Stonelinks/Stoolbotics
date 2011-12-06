@@ -55,8 +55,8 @@ class robot(object):
         self.init_params(d)
         
         self.trace = []
-        self.trace_enabled = config.enable_trace
-        self.ghosts_enabled = config.enable_ghost
+        
+        config.enable_ghost
         
         self.verts = []
 
@@ -201,7 +201,7 @@ class robot(object):
             
             p = (self.P0T[0][0], self.P0T[1][0], self.P0T[2][0])
             self.verts.append(p)
-        if self.trace_enabled:
+        if config.enable_trace:
             self.trace.append(self.verts)
         
     def print_vars(self):
@@ -268,7 +268,7 @@ class robot(object):
         # only save the last whatever points
         self.trace = self.trace[-config.max_trace:]
 
-        if self.ghosts_enabled:
+        if config.enable_ghost:
             if config.enable_lighting:
                 material.grey()
             else:
@@ -294,7 +294,7 @@ class robot(object):
                             glVertex3f(vert[0], vert[1], vert[2])
                     glEnd()
         
-        if self.trace_enabled:
+        if config.enable_trace:
             # saved tool positions
 
             if config.enable_lighting:

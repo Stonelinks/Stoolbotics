@@ -283,11 +283,33 @@ class simulator():
             self.skew_mode = True
         elif cmd == 'help':
             if len(cmd_arr) == 1:
-                self.response_print("available commands")
+                self.response_print("available commands:")
                 for k, _ in help.d.iteritems():
                     self.response_print("  " + k)
                 self.response_print("")
                 self.response_print("type \'help <command>\' to get help on an individual command")
+            else:
+                try:
+                    helpcmd = help.d[cmd.split(' ')[1]]
+                    self.response_print("")
+                    self.response_print("syntax:")
+                    self.response_print("  " + helpcmd['reference'])
+                    self.response_print("")
+                    self.response_print("description:")
+                    self.response_print("  " + helpcmd['description'])
+                    self.response_print("")
+                except:
+                    self.response_print("")
+                    self.response_print("couldn't find command")
+                    self.response_print("")
+        elif cmd == 'dump':
+            if len(cmd_arr) == 1:
+                self.response_print("")
+                self.response_print("-----------------")
+                for k, v in self.robot._d.iteritems():
+                    self.response_print(k + " = " + str(v))
+                self.response_print("-----------------")
+                self.response_print("")
             else:
                 try:
                     helpcmd = help.d[cmd.split(' ')[1]]

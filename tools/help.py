@@ -38,6 +38,9 @@ d = {
   'hide' : { 'reference' : 'hide', 
              'description' : 'hides this terminal.'
             },
+  'dump' : { 'reference' : 'dump <param (optional)>', 
+             'description' : 'dumps the robot\'s numerical data. if param is provided, will dump only that.'
+            },
   'exit' : { 'reference' : 'exit or quit', 
              'description' : 'closes the simulator.'
             }
