@@ -43,15 +43,21 @@ class simulator():
         self.room.scale = self.scale
         self.zoom = 1.6
 
+        
+        self.skew_mode = False
+        self.text = []
+        
+        self.prompt = ">> "
+        self.cmd = ''
+        self.cmd_selection = -1
+
         self.robot.forwardkin()
         self.robot.timestep()
         self.robot.print_vars()
         
-        self.text = ['Interact by typing commands or using the mouse!', 'Welcome to stoolbotics!']
-        self.text += " "
-        
-        self.cmd = ''
-        self.cmd_selection = -1
+        self.response_print('Welcome to stoolbotics!')
+        self.response_print('Interact by typing commands or using the mouse!')
+        self.command_print('')
         
     def timestep(self):
         self.robot.forwardkin()
@@ -80,7 +86,6 @@ class simulator():
         self.angleX += changeY
         self.angleY -= changeX
         
-        self.screenprint("Angle = (" + str(round(self.angleX, 2)) + ", " + str(round(self.angleY, 2)) + ")")
         if (self.angleX < 180):
             self.angleX = 180
         if (self.angleX > 360):
@@ -147,19 +152,56 @@ class simulator():
         elif key == GLUT_KEY_DOWN:
             if not self.cmd_selection == -1:
                 self.cmd_selection += 1
+                try:
+                    while self.text[self.cmd_selection][0] != 'c':
+                        self.cmd_selection += 1
+                except:
+                    pass
             if self.cmd_selection == -1:
-                self.cmd = self.text[-1] = ""
+                self.cmd = self.text[-1][1] = ""
             self.transY -= amount
         elif key == GLUT_KEY_UP:
             if not -self.cmd_selection == len(self.text):
                 self.cmd_selection -= 1
+                try:
+                    while self.text[self.cmd_selection][0] != 'c':
+                        self.cmd_selection -= 1
+                except:
+                    pass
             self.transY += amount
-        self.cmd = self.text[-1] = self.text[self.cmd_selection]
+        self.cmd = self.text[-1][1] = self.text[self.cmd_selection][1]
         glutPostRedisplay()
 
     def handle_cmd(self, cmd):
-        pass
-
+        if cmd == '':
+            return
+        elif cmd == 'play':
+            self.response_print('starting simulation')
+            glutIdleFunc(self.timestep)
+        elif cmd == 'stop':
+            self.response_print('stopping simulation')
+            glutIdleFunc(None)
+        elif '+' in cmd or '-' in cmd:
+            for _ in range(cmd.count('+')):
+                self.camera_zoom('in')
+            for _ in range(cmd.count('-')):
+                self.camera_zoom('out')
+        elif cmd == 'skew':
+            self.response_print('entering skew mode')
+            self.skew_mode = True
+        elif cmd == 'f':
+            self.tscale += .01
+        elif cmd == 'd':
+            self.tscale -= .01
+        elif cmd == 'screendump':
+            self.response_print('check out screendump.png in the working directory')
+            s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
+            img = Image.new('RGB', (self.width, self.height))
+            img.fromstring(s)
+            img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
+            img2.save("screendump.png")
+        else:
+            self.response_print('are you sure that\'s a command?')
     def keyboard(self, key, x, y):
         self._updateMouse(x, y)
         
@@ -168,49 +210,37 @@ class simulator():
         carriagereturn = chr(13)
         newline = chr(10)
 
-        
         if key in [carriagereturn, newline]:
-            self.text.append(" ")
+            if self.cmd[:3] == self.prompt:
+                self.cmd = self.cmd[3:]
             self.handle_cmd(self.cmd)
             self.cmd = ''
+            self.command_print(" ")
+            self.cmd_selection = -1
             print "enter pressed"
         elif key == backspace:
             self.cmd = self.cmd[:-1]
+            self.text[-1][1] = self.cmd
         elif key == esc:
             sys.exit(0)
         else:
             self.cmd += key
-        self.text[-1] = self.cmd
+            self.text[-1][1] = self.cmd
         
         glutPostRedisplay()
         return
-        if key == 'p':
-            glutIdleFunc(self.timestep)
-        elif key == 's':
-            glutIdleFunc(None)
-        elif key == '+':
-            self.camera_zoom('in')
-        elif key == '-':
-            self.camera_zoom('out')
-        elif key == 'f':
-            self.tscale += .01
-        elif key == 'd':
-            self.tscale -= .01
-        elif key == 'y':
-            s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
-            img = Image.new('RGB', (self.width, self.height))
-            img.fromstring(s)
-            img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
-            img2.save("screendump.png")
         
+    def command_print(self, text):
+        self.text.append(['c', text])
         
-    def screenprint(self, text):
-        self.text.append(text)
+    def response_print(self, text):
+        self.text.append(['r', text])
     
     def draw(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         
         glPushMatrix()
+        
         #looking at x/y plane - down z axis
         glTranslatef(self.transX, self.transY, self.transZ)
         
@@ -234,7 +264,7 @@ class simulator():
         display.draw_axes(self.zoom*13, '')
         
         glPopMatrix()
-
+        
         glPushMatrix()
         glTranslatef(-self.zoom*.094*self.width, -self.zoom*.094*self.height, 400.0)
         
@@ -255,14 +285,14 @@ class simulator():
         
         self.text = self.text[-36:]
         
-        prompt = ">> "
         for i in range(len(self.text)):
-            if self.text[i][:len(prompt)] != prompt:
-                self.text[i] = prompt + self.text[i]
-        
+            if self.text[i][0] == 'c':
+                if self.text[i][1][:len(self.prompt)] != self.prompt:
+                    self.text[i][1] = self.prompt + self.text[i][1]
         i = 0
         max_line_chr = 38
         for text in reversed(self.text):
+            text = text[1]
             if len(text) <= max_line_chr:
                 glPushMatrix()
                 display.text_at_pos(0, self.zoom*i*3, 0, text, font=GLUT_BITMAP_9_BY_15)
