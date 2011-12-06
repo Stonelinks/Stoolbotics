@@ -28,38 +28,45 @@ class simulator():
         self.robot = robot
         self.room = room
         self.mouse = mouse()
-
+        
+        # simulator /view dimensions
         self.width = 1000
         self.height = 600
-
         self.angleY = -135
         self.angleX = 245
-
         self.transX = 30.0
         self.transY = -30.0
         self.transZ = 25.0
-
-        self.tscale = .2
         self.scale = 10
-        self.room.scale = self.scale
         self.zoom = 1.6
-
-        self.skew_mode = False
-        self.text = []
+        self.room.scale = self.scale
         
+        # time
+        self.tscale = .2
+        self.t = 0
+        
+        # modes
+        self.skew_mode = False
+        
+        # command line variables
+        self.text = []
         self.prompt = ">> "
         self.max_line_chr = 38
         self.cmd = ''
         self.cmd_selection = -1
         self.hide_cli = False
         
+        # aux message
         self.aux_msg_enabled = False
         self.aux_msg = ''
-        
-        self.robot.timestep()
+
+        # final setup
+        self.t = self.robot.timestep()
         self.robot.print_vars()
-        
         self.welcome()
+        
+        self.file_pointer = None
+        self.state = ''
         
     def welcome(self):
         self.response_print('Welcome to stoolbotics!')
@@ -79,8 +86,14 @@ class simulator():
         self.command_print('')
         
     def timestep(self):
+        if self.state == 'record':
+            l = [str(self.t)]
+            for link in self.robot.links:
+                if not (str(link.index) == str(self.robot.N)): # last link has no param
+                    l.append(str(link.q))
+            self.file_pointer.write( ', '.join(l) + '\n')
         self.robot.forwardkin()
-        self.robot.timestep(self.tscale)
+        self.t = self.robot.timestep(self.tscale)
         glutPostRedisplay()
     
     def _updateMouse(self, x, y):
@@ -202,152 +215,150 @@ class simulator():
     def handle_cmd(self, cmd):
         cmd_arr = cmd.split(' ')
         cmd = cmd_arr[0]
-        
         if cmd == '':
             return
-        elif cmd == 'play':
-            glutIdleFunc(self.timestep)
-        elif cmd == 'stop':
-            glutIdleFunc(None)
-        elif cmd == 'rewind':
-            pass
-        elif cmd == 'record':
-            pass
-        elif cmd == 'load':
-            try:
-                robot_file = 'robots/' + cmd_arr[1] + '.json'
-                self.robot = create_robot(robot_file)
+        else:
+            self.response_print('')
+            if cmd == 'play':
+                glutIdleFunc(self.timestep)
+            elif cmd == 'stop':
+                  if self.state == 'record':
+                      self.response_print('stopping the recording to ' + file)
+                      try:
+                          self.file_pointer.close()
+                      except:
+                          pass
+                glutIdleFunc(None)
+            elif cmd == 'rewind':
+                pass
+            elif cmd == 'status':
+                if self.state == '':
+                    self.response_print('the simulator is currently doing nothing')
+                else:
+                    self.response_print('the simulator is currently in this state: ' + self.state)
+            elif cmd == 'record':
+                  file  = cmd_arr[1]
+                  try:
+                      self.file_pointer = open(file, 'a')
+                      self.state = 'record'
+                      self.response_print('file ' + file + ' opened for recording')
+                  except:
+                      self.response_print('problem opening that file for recording')
+                  self.response_print('')
+            elif cmd == 'load':
+                try:
+                    robot_file = 'robots/' + cmd_arr[1] + '.json'
+                    self.robot = create_robot(robot_file)
+                    self.draw()
+                    glutPostRedisplay()
+                except:
+                    self.response_print('not a robot. try using the \'list\' command to find one.')
+            elif cmd == 'list':
+                for r in os.listdir('robots'):
+                    self.response_print(" " + r.split('.')[0])
+            elif cmd == 'axis':
+                if len(cmd_arr) == 1:
+                    config.enable_axis = not config.enable_axis
+                elif cmd_arr[1] == 'on':
+                    config.enable_axis = True
+                elif cmd_arr[1] == 'off':
+                    config.enable_axis = False
                 self.draw()
                 glutPostRedisplay()
-            except:
-                self.response_print('')
-                self.response_print('not a robot. try using the \'list\' command to find one.')
-                self.response_print('')
-        elif cmd == 'list':
-            self.response_print('')
-            for r in os.listdir('robots'):
-                self.response_print(" " + r.split('.')[0])
-            self.response_print('')
-        elif cmd == 'axis':
-            if len(cmd_arr) == 1:
-                config.enable_axis = not config.enable_axis
-            elif cmd_arr[1] == 'on':
-                config.enable_axis = True
-            elif cmd_arr[1] == 'off':
-                config.enable_axis = False
-            self.draw()
-            glutPostRedisplay()
-        elif cmd == 'trace':
-            if len(cmd_arr) == 1:
-                config.enable_trace = not config.enable_trace
-            elif cmd_arr[1] == 'on':
-                config.enable_trace = True
-            elif cmd_arr[1] == 'off':
-                config.enable_trace = False
-            self.draw()
-            glutPostRedisplay()
-        elif cmd == 'ghosts':
-            if len(cmd_arr) == 1:
-                config.enable_ghost = not config.enable_ghost
-            elif cmd_arr[1] == 'on':
-                config.enable_ghost = True
-            elif cmd_arr[1] == 'off':
-                config.enable_ghost = False
-            self.draw()
-            glutPostRedisplay()
-        elif cmd == 'axis':
-            if len(cmd_arr) == 1:
-                config.enable_axis = not config.enable_axis
-            elif cmd_arr[1] == 'on':
-                config.enable_axis = True
-            elif cmd_arr[1] == 'off':
-                config.enable_axis = False
-            self.draw()
-            glutPostRedisplay()
-        elif cmd == 'quit' or cmd == 'exit':
-            sys.exit(0)
-        elif cmd == 'hide':
-            self.response_print('')
-            self.response_print('hiding this command window')
-            self.response_print('press \'t\' to get it back')
-            self.response_print('')
-            self.hide_cli = True
-            self.aux_msg = 'terminal is hidden. press \'t\' to get it back.'
-            self.aux_msg_enabled = True
-        elif cmd == 'skew':
-            self.response_print('')
-            self.response_print('entering skew mode:')
-            self.response_print(' arrow keys to to translate')
-            self.response_print(' \'j\' and \'k\' to zoom in and out')
-            self.response_print(' \'f\' and \'d\' speed and slow simulation')
-            self.response_print(' \'t\' to quit skew mode')
-            self.response_print('')
-            self.skew_mode = True
-        elif cmd == 'help':
-            if len(cmd_arr) == 1:
-                self.response_print("available commands:")
-                for k, _ in help.d.iteritems():
-                    self.response_print("  " + k)
-                self.response_print("")
-                self.response_print("type \'help <command>\' to get help on an individual command")
-            else:
-                try:
-                    helpcmd = help.d[cmd_arr[1]]
-                    ref = helpcmd['reference']
-                    desc = helpcmd['description']
+            elif cmd == 'trace':
+                if len(cmd_arr) == 1:
+                    config.enable_trace = not config.enable_trace
+                elif cmd_arr[1] == 'on':
+                    config.enable_trace = True
+                elif cmd_arr[1] == 'off':
+                    config.enable_trace = False
+                self.draw()
+                glutPostRedisplay()
+            elif cmd == 'ghosts':
+                if len(cmd_arr) == 1:
+                    config.enable_ghost = not config.enable_ghost
+                elif cmd_arr[1] == 'on':
+                    config.enable_ghost = True
+                elif cmd_arr[1] == 'off':
+                    config.enable_ghost = False
+                self.draw()
+                glutPostRedisplay()
+            elif cmd == 'axis':
+                if len(cmd_arr) == 1:
+                    config.enable_axis = not config.enable_axis
+                elif cmd_arr[1] == 'on':
+                    config.enable_axis = True
+                elif cmd_arr[1] == 'off':
+                    config.enable_axis = False
+                self.draw()
+                glutPostRedisplay()
+            elif cmd == 'quit' or cmd == 'exit':
+                sys.exit(0)
+            elif cmd == 'hide':
+                self.response_print('hiding this command window')
+                self.response_print('press \'t\' to get it back')
+                self.hide_cli = True
+                self.aux_msg = 'terminal is hidden. press \'t\' to get it back.'
+                self.aux_msg_enabled = True
+            elif cmd == 'skew':
+                self.response_print('entering skew mode:')
+                self.response_print(' arrow keys to to translate')
+                self.response_print(' \'j\' and \'k\' to zoom in and out')
+                self.response_print(' \'f\' and \'d\' speed and slow simulation')
+                self.response_print(' \'t\' to quit skew mode')
+                self.skew_mode = True
+            elif cmd == 'help':
+                if len(cmd_arr) == 1:
+                    self.response_print("available commands:")
+                    for k, _ in help.d.iteritems():
+                        self.response_print("  " + k)
                     self.response_print("")
-                    self.response_print("syntax:")
-                    self.response_print("  " + ref)
-                    self.response_print("")
-                    self.response_print("description:")
-                    self.response_print("  " + desc)
-                    self.response_print("")
-                except:
-                    self.response_print("")
-                    self.response_print("couldn't find command")
-                    self.response_print("")
-        elif cmd == 'dump':
-            if len(cmd_arr) == 1:
-                self.response_print("")
-                self.response_print("-----------------")
-                for k, v in self.robot._d.iteritems():
-                    self.response_print(k + " = " + str(v))
-                self.response_print("-----------------")
-                self.response_print("")
-            else:
-                try:
-                    var = cmd_arr[1]
-                    val = self.robot._d[var]
-                    self.response_print("")
-                    self.response_print(var + " = " + str(val))
-                    self.response_print("")
-                except:
-                    self.response_print("")
-                    self.response_print("couldn't find that variable")
-                    self.response_print("")
-        elif cmd == 'screendump':
-            cs1, cs2 = self.aux_msg_enabled, self.hide_cli
-            self.aux_msg_enabled, self.hide_cli = False, True
-            self.draw()
-            glutPostRedisplay()
-            
-            s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
-            img = Image.new('RGB', (self.width, self.height))
-            img.fromstring(s)
-            img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
+                    self.response_print("type \'help <command>\' to get help on an individual command")
+                else:
+                    try:
+                        helpcmd = help.d[cmd_arr[1]]
+                        ref = helpcmd['reference']
+                        desc = helpcmd['description']
+                        self.response_print("syntax:")
+                        self.response_print("  " + ref)
+                        self.response_print("")
+                        self.response_print("description:")
+                        self.response_print("  " + desc)
+                    except:
+                        self.response_print("couldn't find command")
+            elif cmd == 'dump':
+                if len(cmd_arr) == 1:
+                    for k, v in self.robot._d.iteritems():
+                        self.response_print(k + " = " + str(v))
+                else:
+                    try:
+                        var = cmd_arr[1]
+                        val = self.robot._d[var]
+                        self.response_print(var + " = " + str(val))
+                    except:
+                        self.response_print("couldn't find that variable")
+            elif cmd == 'screendump':
+                cs1, cs2 = self.aux_msg_enabled, self.hide_cli
+                self.aux_msg_enabled, self.hide_cli = False, True
+                self.draw()
+                glutPostRedisplay()
+                
+                s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
+                img = Image.new('RGB', (self.width, self.height))
+                img.fromstring(s)
+                img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
 
-            strtime = str(time.time()).split('.')[0]
-            filename = "screendump" + strtime + ".png"
+                strtime = str(time.time()).split('.')[0]
+                filename = "screendump" + strtime + ".png"
 
+                self.response_print('check out ' + filename + ' in the working directory')
+     
+                img2.save(filename)
+                self.aux_msg_enabled, self.hide_cli = cs1, cs2
+            else:
+                self.response_print('are you sure that\'s a command?')
             self.response_print('')
-            self.response_print('check out ' + filename + ' in the working directory')
-            self.response_print('')
- 
-            img2.save(filename)
-            self.aux_msg_enabled, self.hide_cli = cs1, cs2
-        else:
-            self.response_print('are you sure that\'s a command?')
-            
+
     def keyboard(self, key, x, y):
         self._updateMouse(x, y)
         

@@ -41,6 +41,9 @@ d = {
   'dump' : { 'reference' : 'dump <param (optional)>', 
              'description' : 'dumps the robot\'s numerical data. if param is provided, will dump only that.'
             },
+  'status' : { 'reference' : 'status', 
+             'description' : 'tells you what the simulator is currently doing.'
+            },
   'exit' : { 'reference' : 'exit or quit', 
              'description' : 'closes the simulator.'
             }

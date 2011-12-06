@@ -169,7 +169,7 @@ class robot(object):
         globals()['t'] += scale
         self.eval_syms()
         self.build_lists()
-        time.sleep(.01)
+        return globals()['t']
     
     # get any arbitrary rotation matrix, e.g. self.R(0,3) will give you R03
     def R(self, base_index = 0, final_index = 'T'):
