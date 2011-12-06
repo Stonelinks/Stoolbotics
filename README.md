@@ -15,7 +15,7 @@ TODO:
     - (x) world:
         - (x) floor
         - (x) lighting
-    - skew mode - move robot around
+    - (x) skew mode - move robot around
     
 - (x) Port some of Prof. Wen's matlab to python:
     - (x) basic things:
@@ -36,20 +36,20 @@ TODO:
 
 - (x) terminal
     - (x) core functionality
-    - function registry
-    - write command help / document some
-    - simulator commands
-        - load robot
-        - axis on/off
-        - trace on/off
-        - ghost on/off
-        - screendump
-    - hide / show
+    - (x) function registry
+    - (x) write command help / document some
+    - (x) simulator commands
+        - (x) load robot
+        - (x) axis on/off
+        - (x) trace on/off
+        - (x) ghost on/off
+        - (x) screendump
+    - (x) hide / show
 
 - matlab control via socket
 
-- movie making
-    - implement record - write to a file 
-    - implement play / pause / rewind
+- (x) movie making
+    - (x) implement record - write to a file 
+    - (x) implement play / pause / rewind
 
 - (x) windows support / installer
