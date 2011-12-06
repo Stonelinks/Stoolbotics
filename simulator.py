@@ -104,8 +104,9 @@ class simulator():
                 self.robot.eval_syms()
                 self.robot.build_lists()
                 self.robot.forwardkin()
-            except IndexError:
-                self.response_print('reached end of playback')
+            except:
+                # end of file
+                pass
         else:
             self.robot.forwardkin()
             self.t += self.robot.timestep(self.tscale)
@@ -228,7 +229,7 @@ class simulator():
         glutPostRedisplay()
 
     def handle_cmd(self, cmd):
-        cmd_arr = cmd.split(' ')
+        cmd_arr = cmd.strip().split(' ')
         cmd = cmd_arr[0]
         if cmd == '':
             return
@@ -524,13 +525,13 @@ class simulator():
         glEnd()
         
         glColor4f(0.0, 0.0, 0.0, 1.0)
-        self.text = self.text[-36:]
-        for i in range(len(self.text)):
-            if self.text[i][0] == 'c':
-                if self.text[i][1][:len(self.prompt)] != self.prompt:
-                    self.text[i][1] = self.prompt + self.text[i][1]
+        screen_text = self.text[-36:]
+        for text in screen_text:
+            if text[0] == 'c':
+                if text[1][:len(self.prompt)] != self.prompt:
+                    text[1] = self.prompt + text[1]
         i = 0
-        for text in reversed(self.text):
+        for text in reversed(screen_text):
             text = text[1]
             if len(text) <= self.max_line_chr:
                 glPushMatrix()
