@@ -71,12 +71,11 @@ class simulator():
         # final setup
         self.robot.t = self.t
         self.robot.timestep()
-        self.robot.print_vars()
         self.welcome()
         
         self.file_pointer = None
         self.file = None
-        self.state = ''
+        self.state = 'halted'
         self.playback_index = 0
         
     def welcome(self):
@@ -118,10 +117,12 @@ class simulator():
             except:
                 # end of file
                 pass
-        else:
+        elif self.state == 'play':
             self.robot.forwardkin()
             self.t += self.tscale
             self.robot.timestep(self.tscale)
+        elif self.state == 'halted':
+            pass
         glutPostRedisplay()
     
     def _updateMouse(self, x, y):
@@ -129,6 +130,7 @@ class simulator():
         self.mouse.oldMouseDraggedY = self.mouse.y
         self.mouse.x = x
         self.mouse.y = y
+
 
     # Mouse motion callback routine.
     def mouseMotion(self, x, y):
@@ -249,7 +251,7 @@ class simulator():
             self.response_print('')
             if cmd == 'play':
                 if len(cmd_arr) == 1:
-                    glutIdleFunc(self.timestep)
+                    self.state = 'play'
                 elif len(cmd_arr) == 2:
                     try:
                         self.file = []
@@ -260,7 +262,6 @@ class simulator():
                         self.robot.to_pos(self.t, self.file[0][1:])
                         self.response_print('openened ' + cmd_arr[1] + ' for playback')
                         self.state = 'playback'
-                        glutIdleFunc(self.timestep)
                     except:
                         self.response_print('there was an error opening ' + cmd_arr[1] + ' for playback')
                 self.robot.trace = []
@@ -271,7 +272,6 @@ class simulator():
                         self.file_pointer.close()
                     except:
                         pass
-                glutIdleFunc(None)
                 self.state = 'halted'
             elif cmd == 'rewind':
                 pass
@@ -293,7 +293,7 @@ class simulator():
                 try:
                     robot_file = 'robots/' + cmd_arr[1] + '.json'
                     self.robot = create_robot(robot_file)
-                    self.draw()
+                    self.robot.timestep()
                     glutPostRedisplay()
                 except:
                     self.response_print('not a robot. try using the \'list\' command to find one.')
@@ -648,7 +648,8 @@ def main():
     glutMouseFunc(_mouseControl)
     glutPassiveMotionFunc(_mouseMotion)
     glutMotionFunc(_mouseDragged)
-    glutReshapeFunc(_resize);  
+    glutReshapeFunc(_resize)
+    glutIdleFunc(s.timestep)
     glutMainLoop()
     return 0
 
