@@ -1,4 +1,4 @@
-robot_file = 'omni.json'
+robot_file = 'sample.json'
 
 enable_lighting = False
 enable_trace = True

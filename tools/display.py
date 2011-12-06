@@ -5,7 +5,6 @@ from OpenGL.GLUT import *
 
 from config import *
 
-
 import sys, Image, numpy, math
 
 import tools

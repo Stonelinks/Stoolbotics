@@ -185,6 +185,7 @@ class robot(object):
     def forwardkin(self):
         self.R0T = eye(3, 3)
         self.P0T = zeros((3, 1))
+        
         self.verts = []
         
         # make R0T
@@ -198,7 +199,6 @@ class robot(object):
             self.P0T += dot(tmp, link.P)
             tmp = dot(tmp, link.R)
             
-            # TODO - put this in link class
             p = (self.P0T[0][0], self.P0T[1][0], self.P0T[2][0])
             self.verts.append(p)
         if self.trace_enabled:

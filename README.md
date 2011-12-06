@@ -11,17 +11,18 @@ TODO:
     - (x) links between joints = lines for now
     - (x) frames:
         - (x) coordinate axis
-        - need to anchor a frame to a link or joint
+        - (x) need to anchor a frame to a link or joint
     - (x) world:
         - (x) floor
-        - lighting
-
+        - (x) lighting
+    - skew mode - move robot around
+    
 - (x) Port some of Prof. Wen's matlab to python:
     - (x) basic things:
         - (x) hat
         - (x) rot (euler-rodriguez)
         - Note: cross and dot product covered by numpy
-    - homogeneous matrices
+    - (x) homogeneous matrices
     - subproblems for inverse kinematics
     - jacobian (?)
 
@@ -33,7 +34,22 @@ TODO:
 
 - (x) write proposal
 
+- (x) terminal
+    - (x) core functionality
+    - function registry
+    - write command help / document some
+    - simulator commands
+        - load robot
+        - axis on/off
+        - trace on/off
+        - ghost on/off
+        - screendump
+    - hide / show
+
+- matlab control via socket
+
 - movie making
     - implement record - write to a file 
-    - implement play / pause / rewind etc
-    - implement animated GIFs (deffered rendering?)
+    - implement play / pause / rewind
+
+- windows support / installer

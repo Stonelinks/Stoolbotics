@@ -3,7 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import sys, os, json, Image, numpy, math
+import sys, os, json, Image, numpy, math, time
 import config
 
 import objects
@@ -21,7 +21,7 @@ class mouse():
         self.middlePressed = False
         self.rightPressed = False
         self.leftPressed = False
-        
+
 class simulator():
     def __init__(self, robot, room):
         self.robot = robot
@@ -43,20 +43,36 @@ class simulator():
         self.room.scale = self.scale
         self.zoom = 1.6
 
-        
         self.skew_mode = False
         self.text = []
         
         self.prompt = ">> "
+        self.max_line_chr = 38
         self.cmd = ''
         self.cmd_selection = -1
-
+        self.hide_cli = False
+        
+        self.aux_msg_enabled = False
+        self.aux_msg = ''
+        
         self.robot.forwardkin()
         self.robot.timestep()
         self.robot.print_vars()
         
         self.response_print('Welcome to stoolbotics!')
-        self.response_print('Interact by typing commands or using the mouse!')
+        self.response_print('')
+        self.response_print('')
+        self.response_print('Interact by typing commands or by using the mouse.')
+        self.response_print('')
+        self.response_print('')
+        self.response_print('For a list of commands, type \'list\'')
+        self.response_print('')
+        self.response_print('')
+        self.response_print('For help with a specific command you can type \'help <command name>\'')
+        self.response_print('')
+        self.response_print('')
+        self.response_print('')
+        self.response_print('')
         self.command_print('')
         
     def timestep(self):
@@ -79,6 +95,7 @@ class simulator():
         
         v1 = math.sin(self.angleX * config.pi / 180 )
         v2 = math.cos(self.angleY * config.pi / 180 )
+        
         changeX = v1*(x - self.mouse.oldMouseDraggedX)
         changeY = v2*(y - self.mouse.oldMouseDraggedY)
 
@@ -144,32 +161,39 @@ class simulator():
 
     def keyboard_special(self, key, x, y):
         self._updateMouse(x, y)
-        amount = 5
-        if key == GLUT_KEY_RIGHT:
-            self.transX += amount
-        elif key == GLUT_KEY_LEFT:
-            self.transX -= amount
-        elif key == GLUT_KEY_DOWN:
-            if not self.cmd_selection == -1:
-                self.cmd_selection += 1
-                try:
-                    while self.text[self.cmd_selection][0] != 'c':
-                        self.cmd_selection += 1
-                except:
-                    pass
-            if self.cmd_selection == -1:
-                self.cmd = self.text[-1][1] = ""
-            self.transY -= amount
-        elif key == GLUT_KEY_UP:
-            if not -self.cmd_selection == len(self.text):
-                self.cmd_selection -= 1
-                try:
-                    while self.text[self.cmd_selection][0] != 'c':
-                        self.cmd_selection -= 1
-                except:
-                    pass
-            self.transY += amount
-        self.cmd = self.text[-1][1] = self.text[self.cmd_selection][1]
+        if self.skew_mode:
+            amount = 5
+            if key == GLUT_KEY_RIGHT:
+                self.transX += amount
+            elif key == GLUT_KEY_LEFT:
+                self.transX -= amount
+            elif key == GLUT_KEY_DOWN:
+                self.transY -= amount
+            elif key == GLUT_KEY_UP:
+                self.transY += amount
+        else:
+            if key == GLUT_KEY_DOWN:
+                if not self.cmd_selection == -1:
+                    self.cmd_selection += 1
+                    try:
+                        while self.text[self.cmd_selection][0] != 'c':
+                            self.cmd_selection += 1
+                    except:
+                        pass
+                if self.cmd_selection == -1:
+                    self.cmd = self.text[-1][1] = ""
+            elif key == GLUT_KEY_UP:
+                if not -self.cmd_selection == len(self.text):
+                    self.cmd_selection -= 1
+                    try:
+                        while self.text[self.cmd_selection][0] != 'c':
+                            self.cmd_selection -= 1
+                    except:
+                        pass
+            try:
+                self.cmd = self.text[-1][1] = self.text[self.cmd_selection][1]
+            except:
+                pass
         glutPostRedisplay()
 
     def handle_cmd(self, cmd):
@@ -181,61 +205,122 @@ class simulator():
         elif cmd == 'stop':
             self.response_print('stopping simulation')
             glutIdleFunc(None)
+        elif cmd == 'hide':
+            self.response_print('hiding this command window')
+            self.response_print('press \'t\' to get it back')
+            self.hide_cli = True
+            self.aux_msg = 'terminal is hidden. press \'t\' to get it back.'
+            self.aux_msg_enabled = True
         elif '+' in cmd or '-' in cmd:
             for _ in range(cmd.count('+')):
                 self.camera_zoom('in')
             for _ in range(cmd.count('-')):
                 self.camera_zoom('out')
         elif cmd == 'skew':
-            self.response_print('entering skew mode')
+            self.response_print('entering skew mode:')
+            self.response_print(' arrow keys to to translate')
+            self.response_print(' \'j\' and \'k\' to zoom in and out')
+            self.response_print(' \'f\' and \'d\' speed and slow simulation')
+            self.response_print(' \'t\' to quit skew mode')
+            self.response_print('')
             self.skew_mode = True
         elif cmd == 'f':
             self.tscale += .01
         elif cmd == 'd':
             self.tscale -= .01
         elif cmd == 'screendump':
-            self.response_print('check out screendump.png in the working directory')
+            cs1, cs2 = self.aux_msg_enabled, self.hide_cli
+            self.aux_msg_enabled, self.hide_cli = False, True
+            self.draw()
+            glutPostRedisplay()
+            
             s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
             img = Image.new('RGB', (self.width, self.height))
             img.fromstring(s)
             img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
-            img2.save("screendump.png")
+
+            strtime = str(time.time()).split('.')[0]
+            filename = "screendump" + strtime + ".png"
+            self.response_print('check out ' + filename + ' in the working directory')
+            img2.save(filename)
+            self.aux_msg_enabled, self.hide_cli = cs1, cs2
         else:
             self.response_print('are you sure that\'s a command?')
+            
     def keyboard(self, key, x, y):
         self._updateMouse(x, y)
         
-        esc = chr(27)
-        backspace = chr(8)
-        carriagereturn = chr(13)
-        newline = chr(10)
-
-        if key in [carriagereturn, newline]:
-            if self.cmd[:3] == self.prompt:
-                self.cmd = self.cmd[3:]
-            self.handle_cmd(self.cmd)
-            self.cmd = ''
-            self.command_print(" ")
-            self.cmd_selection = -1
-            print "enter pressed"
-        elif key == backspace:
-            self.cmd = self.cmd[:-1]
-            self.text[-1][1] = self.cmd
-        elif key == esc:
-            sys.exit(0)
+        if self.skew_mode:
+          self.skew_mode = True
+          if key == 't':
+              self.skew_mode = False
+              self.command_print('')
+          elif key == 'j':
+              self.camera_zoom('in')
+          elif key == 'k':
+              self.camera_zoom('out')
+          elif key == 'f':
+              self.tscale += .02
+          elif key == 'd':
+              self.tscale -= .02
+          else:
+              self.response_print('in skew mode, type \'t\' to exit')
         else:
-            self.cmd += key
-            self.text[-1][1] = self.cmd
-        
+            esc = chr(27)
+            backspace = chr(8)
+            carriagereturn = chr(13)
+            newline = chr(10)
+
+            if key in [carriagereturn, newline]:
+                if self.cmd[:3] == self.prompt:
+                    self.cmd = self.cmd[3:]
+                self.handle_cmd(self.cmd)
+                self.cmd = ''
+                self.command_print(" ")
+                self.cmd_selection = -1
+                print "enter pressed"
+            elif key == backspace:
+                self.cmd = self.cmd[:-1]
+                self.text[-1][1] = self.cmd
+            elif key == esc:
+                sys.exit(0)
+            else:
+                self.cmd += key
+                self.text[-1][1] = self.cmd
+        if self.hide_cli:
+            if key == 't':
+                self.command_print("")
+                self.hide_cli = False
+                self.aux_msg_enabled = False
         glutPostRedisplay()
-        return
-        
+    
+    def multiline_format(self, text):
+        line = ''
+        s = ''
+        for word in text.split(' '):
+            if len(line) + len(word) + 1 < self.max_line_chr:
+                line += word + ' '
+            else:
+                s += line
+                for _ in range(self.max_line_chr - len(line)):
+                    s += ' '
+                line = word + ' '
+        return s + line
+    
     def command_print(self, text):
-        self.text.append(['c', text])
+        if len(text) < self.max_line_chr:
+            b = text
+        else:
+            b = self.multiline_format(text)
+        self.text.append(['c', b])
         
     def response_print(self, text):
-        self.text.append(['r', text])
-    
+        if len(text) < self.max_line_chr:
+            b = text
+        else:
+            b = self.multiline_format(text)
+        self.text.append(['r', b])
+            
     def draw(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         
@@ -265,11 +350,25 @@ class simulator():
         
         glPopMatrix()
         
+        if self.aux_msg_enabled:
+            glPushMatrix()
+            glTranslatef(-self.zoom*.094*self.width, -self.zoom*.094*self.height, 400.0)
+            glColor4f(0.0, 0.0, 0.0, 1.0)
+            glPushMatrix()
+            display.text_at_pos(0, self.zoom*1*3, 0, self.aux_msg, font=GLUT_BITMAP_9_BY_15)
+            glPopMatrix()
+            glPopMatrix()
+
+        
+        if not self.hide_cli:
+            self.render_cli()
+        glutSwapBuffers()
+
+    def render_cli(self):
         glPushMatrix()
         glTranslatef(-self.zoom*.094*self.width, -self.zoom*.094*self.height, 400.0)
         
         glColor4f(0.5, 0.5, 1.0, 0.4)
-        
         x0 = y0 = self.zoom*-3 # bottom left corner
         x1 = self.zoom*70 # width
         y1 = self.zoom*110 # height
@@ -282,27 +381,24 @@ class simulator():
         glEnd()
         
         glColor4f(0.0, 0.0, 0.0, 1.0)
-        
         self.text = self.text[-36:]
-        
         for i in range(len(self.text)):
             if self.text[i][0] == 'c':
                 if self.text[i][1][:len(self.prompt)] != self.prompt:
                     self.text[i][1] = self.prompt + self.text[i][1]
         i = 0
-        max_line_chr = 38
         for text in reversed(self.text):
             text = text[1]
-            if len(text) <= max_line_chr:
+            if len(text) <= self.max_line_chr:
                 glPushMatrix()
                 display.text_at_pos(0, self.zoom*i*3, 0, text, font=GLUT_BITMAP_9_BY_15)
                 glPopMatrix()
                 i += 1
             else:
                 tmp = []
-                for j in range(0, len(text), max_line_chr):
-                    segment = text[j:j + max_line_chr]
-                    n = max_line_chr - len(segment)
+                for j in range(0, len(text), self.max_line_chr):
+                    segment = text[j:j + self.max_line_chr]
+                    n = self.max_line_chr - len(segment)
                     for _ in range(n):
                         segment += ' '
                     tmp.append(segment)
@@ -313,8 +409,6 @@ class simulator():
                     glPopMatrix()
                     i += 1
         glPopMatrix()
-        
-        glutSwapBuffers()
 
     def resize(self, w, h):
         self.width = w

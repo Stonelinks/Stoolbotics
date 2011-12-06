@@ -11,3 +11,4 @@ pip-log.txt
 *.pbxuser
 *.perspective
 *.perspectivev3
+screendump*
