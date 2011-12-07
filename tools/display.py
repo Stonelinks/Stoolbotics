@@ -26,7 +26,7 @@ class point():
         name += " (" + str(round(self.x, 3)) + ", " + str(round(self.y, 3)) + ", " + str(round(self.z, 3)) + ")"
         text_at_pos(self.x + 1, self.y + 1, self.z + 1, name, GLUT_BITMAP_TIMES_ROMAN_10)
 
-def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder from sP to eP
+def draw_rotational_joint(startP, endP, r, link_rotation): #draws cylinder from sP to eP
     glPushMatrix()
 
     # This is the default direction for the cylinders to face in OpenGL - z axis
@@ -42,8 +42,7 @@ def draw_rotational_joint(startP, endP, r, link_rotation=0): #draws cylinder fro
     length = math.sqrt(numpy.dot(p, p))
     angle = 180 / PI * math.acos(numpy.dot(z, p) / length)
     glRotate(angle, t[0], t[1], t[2])
-    glRotate(link_rotation + 90, 0, 0, 1)
-    
+    glRotate(link_rotation + 90.0, 0.0, 0.0, 1.0)
     if enable_lighting:
         material.blue()
     else:

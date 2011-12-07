@@ -23,11 +23,6 @@ class link():
         self.rot = eval('parent.R' + name)
         self.R = self.rot
 
-        if 'q' in parent.syms['P' + name]:
-            self.type = 'prismatic'
-        else:
-            self.type = 'rotary'
-
         if self.index >= parent.N:
             self.q = None
             self.h = None
@@ -39,10 +34,13 @@ class link():
         self.axis = self.h
         
     def __str__(self):
-        return "link: " + self.name + ", type: " + self.type + ", q: " + str(self.q) + ", h: " + str(self.h) + ", p: " + str(self.P)
+        return "link: " + self.name + ", q: " + str(self.q) + ", h: " + str(self.h) + ", p: " + str(self.P)
     
     def is_prismatic(self):
-        return self.type == 'prismatic'
+        return 'q' in self.parent.syms['P' + self.name]
+
+    def is_rotational(self):
+        return 'rot' in self.parent.syms['R' + self.name]
     
     def location(self):
         return self.parent.verts[self.index]
@@ -250,15 +248,12 @@ class robot(object):
             # draw joint
             if link.is_prismatic(): # prismatic joint
                 display.draw_prismatic_joint([[0], [0], [0]], link.q*link.h, 10)
-            elif (R == eye(3)).all(): # link - no joint
-                pass
-            else: # rotation joint
-                    
+            elif link.is_rotational():
                 if config.enable_lighting:
                     material.green()
                 else:
                     glColor3f(0, 0.6, 0)
-                display.draw_rotational_joint(h*10, -h*10, 8, link.q * 180 / PI)
+                display.draw_rotational_joint(h*10, -h*10, 8, link.q*180/PI)
 
                 if config.enable_lighting:
                     material.grey()
@@ -266,6 +261,8 @@ class robot(object):
                     glColor3f(0.3, 0.3, 0.3)
                 
                 glRotate(link.q * 180 / PI, link.h[0], link.h[1], link.h[2])
+            elif (R == eye(3)).all(): # link - no joint
+                pass
 
         # pop all joints off
         for matPop in self.links:
