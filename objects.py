@@ -231,8 +231,12 @@ class robot(object):
             glPushMatrix()
             glLineWidth(15)
             glBegin(GL_LINES)
-            glVertex3f(0,0,0)
-            glVertex3f(P[0],P[1],P[2])
+            if not link.is_prismatic():
+                glVertex3f(0,0,0)
+                glVertex3f(P[0],P[1],P[2])
+            else:
+                glVertex3f(0,0,0)
+                glVertex3f(P[0]-link.q*link.h[0],P[1] - link.q*link.h[1],P[2] - link.q*link.h[2])
             glEnd()
 
             glTranslate(P[0], P[1], P[2])
@@ -245,7 +249,7 @@ class robot(object):
             
             # draw joint
             if link.is_prismatic(): # prismatic joint
-                display.draw_prismatic_joint([[0],[0],[0]], P, 10)
+                display.draw_prismatic_joint([[0], [0], [0]], link.q*link.h, 10)
             elif (R == eye(3)).all(): # link - no joint
                 pass
             else: # rotation joint
