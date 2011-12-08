@@ -13,3 +13,5 @@ pip-log.txt
 *.perspectivev3
 screendump*
 *.csv
+
+dist
