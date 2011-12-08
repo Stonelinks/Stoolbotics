@@ -15,3 +15,4 @@ screendump*
 *.csv
 
 dist
+build
