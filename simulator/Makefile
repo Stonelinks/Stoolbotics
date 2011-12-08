@@ -2,7 +2,7 @@
 
 win:
 	@python setup.py py2exe
-	@cp -r robots/* dist/robots
+	@cp -r ../robots/* dist/robots
 	@mkdir simulator
 	@cp -r dist/* simulator
 	@rm builds/simulator.zip &

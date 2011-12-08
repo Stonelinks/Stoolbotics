@@ -496,8 +496,8 @@ class simulator():
 
         # reference axis
         glPushMatrix()
-        
-        glTranslatef(self.zoom*40.0, self.zoom*-55.0, 400.0)
+
+        glTranslatef(self.zoom*.07*self.width, self.zoom*.07*self.height, 400.0)
 
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
         glRotatef(self.angleX, 1.0, 0.0, 0.0)
@@ -513,7 +513,7 @@ class simulator():
             display.text_at_pos(0, self.zoom*1*3, 0, self.aux_msg, font=GLUT_BITMAP_9_BY_15)
             glPopMatrix()
             glPopMatrix()
-
+    
         if not self.hide_cli:
             self.render_cli()
         
@@ -524,9 +524,10 @@ class simulator():
         glTranslatef(-self.zoom*.094*self.width, -self.zoom*.094*self.height, 400.0)
         
         glColor4f(0.5, 0.5, 1.0, 0.4)
-        x0 = y0 = self.zoom*-3 # bottom left corner
-        x1 = self.zoom*70 # width
-        y1 = self.zoom*110 # height
+        x0 = -self.zoom*.0023*self.width
+        y0 = -self.zoom*.0023*self.height # bottom left corner
+        x1 = self.zoom*.065*self.width # width
+        y1 = self.zoom*.19*self.height # height
         
         glBegin(GL_QUADS)
         glVertex3f(x0, y0, -1)
