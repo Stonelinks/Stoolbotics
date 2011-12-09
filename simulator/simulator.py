@@ -7,11 +7,17 @@ try:
 except AttributeError:
     pass
 
+try:
+    import Image
+except:
+    print "looks like you don't have the python imaging library"
+    print "so the screendump command will not work"
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import sys, os, json, Image, numpy, math, time, csv
+import sys, os, json, numpy, math, time, csv
 import config
 
 import objects
@@ -99,7 +105,6 @@ class simulator():
         self.command_print('')
         
     def timestep(self):
-        self.robot.t = self.t
         if self.state == 'record':
             l = [str(self.t)]
             for link in self.robot.links:
@@ -127,6 +132,7 @@ class simulator():
             self.robot.timestep(self.tscale)
         elif self.state == 'halted':
             pass
+        self.robot.t = self.t
         glutPostRedisplay()
     
     def _updateMouse(self, x, y):
@@ -363,12 +369,18 @@ class simulator():
                     self.response_print(str(eval('self.' + cmd_arr[1])))
                 except:
                     self.response_print("error evaluating command")
-            elif cmd == 'setsym':
+            elif cmd == 'set':
                 var = cmd_arr[1]
                 val = ' '.join(cmd_arr[2:])
                 try:
-                    exec 'self.robot.syms[\'' + var + '\'] = \'' + val + '\''
-                    self.response_print(str(eval('self.robot.syms[\'' + var + '\']')))
+                    if var in self.robot.syms:
+                        exec 'self.robot.syms[\'' + var + '\'] = \'' + val + '\''
+                        self.response_print(str(eval('self.robot.syms[\'' + var + '\']')))
+                        self.robot.trace = []
+                    else:
+                        exec 'self.' + var + ' = ' + val
+                        self.response_print(str(eval('self.' + var)))
+                        self.robot.trace = []
                 except:
                     self.response_print('error setting expression')
             elif cmd == 'quit' or cmd == 'exit':
@@ -411,18 +423,22 @@ class simulator():
                 self.draw()
                 glutPostRedisplay()
                 
-                s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
-                img = Image.new('RGB', (self.width, self.height))
-                img.fromstring(s)
-                img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
+                try:
+                    s = glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE)
+                    img = Image.new('RGB', (self.width, self.height))
+                    img.fromstring(s)
+                    img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
 
-                strtime = str(time.time()).split('.')[0]
-                filename = config.save_path + "screendump" + strtime + ".png"
+                    strtime = str(time.time()).split('.')[0]
+                    filename = config.save_path + "screendump" + strtime + ".png"
 
-                self.response_print('check out ' + filename + ' in the working directory')
-     
-                img2.save(filename)
-                self.aux_msg_enabled, self.hide_cli = cs1, cs2
+                    self.response_print('check out ' + filename + ' in the working directory')
+         
+                    img2.save(filename)
+                    self.aux_msg_enabled, self.hide_cli = cs1, cs2
+                except:
+                    self.aux_msg_enabled, self.hide_cli = cs1, cs2
+                    self.response_print('error taking screenshot, do you have the python imaging library installed?')
             else:
                 self.response_print('are you sure that\'s a command?')
             self.response_print('')
@@ -565,7 +581,7 @@ class simulator():
         glEnd()
         
         glColor4f(0.0, 0.0, 0.0, 1.0)
-        screen_text = self.text[-36:]
+        screen_text = self.text[-100:]
         for text in screen_text:
             if text[0] == 'c':
                 if text[1][:len(self.prompt)] != self.prompt:

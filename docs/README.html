@@ -1,0 +1,168 @@
+<html>
+<head>
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" href="static/bootstrap.min.css">
+    <style type="text/css">
+      html, body {
+        background-color: #ddd;
+      }
+      body {
+        padding: 40px;
+      }
+      .container {
+        width: 820px;
+      }
+      .content {
+        background-color: #fff;
+        padding: 20px;
+        margin: 0 -20px;
+        -webkit-border-radius: 16px;
+           -moz-border-radius: 16px;
+                border-radius: 16px;
+        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                
+      }
+    </style>
+
+    <title>Stoolbotics Documentation</title>
+
+</head>
+<body>
+
+<div class="container">
+<div class="content">
+<p><center><h1>Welcome to Stoolbotics!</h1></center>
+<center><small>Luke Doyle and Scott Peck</small></center></p>
+<hr>
+
+<div class="toc">
+<ul>
+<li><a href="#introduction">Introduction</a><ul>
+<li><a href="#welcome">Welcome</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#getting-stoolbotics">Getting Stoolbotics</a><ul>
+<li><a href="#for-windows">For Windows</a><ul>
+<li><a href="#prebuilt-reccomended">Prebuilt (reccomended)</a></li>
+<li><a href="#from-source">From Source</a></li>
+</ul>
+</li>
+<li><a href="#for-linux">For Linux</a></li>
+<li><a href="#for-mac-osx">For Mac OSX</a></li>
+</ul>
+</li>
+<li><a href="#quickstart">Quickstart</a></li>
+</ul>
+</li>
+<li><a href="#using-the-simulator">Using the Simulator</a><ul>
+<li><a href="#specifying-a-robot">Specifying a Robot</a></li>
+<li><a href="#command-overview">Command Overview</a></li>
+<li><a href="#examples">Examples</a><ul>
+<li><a href="#changing-the-environment">Changing the Environment</a></li>
+<li><a href="#skew-mode">Skew mode</a></li>
+<li><a href="#set">Set</a></li>
+<li><a href="#playback-and-recording">Playback and Recording</a><ul>
+<li><a href="#play-back">Play back</a></li>
+<li><a href="#recording">Recording</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#implementation">Implementation</a><ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#algorithms">Algorithms</a><ul>
+<li><a href="#symbolics">Symbolics</a></li>
+<li><a href="#kinematics">Kinematics</a></li>
+<li><a href="#timestepping">Timestepping</a></li>
+</ul>
+</li>
+<li><a href="#drawing-the-robot">Drawing the Robot</a><ul>
+<li><a href="#joints">Joints</a></li>
+<li><a href="#links">Links</a></li>
+<li><a href="#tracing">Tracing</a></li>
+<li><a href="#axis">Axis</a></li>
+</ul>
+</li>
+<li><a href="#misc">Misc</a><ul>
+<li><a href="#terminal-implementation">Terminal Implementation</a></li>
+<li><a href="#recording-and-playback">Recording and Playback</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#closing-remarks">Closing Remarks</a><ul>
+<li><a href="#future-improvements">Future improvements</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<hr>
+
+<h1 id="introduction">Introduction</h1>
+<h2 id="welcome">Welcome</h2>
+<p>Hello and welcome to the Stoolbotics! Stoolbotics is a general purpose robotic arm and kinematics simulator aimed at being a teaching tool for aspiring roboticists. The motivation for this project was simple: the linear algebra and mathematical concepts behind robotics is difficult for a beginner to understand without any visual context. This is especially true for people who are primarily visual learners.</p>
+<p>This tool will hopefully fill a gap in many higher education robotics classrooms. It was designed to be easy to use, compatible with other technologies (like MATLAB). The project itself was conceived halfway through the Fall 2011 semester at RPI by Lucas Doyle, and the implementation was carried out by Lucas Doyle and Scott Peck.</p>
+<h2 id="features">Features</h2>
+<p>Stoolbotics has many features that make it attractive to the aspiring roboticst and robotics professor. To name a few:</p>
+<ul>
+<li>Easy to use file format for specifying a robot arm</li>
+<li>Ability to visualize any robot that can be specified in such a file</li>
+<li>Compute the forward kinematics of any robot</li>
+<li>Animate and draw paths for robots</li>
+<li>Command line interface within simulator with many useful commands</li>
+<li>Completley customizable simulation environment (timestepping, etc)</li>
+<li>Ability to record simulator activity</li>
+<li>Ability to playback saved recordings, or even import a recording generated in MATLAB</li>
+<li>Change variables in the simulator on the fly</li>
+<li>Built in help from simulator command line, and of this stellar documentation</li>
+<li>Cross platform</li>
+</ul>
+<h2 id="getting-stoolbotics">Getting Stoolbotics</h2>
+<h3 id="for-windows">For Windows</h3>
+<h4 id="prebuilt-reccomended">Prebuilt (reccomended)</h4>
+<h4 id="from-source">From Source</h4>
+<h3 id="for-linux">For Linux</h3>
+<h3 id="for-mac-osx">For Mac OSX</h3>
+<p>Nobody on the development team had access to a Mac</p>
+<h2 />
+<h2 id="quickstart">Quickstart</h2>
+<h1 id="using-the-simulator">Using the Simulator</h1>
+<h2 id="specifying-a-robot">Specifying a Robot</h2>
+<h2 id="command-overview">Command Overview</h2>
+<table><tr><td><h4>Command</h4></td><td><h4>Usage</h4></td><td><h4>Description</h4></td></tr><tr><td><b>axis</b></td><td><b>axis &lt;on/off&gt;</b></td><td>Turn robot axis on/off. Providing no arguments toggles the axis.</td></tr><tr><td><b>eval</b></td><td><b>eval &lt;expression&gt;</b></td><td>Return some variable from the simulator. e.g. 'eval robot.P01'. Output might look a little weird.</td></tr><tr><td><b>exit</b></td><td><b>exit or quit</b></td><td>Closes the simulator.</td></tr><tr><td><b>floor</b></td><td><b>floor &lt;on/off&gt;</b></td><td>Turns the floor on and off. Providing no arguments toggles the floor.</td></tr><tr><td><b>ghost</b></td><td><b>ghost &lt;on/off/interval&gt; &lt;number&gt;</b></td><td>turn robot ghosts on/off. If &lt;interval&gt; is present, provide a number to set the ghost interval. Providing no arguments toggles the ghosts.</td></tr><tr><td><b>help</b></td><td><b>help &lt;cmd (optional)&gt;</b></td><td>If &lt;cmd&gt; is provided, display help for that command. Otherwise  it just list all commands.</td></tr><tr><td><b>hide</b></td><td><b>hide</b></td><td>Hides this terminal.</td></tr><tr><td><b>list</b></td><td><b>list</b></td><td>Lists all the robots that can be loaded into the simulator. To add something to this list, just place a valid robot.json file in the 'robots' folder.</td></tr><tr><td><b>load</b></td><td><b>load &lt;robot file&gt;</b></td><td>Loads a robot file into the simulator. Use the 'list' command to see what robots are able to be loaded.</td></tr><tr><td><b>play</b></td><td><b>play &lt;file (optional)&gt;</b></td><td>If &lt;file&gt; is present, the simulator plays that file. Otherwise, it just starts the simulator.</td></tr><tr><td><b>record</b></td><td><b>record &lt;file&gt;</b></td><td>Outputs current arm movements to a file which can be exported or played back later.</td></tr><tr><td><b>screendump</b></td><td><b>screendump</b></td><td>Take a picture of the current screen and save it to disk.</td></tr><tr><td><b>set</b></td><td><b>set &lt;var&gt; &lt;expression&gt;</b></td><td>Sets a symbolic variable in the simulator. e.g. 'set q3 cos(t)', 'set t 0', 'set tscale -.1', 'set P23 \[0, 0, l2 + q2\]'.</td></tr><tr><td><b>skew</b></td><td><b>skew</b></td><td>Enters skew mode, where the view of the robot and simulation speed can be rapidly adjusted.</td></tr><tr><td><b>status</b></td><td><b>status</b></td><td>Tells you what the simulator is currently doing.</td></tr><tr><td><b>stop</b></td><td><b>stop</b></td><td>Halts the simulaton.</td></tr><tr><td><b>trace</b></td><td><b>trace &lt;on/off/clear/limit&gt; &lt;number&gt;</b></td><td>Turn robot traces on/off, or clear the current set of traces. If the &lt;limit&gt; argument is used, provide a number to set the maximum number of traces.</td></tr></table>
+
+<h2 id="examples">Examples</h2>
+<h3 id="changing-the-environment">Changing the Environment</h3>
+<h3 id="skew-mode">Skew mode</h3>
+<h3 id="set">Set</h3>
+<h3 id="playback-and-recording">Playback and Recording</h3>
+<h4 id="play-back">Play back</h4>
+<h4 id="recording">Recording</h4>
+<h1 id="implementation">Implementation</h1>
+<h2 id="overview">Overview</h2>
+<h2 id="algorithms">Algorithms</h2>
+<h3 id="symbolics">Symbolics</h3>
+<h3 id="kinematics">Kinematics</h3>
+<h3 id="timestepping">Timestepping</h3>
+<h2 id="drawing-the-robot">Drawing the Robot</h2>
+<h3 id="joints">Joints</h3>
+<h3 id="links">Links</h3>
+<h3 id="tracing">Tracing</h3>
+<h3 id="axis">Axis</h3>
+<h2 id="misc">Misc</h2>
+<h3 id="terminal-implementation">Terminal Implementation</h3>
+<h3 id="recording-and-playback">Recording and Playback</h3>
+<h1 id="closing-remarks">Closing Remarks</h1>
+<h2 id="future-improvements">Future improvements</h2>
+<h2 id="credits">Credits</h2></div>
+</div>
+</body>
+</html>

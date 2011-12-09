@@ -3,7 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import sys, Image, numpy, math
+import sys, numpy, math
 
 import tools.material as material
 import config
@@ -226,11 +226,3 @@ def draw_axes(axes_l = 10, number=''):
     text_at_pos(offset + axes_l, 0, 0, 'X' + number)
     text_at_pos(0, offset + axes_l, 0, 'Y' + number)
     text_at_pos(0, 0, offset + axes_l, 'Z' + number)
-
-def screendump(self, filename="screendump"):
-    s = glReadPixels(0, 0, self.w, self.h, GL_RGB, GL_UNSIGNED_BYTE)
-    img = Image.new('RGB', (self.w, self.h))
-    img.fromstring(s)
-    img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
-    img2.save(filename + ".jpg")
-
