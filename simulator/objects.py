@@ -155,7 +155,10 @@ class robot(object):
                 tmp = 'array([' + tmp + '], float).T'
             elif k[0] == 'h' and v[0] != '[': #axis shorthand
                 tmp = v
-            self._d[k] = eval(tmp)
+            try:
+                self._d[k] = eval(tmp)
+            except:
+                pass
         self.sync_d()
     
     def sync_d(self):

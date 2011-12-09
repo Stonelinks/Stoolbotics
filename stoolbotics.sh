@@ -1,0 +1,1 @@
+cd simulator && python simulator.py

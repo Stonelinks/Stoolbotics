@@ -6,3 +6,6 @@ enable_ghost = False
 max_trace = 3000
 ghost_interval = 20
 enable_axis = False
+floor_on = True
+
+save_path = '../'

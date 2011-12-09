@@ -119,6 +119,7 @@ class simulator():
                 self.robot.forwardkin()
             except:
                 # end of file
+                self.state = 'halted'
                 pass
         elif self.state == 'play':
             self.robot.forwardkin()
@@ -254,11 +255,14 @@ class simulator():
             self.response_print('')
             if cmd == 'play':
                 if len(cmd_arr) == 1:
-                    self.state = 'play'
+                    if self.state == 'prerecord':
+                        self.state = 'record'
+                    else:
+                        self.state = 'play'
                 elif len(cmd_arr) == 2:
                     try:
                         self.file = []
-                        for row in csv.reader(open(cmd_arr[1], 'r')):
+                        for row in csv.reader(open(config.save_path + cmd_arr[1], 'r')):
                             self.file.append(row)
                         self.t = float(self.file[0][0])
                         self.playback_index = 0
@@ -286,22 +290,22 @@ class simulator():
             elif cmd == 'record':
                   file  = cmd_arr[1] + '.csv'
                   try:
-                      self.file_pointer = open(file, 'a')
-                      self.state = 'record'
+                      self.file_pointer = open(config.save_path + file, 'a')
+                      self.state = 'prerecord'
                       self.response_print('file ' + file + ' opened for recording')
                   except:
                       self.response_print('problem opening that file for recording')
                   self.response_print('')
             elif cmd == 'load':
                 try:
-                    robot_file = 'robots/' + cmd_arr[1] + '.json'
+                    robot_file = '../robots/' + cmd_arr[1] + '.json'
                     self.robot = create_robot(robot_file)
                     self.robot.timestep()
                     glutPostRedisplay()
                 except:
                     self.response_print('not a robot. try using the \'list\' command to find one.')
             elif cmd == 'list':
-                for r in os.listdir('robots'):
+                for r in os.listdir('../robots'):
                     self.response_print(" " + r.split('.')[0])
             elif cmd == 'axis':
                 if len(cmd_arr) == 1:
@@ -319,15 +323,21 @@ class simulator():
                     config.enable_trace = True
                 elif cmd_arr[1] == 'off':
                     config.enable_trace = False
-                self.draw()
+                elif cmd_arr[1] == 'clear':
+                    self.robot.trace = []
+                elif cmd_arr[1] == 'limit':
+                    config.max_trace = int(cmd_arr[2])
+                    self.draw()
                 glutPostRedisplay()
-            elif cmd == 'ghosts':
+            elif cmd == 'ghost':
                 if len(cmd_arr) == 1:
                     config.enable_ghost = not config.enable_ghost
                 elif cmd_arr[1] == 'on':
                     config.enable_ghost = True
                 elif cmd_arr[1] == 'off':
                     config.enable_ghost = False
+                elif cmd_arr[1] == 'interval':
+                    config.ghost_interval = int(cmd_arr[2])
                 self.draw()
                 glutPostRedisplay()
             elif cmd == 'axis':
@@ -339,11 +349,28 @@ class simulator():
                     config.enable_axis = False
                 self.draw()
                 glutPostRedisplay()
+            elif cmd == 'floor':
+                if len(cmd_arr) == 1:
+                    config.floor_on = not config.floor_on
+                elif cmd_arr[1] == 'on':
+                    config.floor_on = True
+                elif cmd_arr[1] == 'off':
+                    config.floor_on = False
+                self.draw()
+                glutPostRedisplay()
             elif cmd == 'eval':
                 try:
                     self.response_print(str(eval('self.' + cmd_arr[1])))
                 except:
                     self.response_print("error evaluating command")
+            elif cmd == 'setsym':
+                var = cmd_arr[1]
+                val = ' '.join(cmd_arr[2:])
+                try:
+                    exec 'self.robot.syms[\'' + var + '\'] = \'' + val + '\''
+                    self.response_print(str(eval('self.robot.syms[\'' + var + '\']')))
+                except:
+                    self.response_print('error setting expression')
             elif cmd == 'quit' or cmd == 'exit':
                 sys.exit(0)
             elif cmd == 'hide':
@@ -390,7 +417,7 @@ class simulator():
                 img2 = img.transpose(Image.FLIP_TOP_BOTTOM)
 
                 strtime = str(time.time()).split('.')[0]
-                filename = "screendump" + strtime + ".png"
+                filename = config.save_path + "screendump" + strtime + ".png"
 
                 self.response_print('check out ' + filename + ' in the working directory')
      
@@ -485,7 +512,8 @@ class simulator():
         glRotatef(self.angleY, 0.0, 1.0, 0.0)
         glRotatef(self.angleX, 1.0, 0.0, 0.0)
         
-        self.room.render()
+        if config.floor_on:
+            self.room.render()
         
         glColor3f(0, 0, 0)
         #display.draw_axes(20, '1')

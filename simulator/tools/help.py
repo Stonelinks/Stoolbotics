@@ -8,11 +8,11 @@ d = {
   'stop' : { 'reference' : 'stop', 
              'description' : 'halts the simulaton.'
             },
-  'rewind' : { 'reference' : 'rewind', 
-             'description' : 'if playing a file, resets to the beginning'
-            },
   'skew' : { 'reference' : 'skew', 
              'description' : 'enters skew mode, where the view of the robot and simulation speed can be rapidly adjusted.'
+            },
+  'floor' : { 'reference' : 'floor <on/off>', 
+             'description' : 'turns the floor on and off.'
             },
   'record' : { 'reference' : 'record <file>', 
              'description' : 'outputs current arm movements to a file which can be played back later.'
@@ -26,14 +26,11 @@ d = {
   'axis' : { 'reference' : 'axis <on/off>', 
              'description' : 'turn robot axis on/off.'
             },
-  'floor' : { 'reference' : 'floor <on/off>', 
-             'description' : 'turn floor on/off.'
+  'trace' : { 'reference' : 'trace <on/off/clear/limit> <number>', 
+             'description' : 'turn robot traces on/off, or clear the current set of traces. if limit is present, provide a number to set the maximum number of traces.'
             },
-  'trace' : { 'reference' : 'trace <on/off>', 
-             'description' : 'turn robot traces on/off.'
-            },
-  'ghost' : { 'reference' : 'ghost <on/off>', 
-             'description' : 'turn robot ghost on/off.'
+  'ghost' : { 'reference' : 'ghost <on/off/interval> <number>', 
+             'description' : 'turn robot ghosts on/off. if interval is present, provide a number to set the ghost interval.'
             },
   'eval' : { 'reference' : 'eval <expression>', 
              'description' : 'return some variable from the simulator. e.g. \'eval robot.P01\'.'
@@ -49,5 +46,11 @@ d = {
             },
   'exit' : { 'reference' : 'exit or quit', 
              'description' : 'closes the simulator.'
+            },
+  'setsym' : { 'reference' : 'setsym <var> <expression>', 
+             'description' : 'sets a symbolic variable in the robot. e.g. \'setsym q3 cos(t)\.'
+            },
+  'maxtrace' : { 'reference' : 'maxtrace <number>', 
+             'description' : 'limits the max number of traces for the tip of the robot.'
             }
 }
