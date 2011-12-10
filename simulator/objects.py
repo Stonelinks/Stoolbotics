@@ -64,8 +64,8 @@ class robot(object):
         # establish local vars, pick out syms
         self.syms = {}
         for k, v in d.iteritems():
-            if k[0] in ['q', 'R', 'P']:
-                if k[0] == 'q':
+            if k[0] in ['q', 'R', 'P', 'h', 'l']:
+                if k[0] in ['q', 'l']:
                     self.syms[k] = 'float(' + v + ')'
                 else:
                     self.syms[k] = v
@@ -151,14 +151,11 @@ class robot(object):
                     tmp = tmp.replace('u\'' + key + '\'', key)
                     #something like this would be awesome: tmp = re.sub(r'u\'(.*)\'', tmp, tmp)
             
-            if k[0] == 'P' and tmp[0] == '[':
+            if (k[0] == 'P' or k[0] == 'h') and tmp[0] == '[':
                 tmp = 'array([' + tmp + '], float).T'
             elif k[0] == 'h' and v[0] != '[': #axis shorthand
                 tmp = v
-            try:
-                self._d[k] = eval(tmp)
-            except:
-                pass
+            self._d[k] = eval(tmp)
         self.sync_d()
     
     def sync_d(self):
@@ -235,11 +232,11 @@ class robot(object):
             glLineWidth(15)
             glBegin(GL_LINES)
             if not link.is_prismatic():
-                glVertex3f(0,0,0)
-                glVertex3f(P[0],P[1],P[2])
+                glVertex3f(0, 0, 0)
+                glVertex3f(P[0], P[1], P[2])
             else:
-                glVertex3f(0,0,0)
-                glVertex3f(P[0]-link.q*link.h[0],P[1] - link.q*link.h[1],P[2] - link.q*link.h[2])
+                glVertex3f(0, 0, 0)
+                glVertex3f(P[0]-link.q*link.h[0], P[1] - link.q*link.h[1], P[2] - link.q*link.h[2])
             glEnd()
 
             glTranslate(P[0], P[1], P[2])
@@ -258,10 +255,7 @@ class robot(object):
                     material.green()
                 else:
                     glColor3f(0, 0.6, 0)
-                try:
-                    display.draw_rotational_joint(h*10, -h*10, 8, link.q*180/PI)
-                except:
-                    pass
+                display.draw_rotational_joint(h*10, h*-10, 8, link.q*180/PI)
                 if config.enable_lighting:
                     material.grey()
                 else:

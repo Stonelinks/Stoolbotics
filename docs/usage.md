@@ -53,9 +53,9 @@ Once you have written a robot.json file, there are two commands that will help y
 The cosmetics of the simulation environment are highly configurable:
 
 - Axis
-    - The joint coordinate frame axis display can be turned on and off with the use of the <code>axis<code> command.
+    - The joint coordinate frame axis display can be turned on and off with the use of the <code>axis</code> command.
 - Floor
-    - The floor in the simulator can be turned on and off with the use of the <code>floor<code> command.
+    - The floor in the simulator can be turned on and off with the use of the <code>floor</code> command.
 - Ghosts
     - A 'ghost' is a shadow of a robot in a previous articulated position. Use the <code>ghost</code> command to control them.
     - The interval of when ghosts appear can be set with <code>ghost interval &lt;somenumber&gt;</code>.
@@ -70,10 +70,87 @@ Here is an example of some simulation environment manipulation and the result:
 
 ###Skew mode
 
-Skew mode allows you to rapidly x
+Skew mode allows you to rapidly adjust where the camera is positioned in the simulation as well as adjust the timestep. To enter skew mode, just type <code>skew</code>. From there you can use the arrow keys to translate the camera up or down, use 'f' and 'd' to speed up or slow down the simulation, and finally 'j' and 'k' to zoom in and out. While in skew mode, none of the other commands work, so to exit you need to type 't'.
 
 ###Set
+
+As you can see from the quickstart, the set command is highly versatile. You can set any variable in the simulator or the robot with this command. Here are some examples of clever ways to use the set command:
+
+<table>
+<tr>
+<td><h4>Command &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h4></td>
+<td><h4>Effect</h4></td>
+</tr>
+
+<tr>
+<td><pre>set t 0</pre></td>
+<td>Resets the time in the simulator back to time = 0.</td>
+</tr>
+
+<tr>
+<td><pre>set tscale 0.05</pre></td>
+<td>Manually sets the timescale in the simulator (the same effect could also be done with the skew command).</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set q1 0
+set q2 0
+set q3 0
+(etc ...)
+</pre>
+</td>
+<td>Sets all joints in the robot to zero position.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set h1 x
+set h2 [1, 1, 1]
+set h3 z
+(etc ...)
+</pre>
+</td>
+<td>Sets all joints axis in the robot to arbitrary vectors. use of shortcuts like "x" is entirely optional, you can do things like [1, 0, 0] and accomplish the same effect.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set l1 50
+</pre>
+</td>
+<td>Set link one to be 50.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set P12 [0, 0, l2 + q2]
+</pre>
+</td>
+<td>Make a prismatic joint in the Z direction from frame one to frame two.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set R12 eye(3, 3)
+</pre>
+</td>
+<td>Sets R12 to be the identity matrix, effectively creating a static link.</td>
+</tr>
+</table>
+
+
 ###Playback and Recording
+
+The simulator also includes functionality to play back and record robot motion.
+
+<!--
+
 ####Play back
 ####Recording
 

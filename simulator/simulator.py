@@ -308,6 +308,8 @@ class simulator():
                     self.robot = create_robot(robot_file)
                     self.robot.timestep()
                     glutPostRedisplay()
+                except AttributeError:
+                    self.response_print('Error in this robot file. Are you sure you\'re not missing a parameter?')
                 except:
                     self.response_print('not a robot. try using the \'list\' command to find one.')
             elif cmd == 'list':

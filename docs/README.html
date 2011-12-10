@@ -69,40 +69,9 @@
 <li><a href="#changing-the-environment">Changing the Environment</a></li>
 <li><a href="#skew-mode">Skew mode</a></li>
 <li><a href="#set">Set</a></li>
-<li><a href="#playback-and-recording">Playback and Recording</a><ul>
-<li><a href="#play-back">Play back</a></li>
-<li><a href="#recording">Recording</a></li>
+<li><a href="#playback-and-recording">Playback and Recording</a></li>
 </ul>
 </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#implementation">Implementation</a><ul>
-<li><a href="#overview">Overview</a></li>
-<li><a href="#algorithms">Algorithms</a><ul>
-<li><a href="#symbolics">Symbolics</a></li>
-<li><a href="#kinematics">Kinematics</a></li>
-<li><a href="#timestepping">Timestepping</a></li>
-</ul>
-</li>
-<li><a href="#drawing-the-robot">Drawing the Robot</a><ul>
-<li><a href="#joints">Joints</a></li>
-<li><a href="#links">Links</a></li>
-<li><a href="#tracing">Tracing</a></li>
-<li><a href="#axis">Axis</a></li>
-</ul>
-</li>
-<li><a href="#misc">Misc</a><ul>
-<li><a href="#terminal-implementation">Terminal Implementation</a></li>
-<li><a href="#recording-and-playback">Recording and Playback</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#closing-remarks">Closing Remarks</a><ul>
-<li><a href="#future-improvements">Future improvements</a></li>
-<li><a href="#credits">Credits</a></li>
 </ul>
 </li>
 </ul>
@@ -241,11 +210,11 @@
 <p>The cosmetics of the simulation environment are highly configurable:</p>
 <ul>
 <li>Axis<ul>
-<li>The joint coordinate frame axis display can be turned on and off with the use of the <code>axis<code> command.</li>
+<li>The joint coordinate frame axis display can be turned on and off with the use of the <code>axis</code> command.</li>
 </ul>
 </li>
 <li>Floor<ul>
-<li>The floor in the simulator can be turned on and off with the use of the <code>floor<code> command.</li>
+<li>The floor in the simulator can be turned on and off with the use of the <code>floor</code> command.</li>
 </ul>
 </li>
 <li>Ghosts<ul>
@@ -264,28 +233,103 @@
 <img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/8.png" width="780px" height="540px">
 
 <h3 id="skew-mode">Skew mode</h3>
-<p>Skew mode allows you to rapidly x</p>
+<p>Skew mode allows you to rapidly adjust where the camera is positioned in the simulation as well as adjust the timestep. To enter skew mode, just type <code>skew</code>. From there you can use the arrow keys to translate the camera up or down, use 'f' and 'd' to speed up or slow down the simulation, and finally 'j' and 'k' to zoom in and out. While in skew mode, none of the other commands work, so to exit you need to type 't'.</p>
 <h3 id="set">Set</h3>
+<p>As you can see from the quickstart, the set command is highly versatile. You can set any variable in the simulator or the robot with this command. Here are some examples of clever ways to use the set command:</p>
+<table>
+<tr>
+<td><h4>Command &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h4></td>
+<td><h4>Effect</h4></td>
+</tr>
+
+<tr>
+<td><pre>set t 0</pre></td>
+<td>Resets the time in the simulator back to time = 0.</td>
+</tr>
+
+<tr>
+<td><pre>set tscale 0.05</pre></td>
+<td>Manually sets the timescale in the simulator (the same effect could also be done with the skew command).</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set q1 0
+set q2 0
+set q3 0
+(etc ...)
+</pre>
+</td>
+<td>Sets all joints in the robot to zero position.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set h1 x
+set h2 [1, 1, 1]
+set h3 z
+(etc ...)
+</pre>
+</td>
+<td>Sets all joints axis in the robot to arbitrary vectors. use of shortcuts like "x" is entirely optional, you can do things like [1, 0, 0] and accomplish the same effect.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set l1 50
+</pre>
+</td>
+<td>Set link one to be 50.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set P12 [0, 0, l2 + q2]
+</pre>
+</td>
+<td>Make a prismatic joint in the Z direction from frame one to frame two.</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+set R12 eye(3, 3)
+</pre>
+</td>
+<td>Sets R12 to be the identity matrix, effectively creating a static link.</td>
+</tr>
+</table>
+
 <h3 id="playback-and-recording">Playback and Recording</h3>
-<h4 id="play-back">Play back</h4>
-<h4 id="recording">Recording</h4>
-<h1 id="implementation">Implementation</h1>
-<h2 id="overview">Overview</h2>
-<h2 id="algorithms">Algorithms</h2>
-<h3 id="symbolics">Symbolics</h3>
-<h3 id="kinematics">Kinematics</h3>
-<h3 id="timestepping">Timestepping</h3>
-<h2 id="drawing-the-robot">Drawing the Robot</h2>
-<h3 id="joints">Joints</h3>
-<h3 id="links">Links</h3>
-<h3 id="tracing">Tracing</h3>
-<h3 id="axis">Axis</h3>
-<h2 id="misc">Misc</h2>
-<h3 id="terminal-implementation">Terminal Implementation</h3>
-<h3 id="recording-and-playback">Recording and Playback</h3>
-<h1 id="closing-remarks">Closing Remarks</h1>
-<h2 id="future-improvements">Future improvements</h2>
-<h2 id="credits">Credits</h2></div>
+<p>The simulator also includes functionality to play back and record robot motion.</p>
+<!--
+
+####Play back
+####Recording
+
+#Implementation
+##Overview
+##Algorithms
+###Symbolics
+###Kinematics
+###Timestepping
+##Drawing the Robot
+###Joints
+###Links
+###Tracing
+###Axis
+##Misc
+###Terminal Implementation
+###Recording and Playback
+#Closing Remarks
+##Future improvements
+##Credits
+
+--></div>
 </div>
 </body>
 </html>

@@ -31,11 +31,13 @@ def draw_rotational_joint(startP, endP, r, link_rotation): #draws cylinder from 
     glPushMatrix()
 
     # This is the default direction for the cylinders to face in OpenGL - z axis
-    z = [0.0, 0.0, 1.0]
+    z = numpy.array([0.0, 0.0, 1.0])
     
     # Get diff between two points you want cylinder along
-    p = numpy.array(startP - endP, float).transpose()[0]
-
+    startP = numpy.array(startP, float).transpose()[0]
+    endP = numpy.array(endP, float).transpose()[0]
+    p = startP - endP
+    
     # Get CROSS product (the axis of rotation)
     t = numpy.cross(z, p)
 
