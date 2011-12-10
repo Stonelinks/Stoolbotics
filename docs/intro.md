@@ -32,7 +32,7 @@ Simply unzip and run stoolbotics.bat, and you should be up and running!
 ####From Source
 If you're feeling more adventerous, or want to develop stoolbotics for Windows, you can still run the simulator through python. You will need to install a few dependencies though. You will need to have python (2.7 works best), numpy, PyOpenGL and (optionally) the python imaging library (PIL) installed. If you choose not to install PIL, the only functionality that will be effected is the ability to take screenshots from within the simulator.
 
-Once you have everything above installed, you should [download the latest zip](https://github.com/Stonelinks/Stoolbotics/zipball/master) of our repository. Once you have it downloaded, just unzip and run <code>python simulator.py</code> in the simulator directory.
+Once you have everything above installed, you should [download the latest zip](https://github.com/Stonelinks/Stoolbotics/zipball/master) of our code repository. Once you have it downloaded, just unzip and run <code>python simulator.py</code> in the simulator directory.
 
 ###For Linux
 
@@ -42,6 +42,14 @@ Make a clone of our repository by running <code>git clone https://github.com/Sto
 
 ###For Mac OSX
 
-OSX isn't officially supported as we don't have a machine we can test on, but if you have a python installation with PyOpenGL, numpy, and PIL then there is no reason why following the Linux instructions wouldn't work.
+OSX isn't officially supported as we don't have a machine we can test on, but if you have a python installation with PyOpenGL, numpy, and PIL then there is no reason why following the Linux instructions above wouldn't work.
+
+If you just want to grab a copy of the code, you can [download the latest zip](https://github.com/Stonelinks/Stoolbotics/zipball/master) of our code repository.
 
 ##Quickstart
+
+When you fire up the simulator for the first time, you should see something like what is shown below.
+
+<img src="static/1.png" width="640px" height="480px">
+
+
