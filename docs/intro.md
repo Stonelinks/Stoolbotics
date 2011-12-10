@@ -50,6 +50,61 @@ If you just want to grab a copy of the code, you can [download the latest zip](h
 
 When you fire up the simulator for the first time, you should see something like what is shown below.
 
-<img src="static/1.png" width="640px" height="480px">
+<img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/1.png" width="780px" height="540px">
 
+You'll notice a robot is loaded into the simulator to start with. This simple three joint arm is called the phantom omni, and is defined by the 'omni.json' file in the robots directory. All robot files that the simulator uses are described in such robot.json files. They are simple and easy to understand. Below we have reproduced omni.json as it is first loaded into the simulator:
 
+        "N" : "3",
+        
+        "h1" : "z",
+        "h2" : "x",
+        "h3" : "x",
+        
+        "q1" : ".1*t",
+        "q2" : ".1*cos(t)",
+        "q3" : ".001*t + .2*sin(t)",
+        
+        "l1" : "40",
+        "l2" : "50",
+        "l3" : "50",
+        
+        "P01" : "[0, 0, 0]",
+        "P12" : "[0, 0, l1]",
+        "P23" : "[0, l2, 0]",
+        "P3T" : "[0, l3, 0]",
+        
+        "R01" : "rot(h1, q1)",
+        "R12" : "rot(h2, q2)",
+        "R23" : "rot(h3, q3)",
+        "R3T" : "eye(3, 3)"
+
+Lets look at this file line by line to see how it makes a complete robot object:
+
+- "N" is first declaired to tell the simulator the number of joints to expect in this robot.
+- All the joint axes are specified with an "h" and an index. In this case, shorthand is used (e.g. use of "z" instead of "[0, 0, 1]"), but if we wanted a non-standard axis vector we could have used something like "[-.1, .2, .4]".
+- Angle parameters are specified with a "q" and an index. These can be completley arbitrary functions of time, static numbers, or whatever you like. These parameters represent how much an axis has rotated or displaced along its axis.
+- Link lengths are specified with an "l" and an index.
+- Position vectors tell the simulator how to get from one frame to the next. Additionally, prismatic joints are specified here by including a joint axis parameter (a "q").
+- Finally, the rotation matricies are specified by using the <code>rot()</code> command, which calculates the rotation matric using the euler-rodrigues formula. If no rotation is desired, just specify the identity matrix with the <code>eye()</code> command.
+
+All these variables can be changed once the simulator has started using the <code>set</code> command. There are many more commands available to you in the simulator that can be accessed through the command line. To see a list of them, just type <code>help</code> into the console and you should see a list like whats below. To view help about a specific command, just type <code>help &lt;command&gt;</code>.
+
+<img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/3.png" width="780px" height="540px">
+
+In this case, we looked at the help for the <code>axis</code> command. Lets see what it does:
+
+<img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/4.png" width="780px" height="540px">
+
+It is then clear that the axis command can be used to turn on and off the the axis for each intermediary joint coordinate frame. There are many other commands that can be used to manipulate the cosmetics of the simulation environment, which will be covered in an example later on. For now though, lets check out another command, the <code>play</code> command. A simulator is pretty useless unless it can actually simulate things. The <code>play</code> command starts the simulaton:
+
+<img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/5.png" width="780px" height="540px">
+
+To stop the simulator, just type <code>stop</code>. All the varibles we set earlier are still modifiable during the runtime. To set these, we use the <code>set</code> command. For example, lets set q3 to cos(t) by typing <code>set q3 cos(t)</code>:
+
+<img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/6.png" width="780px" height="540px">
+
+Though you can't see it in a static picture, that joint is now moving pretty fast. Lets use the <code>set</code> command again to slow it down. Type <code>set tscale .05</code> command and notice that it now goes slower. The value of an appropriate timescale may vary depending on how fast your computer is.
+
+<img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/7.png" width="780px" height="540px">
+
+To do more advanced things like play, record, manipulate the environment, etc., check out the examples section!
