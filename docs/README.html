@@ -69,9 +69,38 @@
 <li><a href="#changing-the-environment">Changing the Environment</a></li>
 <li><a href="#skew-mode">Skew mode</a></li>
 <li><a href="#set">Set</a></li>
-<li><a href="#playback-and-recording">Playback and Recording</a></li>
+<li><a href="#playback-and-recording">Playback and Recording</a><ul>
+<li><a href="#file-format">File Format</a></li>
+<li><a href="#recording">Recording</a></li>
+<li><a href="#playback">Playback</a></li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#implementation">Implementation</a><ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#symbolics">Symbolics</a></li>
+<li><a href="#kinematics">Kinematics</a></li>
+<li><a href="#timestepping">Timestepping</a></li>
+<li><a href="#drawing-the-robot">Drawing the Robot</a><ul>
+<li><a href="#joints">Joints</a></li>
+<li><a href="#links">Links</a></li>
+<li><a href="#tracing">Tracing</a></li>
+<li><a href="#axis">Axis</a></li>
+</ul>
+</li>
+<li><a href="#misc">Misc</a><ul>
+<li><a href="#terminal-implementation">Terminal Implementation</a></li>
+<li><a href="#recording-and-playback">Recording and Playback</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#closing-remarks">Closing Remarks</a><ul>
+<li><a href="#future-improvements">Future improvements</a></li>
+<li><a href="#credits">Credits</a></li>
 </ul>
 </li>
 </ul>
@@ -203,7 +232,7 @@
 <p>First, all robots are pulled from the robots directory in root directory of the simulator. I reccomend actually copying an existing one and modifying it to suit your needs.</p>
 <p>Once you have written a robot.json file, there are two commands that will help you out getting it into the simulator. First, use the <code>list</code> command to see what robots the simulator think's exists. You should see a list containing the omni, puma560, etc. and whatever else you have put in the robots directory. Next, use the <code>load</code> command to load your robot.</p>
 <h2 id="command-overview">Command Overview</h2>
-<table><tr><td><h4>Command</h4></td><td><h4>Usage</h4></td><td><h4>Description</h4></td></tr><tr><td><b>axis</b></td><td><b>axis &lt;on/off&gt;</b></td><td>Turn robot axis on/off. Providing no arguments toggles the axis.</td></tr><tr><td><b>eval</b></td><td><b>eval &lt;expression&gt;</b></td><td>Return some variable from the simulator. e.g. 'eval robot.P01'. Output might look a little weird.</td></tr><tr><td><b>exit</b></td><td><b>exit or quit</b></td><td>Closes the simulator.</td></tr><tr><td><b>floor</b></td><td><b>floor &lt;on/off&gt;</b></td><td>Turns the floor on and off. Providing no arguments toggles the floor.</td></tr><tr><td><b>ghost</b></td><td><b>ghost &lt;on/off/interval&gt; &lt;number&gt;</b></td><td>turn robot ghosts on/off. If &lt;interval&gt; is present, provide a number to set the ghost interval. Providing no arguments toggles the ghosts.</td></tr><tr><td><b>help</b></td><td><b>help &lt;cmd (optional)&gt;</b></td><td>If &lt;cmd&gt; is provided, display help for that command. Otherwise  it just list all commands.</td></tr><tr><td><b>hide</b></td><td><b>hide</b></td><td>Hides this terminal.</td></tr><tr><td><b>list</b></td><td><b>list</b></td><td>Lists all the robots that can be loaded into the simulator. To add something to this list, just place a valid robot.json file in the 'robots' folder.</td></tr><tr><td><b>load</b></td><td><b>load &lt;robot file&gt;</b></td><td>Loads a robot file into the simulator. Use the 'list' command to see what robots are able to be loaded.</td></tr><tr><td><b>play</b></td><td><b>play &lt;file (optional)&gt;</b></td><td>If &lt;file&gt; is present, the simulator plays that file. Otherwise, it just starts the simulator.</td></tr><tr><td><b>record</b></td><td><b>record &lt;file&gt;</b></td><td>Outputs current arm movements to a file which can be exported or played back later.</td></tr><tr><td><b>screendump</b></td><td><b>screendump</b></td><td>Take a picture of the current screen and save it to disk.</td></tr><tr><td><b>set</b></td><td><b>set &lt;var&gt; &lt;expression&gt;</b></td><td>Sets a symbolic variable in the simulator. e.g. 'set q3 cos(t)', 'set t 0', 'set tscale -.1', 'set P23 [0, 0, l2 + q2]'.</td></tr><tr><td><b>skew</b></td><td><b>skew</b></td><td>Enters skew mode, where the view of the robot and simulation speed can be rapidly adjusted.</td></tr><tr><td><b>status</b></td><td><b>status</b></td><td>Tells you what the simulator is currently doing.</td></tr><tr><td><b>stop</b></td><td><b>stop</b></td><td>Halts the simulaton.</td></tr><tr><td><b>trace</b></td><td><b>trace &lt;on/off/clear/limit&gt; &lt;number&gt;</b></td><td>Turn robot traces on/off, or clear the current set of traces. If the &lt;limit&gt; argument is used, provide a number to set the maximum number of traces.</td></tr></table>
+<table><tr><td><h4 style="width: 100px;">Command</h4></td><td><h4 style="width: 300px;">Usage</h4></td><td><h4>Description</h4></td></tr><tr><td><b>axis</b></td><td><b>axis &lt;on/off&gt;</b></td><td>Turn robot axis on/off. Providing no arguments toggles the axis.</td></tr><tr><td><b>eval</b></td><td><b>eval &lt;expression&gt;</b></td><td>Return some variable from the simulator. e.g. 'eval robot.P01'. Output might look a little weird.</td></tr><tr><td><b>exit</b></td><td><b>exit or quit</b></td><td>Closes the simulator.</td></tr><tr><td><b>floor</b></td><td><b>floor &lt;on/off&gt;</b></td><td>Turns the floor on and off. Providing no arguments toggles the floor.</td></tr><tr><td><b>ghost</b></td><td><b>ghost &lt;on/off/interval&gt; &lt;number&gt;</b></td><td>turn robot ghosts on/off. If &lt;interval&gt; is present, provide a number to set the ghost interval. Providing no arguments toggles the ghosts.</td></tr><tr><td><b>help</b></td><td><b>help &lt;cmd (optional)&gt;</b></td><td>If &lt;cmd&gt; is provided, display help for that command. Otherwise  it just list all commands.</td></tr><tr><td><b>hide</b></td><td><b>hide</b></td><td>Hides this terminal.</td></tr><tr><td><b>list</b></td><td><b>list</b></td><td>Lists all the robots that can be loaded into the simulator. To add something to this list, just place a valid robot.json file in the 'robots' folder.</td></tr><tr><td><b>load</b></td><td><b>load &lt;robot file&gt;</b></td><td>Loads a robot file into the simulator. Use the 'list' command to see what robots are able to be loaded.</td></tr><tr><td><b>play</b></td><td><b>play &lt;file (optional)&gt;</b></td><td>If &lt;file&gt; is present, the simulator plays that file. Otherwise, it just starts the simulator.</td></tr><tr><td><b>record</b></td><td><b>record &lt;file&gt;</b></td><td>Outputs current arm movements to a file which can be exported or played back later.</td></tr><tr><td><b>screendump</b></td><td><b>screendump</b></td><td>Take a picture of the current screen and save it to disk.</td></tr><tr><td><b>set</b></td><td><b>set &lt;var&gt; &lt;expression&gt;</b></td><td>Sets a symbolic variable in the simulator. e.g. 'set q3 cos(t)', 'set t 0', 'set tscale -.1', 'set P23 [0, 0, l2 + q2]'.</td></tr><tr><td><b>skew</b></td><td><b>skew</b></td><td>Enters skew mode, where the view of the robot and simulation speed can be rapidly adjusted.</td></tr><tr><td><b>status</b></td><td><b>status</b></td><td>Tells you what the simulator is currently doing.</td></tr><tr><td><b>stop</b></td><td><b>stop</b></td><td>Halts the simulaton.</td></tr><tr><td><b>trace</b></td><td><b>trace &lt;on/off/clear/limit&gt; &lt;number&gt;</b></td><td>Turn robot traces on/off, or clear the current set of traces. If the &lt;limit&gt; argument is used, provide a number to set the maximum number of traces.</td></tr></table>
 
 <h2 id="examples">Examples</h2>
 <h3 id="changing-the-environment">Changing the Environment</h3>
@@ -236,12 +265,7 @@
 <p>Skew mode allows you to rapidly adjust where the camera is positioned in the simulation as well as adjust the timestep. To enter skew mode, just type <code>skew</code>. From there you can use the arrow keys to translate the camera up or down, use 'f' and 'd' to speed up or slow down the simulation, and finally 'j' and 'k' to zoom in and out. While in skew mode, none of the other commands work, so to exit you need to type 't'.</p>
 <h3 id="set">Set</h3>
 <p>As you can see from the quickstart, the set command is highly versatile. You can set any variable in the simulator or the robot with this command. Here are some examples of clever ways to use the set command:</p>
-<table>
-<tr>
-<td><h4>Command &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h4></td>
-<td><h4>Effect</h4></td>
-</tr>
-
+<table><tr><td><h4 style="width: 300px;">Command</h4></td><td><h4>Effect</h4></td></tr>
 <tr>
 <td><pre>set t 0</pre></td>
 <td>Resets the time in the simulator back to time = 0.</td>
@@ -305,31 +329,78 @@ set R12 eye(3, 3)
 </table>
 
 <h3 id="playback-and-recording">Playback and Recording</h3>
-<p>The simulator also includes functionality to play back and record robot motion.</p>
-<!--
+<p>The simulator also includes functionality to play back and record robot motion through the <code>play</code> and <code>record</code> commands.</p>
+<h4 id="file-format">File Format</h4>
+<p>The file format that stoolbotics uses to store robot activity is very straightforward. It is a standard .csv file, where each row is a slice of time. The first entry in each row is always time, but since the timescale can be adjusted in the simulator, this column almost doesn't matter. The remaining entries in the row coorespond to to joint angles (in radians) starting from the first joint out to the end of the arm. An example snippit for a three joint arm is shown below:</p>
+<pre>
 
-####Play back
-####Recording
+0.0, 0.1, 0.0540302305868, 0.169294196962
+0.2, 0.02, 0.0980066577841, 0.039933866159
+0.4, 0.04, 0.0921060994003, 0.0782836684617
+0.6, 0.06, 0.082533561491, 0.113528494679
+0.8, 0.08, 0.0696706709347, 0.14427121818
+1.0, 0.1, 0.0540302305868, 0.169294196962
+1.2, 0.12, 0.0362357754477, 0.187607817193
+1.4, 0.14, 0.01699671429, 0.198489945998
+1.6, 0.16, -0.00291995223013, 0.201514720608
+1.8, 0.18, -0.0227202094693, 0.196569526176
+2.0, 0.2, -0.0416146836547, 0.183859485365
+2.2, 0.22, -0.0588501117255, 0.163899280764
+2.4, 0.24, -0.0737393715541, 0.13749263611
+2.6, 0.26, -0.0856888753369, 0.105700274364
+2.8, 0.28, -0.0942222340669, 0.0697976300312
+3.0, 0.3, -0.09899924966, 0.031224001612
 
-#Implementation
-##Overview
-##Algorithms
-###Symbolics
-###Kinematics
-###Timestepping
-##Drawing the Robot
-###Joints
-###Links
-###Tracing
-###Axis
-##Misc
-###Terminal Implementation
-###Recording and Playback
-#Closing Remarks
-##Future improvements
-##Credits
+</pre>
 
---></div>
+<h4 id="recording">Recording</h4>
+<p>Recording is as easy as using the <code>record</code> command. Providing an argument to the command, such as "example" will automatically start recording to a file called "example.csv" in the root of stoolbotics.</p>
+<h4 id="playback">Playback</h4>
+<p>When playing back, all you need to do is use the <code>play</code> command with the filename you want to play back. For example, after recording to "example", you could type <code>play example.csv</code> to start playing what was recorded in the file.</p>
+<h1 id="implementation">Implementation</h1>
+<h2 id="overview">Overview</h2>
+<p>Many technical challenges were overcome during the development of stoolbotics. To take a look at the code yourself, here is a <a href="https://github.com/Stonelinks/Stoolbotics">link</a> to our github. Choice algorithms and segments of the code will be explained and highlited in this section.</p>
+<h2 id="symbolics">Symbolics</h2>
+<p>In order to properly make use of the configuration file, a symbolic solving engine had to me implemented in python to evaluate symbolic expressions. This means that given a symbolic string like 'rot(h1, q1)', the solver knows what the values of h1 and q1 are, and knows how to call the rot() function on them and generate a numeric answer. This solver is also used for evaluating joint parameters as a finction of time. For example, given the joint parameter .001*cos(t) + PI / 2, spit out the correct answer for a given time t, and be able to recognize special cases of variables (in this case PI) that are not first order robot class variables.</p>
+<p>To accomplish this, the robot object contains two dictionaries, _d and syms. As you probably could have guessed, syms contains the symbolic expressions much in the same state as they are in the configuration file. At every time step, this syms dictionary is parsed and evaluated into numeric values that are entered into the other dictionary, _d. This has the advantage of being able to set any string into the syms dictionary, and then being to immediately see its effect on the simulation without having to restart the simulator. This is indeed how the 'syms' command in the simulator works for variables inside the robot object.</p>
+<p>Once every timestep, a function called eval_syms() is called. This function goes through the syms dictionary and uses string manipulation, substitution and finally the pythin eval() command to turn everything into numerical answers. These numerical answers are plugs into _d. It is from _d that the values for the various links are assigned, which ultimately dictate how the robot is drawn. Additionally, after evaluating _d, a function called sync_d() is called that simply uses the built in python setattr() function to make each entry in _d a class variable within the robot object instance. This allows calling of things like robot.P01 to work instead of having to do robot._d['P01'] every time you want to get at a varable inside _d.</p>
+<p>Links are then constructed from all these variables as a convienent way to group related variables together. These links contain things like a joint's rotation matrix, position vector, joint parameter and joint axis. As we'll see later on, links are used mostly for accessing information about a robot arm.</p>
+<h2 id="kinematics">Kinematics</h2>
+<p>Once all symbolics for the robot are evaluated, it is actually pretty easy to solve for the forward kinematics of the arm. We use the product of exponentials approach to solve this. First, computing R0T is as simple as this:</p>
+<pre>
+robot.R0T = eye(3, 3)
+for link in robot.links:
+    robot.R0T = dot(robot.R0T, link.R)
+</pre>
+
+<p>As you can see, R0T starts out as the identity matrix. The links of the robot then are traversed in order from the base to the end, and along the way the current R0T is multiplied by the link's individual rotation matrix (which comes from _d). When this is all done, the resulting matrix is the correct R0T.</p>
+<p>For positions, the algorithm is a bit more involved:</p>
+<pre>
+tmp = eye(3,3)
+robot.P0T = zeros((3, 1))
+p = None
+for link in robot.links:
+    robot.P0T += dot(tmp, link.P)
+    tmp = dot(tmp, link.R)
+
+p = (robot.P0T[0][0], robot.P0T[1][0], robot.P0T[2][0])
+    self.verts.append(p)
+</pre>
+
+<p>First, a few variables are initialized. tmp is the temporary rotation matrix for all links up until the current iteration. It starts off as the identity matrix. Second, the overall position vector, P0T, starts out as a three by one zero vector. Next, for each link in the robot arm, the representation of the link's position vector in terms of the base frame is added to the current position vector. This is done by using the dot product of the tmp rotation matrix and the link's position vector. The temporary rotation matrix is then updated, and the current position vector is appended to the verts list, which contains all the robot's verticies for the current timestep. This list is later used to draw things like the arm ghosts and trace.</p>
+<h2 id="timestepping">Timestepping</h2>
+<h2 id="drawing-the-robot">Drawing the Robot</h2>
+<h3 id="joints">Joints</h3>
+<p>When drawing the robot in a certain configuration in OpenGL, it is necessary to indicate which joints are rotational or prismatic. Also have to distinguish the links from the prismatic joints. This is done by using a gluCylinder along the axis of the joint. Unfortunately, OpenGL can only use gluCylinder along the Z axis. To accommodate this as our frame is independent of our rotation axis, we calculate the rotation need from the the axis we want to draw along (some arbitrary axis - the rotation axis within our frame) to the Z vector within this same frame. Once this is rotated, drawing along the Z axis inside this new frame will draw along the rotation axis in the old frame. After the cylinder is drawn, endcaps were drawn so enclose this cylinder. Using a for loop to iterate around a circle of points for gl_triangle_fan. This is done by using glPushMatrix and glPopMatrix with all the drawing taking place within the new calculated rotated matrix. For prismatic joints, a method was developed to draw a rectangular prism along an arbitrary axis. This was done using a length and width/height (square area) as well as a start and end point. From there, a matrix is push onto the model view which is the rotation from the vector (end-start, same as shown above) to the Z axis. Then, a simple gl_quads was used to draw the 6 faces of the rectangular prism of the size provided and the matrix popped off. After the joint is drawn, the frame is rotated along the axis of rotation by the amount specified using glRotate. Then it is translated using glTranslate along the link which is representative in the rotated frame so no additional calculations are needed. Now that the frame is at the next joint, the process is repeated till all joints are displayed. This process works off of the stack pushing and popping matrices. Joint 3 is related to Joint 2 which is a rotation and translation from Joint 1. Problems encountered while drawing the robot include the drawing of the gluClinder along the axis or rotation as the rotation matrix needed to draw along the Z axis was causing issues due math errors in the passing of parameters  to the cross and dot product. Another issue was trying to draw the entire robot in one frame as python was already calculating all the necessary information. This led to complexity issues that were troublesome to debug and even harder to comment and follow. The last troublesome part was using glLoadMatrix to force OpenGL to load a matrix that python had already calculated for internal purposes. The problem became known when rounding errors in python of the rotation matrix caused the determinate not to be 1.000 in all cases which would cause OpenGL to clip triangles of the screen and paint the pixels white.</p>
+<h3 id="links">Links</h3>
+<h3 id="tracing">Tracing</h3>
+<h3 id="axis">Axis</h3>
+<h2 id="misc">Misc</h2>
+<h3 id="terminal-implementation">Terminal Implementation</h3>
+<h3 id="recording-and-playback">Recording and Playback</h3>
+<h1 id="closing-remarks">Closing Remarks</h1>
+<h2 id="future-improvements">Future improvements</h2>
+<h2 id="credits">Credits</h2></div>
 </div>
 </body>
 </html>
