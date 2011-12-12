@@ -129,10 +129,17 @@ class simulator():
             self.t += self.tscale
             self.robot.timestep(self.tscale)
         elif self.state == 'server':
-            data, addr = self.sock.recvfrom( 1024 ) # buffer size is 1024 bytes
-            print "received message:", data
-            self.robot.to_pos(data.split(','))
-            self.robot.forwardkin()
+            sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+            sock.settimeout(.1)
+            sock.bind(("",self.port))
+            try:
+                data, addr = sock.recvfrom( 1024 ) # buffer size is 1024 bytes
+                print "received message:", data
+                self.robot.to_pos(data.split(','))
+                self.robot.forwardkin()
+            except:
+                pass
+            sock.close()
         elif self.state == 'halted':
             pass
         self.robot.t = self.t
@@ -293,21 +300,11 @@ class simulator():
                 c2 = cmd_arr[1]
                 if c2 == 'start':
                     self.state = 'server'
-                    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    s.connect(("gmail.com", 80))
                     port = cmd_arr[2]
-                    self.response_print('starting server at ' + s.getsockname()[0] + ':' + port)
-                    s.close()
-
-                    self.sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-                    self.sock.settimeout(.1)
-                    self.sock.bind(("",int(port)))
+                    self.response_print('starting server on port ' + port)
+                    self.port = int(port)
                 elif c2 == 'stop':
-                    try:
-                        self.sock.close()
-                    except:
-                        pass
-                    self.sock = None
+                    self.port = None
                     self.state = 'halted'
                     self.response_print('stopped server')
                 else:
