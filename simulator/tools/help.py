@@ -50,4 +50,7 @@ d = {
   'set' : { 'reference' : 'set <var> <expression>', 
              'description' : 'Sets a symbolic variable in the simulator. e.g. \'set q3 cos(t)\', \'set t 0\', \'set tscale -.1\', \'set P23 [0, 0, l2 + q2]\'.'
             },
+  'server' : { 'reference' : 'server <start/stop> <port>', 
+             'description' : 'Starts or stops the simulator listening on the specified port for incoming commands from other programs.'
+            },
 }
