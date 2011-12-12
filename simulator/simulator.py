@@ -10,14 +10,14 @@ except AttributeError:
 try:
     import Image
 except:
-    print "looks like you don't have the python imaging library"
+    print "looks like you don't have the python imaging library,"
     print "so the screendump command will not work"
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import sys, os, json, numpy, math, time, csv, traceback
+import sys, os, json, numpy, math, time, csv, traceback, socket
 import config
 
 import objects
@@ -117,10 +117,8 @@ class simulator():
         elif self.state == 'playback':
             self.playback_index += 1 #int(self.playback_index + self.tscale)
             try:
-                self.t  = float(self.file[self.playback_index][0])
-                self.robot.to_pos(self.t, self.file[self.playback_index][1:])
-                self.robot.eval_syms()
-                self.robot.build_lists()
+                self.t = float(self.file[self.playback_index][0])
+                self.robot.to_pos(self.file[self.playback_index][1:])
                 self.robot.forwardkin()
             except:
                 # end of file
@@ -130,6 +128,11 @@ class simulator():
             self.robot.forwardkin()
             self.t += self.tscale
             self.robot.timestep(self.tscale)
+        elif self.state == 'server':
+            data, addr = self.sock.recvfrom( 1024 ) # buffer size is 1024 bytes
+            print "received message:", data
+            self.robot.to_pos(data.split(','))
+            self.robot.forwardkin()
         elif self.state == 'halted':
             pass
         self.robot.t = self.t
@@ -272,7 +275,7 @@ class simulator():
                             self.file.append(row)
                         self.t = float(self.file[0][0])
                         self.playback_index = 0
-                        self.robot.to_pos(self.t, self.file[0][1:])
+                        self.robot.to_pos(self.file[0][1:])
                         self.response_print('openened ' + cmd_arr[1] + ' for playback')
                         self.state = 'playback'
                     except:
@@ -286,8 +289,29 @@ class simulator():
                     except:
                         pass
                 self.state = 'halted'
-            elif cmd == 'rewind':
-                pass
+            elif cmd == 'server':
+                c2 = cmd_arr[1]
+                if c2 == 'start':
+                    self.state = 'server'
+                    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    s.connect(("gmail.com", 80))
+                    port = cmd_arr[2]
+                    self.response_print('starting server at ' + s.getsockname()[0] + ':' + port)
+                    s.close()
+
+                    self.sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+                    self.sock.settimeout(1.0)
+                    self.sock.bind(("",int(port)))
+                elif c2 == 'stop':
+                    try:
+                        self.sock.close()
+                    except:
+                        pass
+                    self.sock = None
+                    self.state = 'halted'
+                    self.response_print('stopped server')
+                else:
+                    self.response_print('unknown server command')
             elif cmd == 'status':
                 if self.state == '':
                     self.response_print('the simulator is currently doing nothing')
@@ -307,7 +331,6 @@ class simulator():
                     robot_file = '../robots/' + cmd_arr[1] + '.json'
                     self.robot = create_robot(robot_file)
                     self.robot.timestep()
-                    glutPostRedisplay()
                 except:
                     self.response_print('Error with this robot file: ' + traceback.format_exc())
                 print traceback.format_exc()
@@ -322,7 +345,6 @@ class simulator():
                 elif cmd_arr[1] == 'off':
                     config.enable_axis = False
                 self.draw()
-                glutPostRedisplay()
             elif cmd == 'trace':
                 if len(cmd_arr) == 1:
                     config.enable_trace = not config.enable_trace
@@ -334,8 +356,6 @@ class simulator():
                     self.robot.trace = []
                 elif cmd_arr[1] == 'limit':
                     config.max_trace = int(cmd_arr[2])
-                    self.draw()
-                glutPostRedisplay()
             elif cmd == 'ghost':
                 if len(cmd_arr) == 1:
                     config.enable_ghost = not config.enable_ghost
@@ -345,8 +365,6 @@ class simulator():
                     config.enable_ghost = False
                 elif cmd_arr[1] == 'interval':
                     config.ghost_interval = int(cmd_arr[2])
-                self.draw()
-                glutPostRedisplay()
             elif cmd == 'axis':
                 if len(cmd_arr) == 1:
                     config.enable_axis = not config.enable_axis
@@ -354,8 +372,6 @@ class simulator():
                     config.enable_axis = True
                 elif cmd_arr[1] == 'off':
                     config.enable_axis = False
-                self.draw()
-                glutPostRedisplay()
             elif cmd == 'floor':
                 if len(cmd_arr) == 1:
                     config.floor_on = not config.floor_on
@@ -363,8 +379,6 @@ class simulator():
                     config.floor_on = True
                 elif cmd_arr[1] == 'off':
                     config.floor_on = False
-                self.draw()
-                glutPostRedisplay()
             elif cmd == 'eval':
                 try:
                     self.response_print(str(eval('self.' + cmd_arr[1])))
@@ -442,6 +456,7 @@ class simulator():
                     self.response_print('error taking screenshot, do you have the python imaging library installed?')
             else:
                 self.response_print('are you sure that\'s a command?')
+            glutPostRedisplay()
             self.response_print('')
 
     def keyboard(self, key, x, y):

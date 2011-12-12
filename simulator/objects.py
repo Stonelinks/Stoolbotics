@@ -134,33 +134,36 @@ class robot(object):
             self.links.append(l)
             c += 1
         
-    def eval_syms(self):
+    def eval_syms(self, omit_q=False):
         t = self.t
         x = array([[1], [0], [0]], float)
         y = array([[0], [1], [0]], float)
         z = array([[0], [0], [1]], float)
 
         for k, v in self.syms.iteritems():
-            tmp = v
-            for key, _ in self._d.iteritems():
-                collision = False
-                for key1, _ in self._d.iteritems():
-                    if key in key1 and key in tmp and not key == key1:
-                        if key1 in tmp:
-                            collision = True
-                            break
-                if not collision:
-                    tmp = str(tmp).replace(key, 'self._d[\'' + key + '\']')
-                    if 'u\'' + key + '\'' in tmp:
-                        tmp = tmp.replace('u\'' + key + '\'', key)
-                else:
-                    # avoid collision
-                    pass
-            if (k[0] == 'P' or k[0] == 'h') and tmp[0] == '[':
-                tmp = 'array([' + tmp + '], float).T'
-            elif k[0] == 'h' and v[0] != '[': #axis shorthand
+            if omit_q and k[0] == 'q':
+                continue
+            else:
                 tmp = v
-            self._d[k] = eval(tmp)
+                for key, _ in self._d.iteritems():
+                    collision = False
+                    for key1, _ in self._d.iteritems():
+                        if key in key1 and key in tmp and not key == key1:
+                            if key1 in tmp:
+                                collision = True
+                                break
+                    if not collision:
+                        tmp = str(tmp).replace(key, 'self._d[\'' + key + '\']')
+                        if 'u\'' + key + '\'' in tmp:
+                            tmp = tmp.replace('u\'' + key + '\'', key)
+                    else:
+                        # avoid collision
+                        pass
+                if (k[0] == 'P' or k[0] == 'h') and tmp[0] == '[':
+                    tmp = 'array([' + tmp + '], float).T'
+                elif k[0] == 'h' and v[0] != '[': #axis shorthand
+                    tmp = v
+                self._d[k] = eval(tmp)
         self.sync_d()
     
     def sync_d(self):
@@ -184,13 +187,12 @@ class robot(object):
         return R
     
     # force the robot to be at this timestep and joint angles
-    def to_pos(self, time, angles):
-        self.t = time
-        for i in range(len(self.links)):
-            try:
-                self.links[i].q = float(angles[i])
-            except:
-                self.links[i].q = None
+    def to_pos(self, angles):
+        for i in range(self.N):
+            exec 'self._d[\'q' + str(i+1) + '\'] = ' + str(angles[i])
+        
+        self.eval_syms(omit_q=True)
+        self.build_lists()
         
     def forwardkin(self):
         self.R0T = eye(3, 3)
@@ -203,7 +205,7 @@ class robot(object):
             self.R0T = dot(self.R0T, link.R)
         
         # make P0T
-        tmp = eye(3,3)
+        tmp = eye(3, 3)
         p = None
         for link in self.links:
             self.P0T += dot(tmp, link.P)
@@ -211,6 +213,7 @@ class robot(object):
             
             p = (self.P0T[0][0], self.P0T[1][0], self.P0T[2][0])
             self.verts.append(p)
+
         if config.enable_trace:
             self.trace.append(self.verts)
         
@@ -291,7 +294,7 @@ class robot(object):
                 if i % config.ghost_interval == 1:
                     glBegin(GL_POINTS)
                     for vert in verts:
-                            glVertex3f(vert[0], vert[1], vert[2])
+                        glVertex3f(vert[0], vert[1], vert[2])
                     glEnd()
 
             if config.enable_lighting:
@@ -303,7 +306,7 @@ class robot(object):
                 if i % config.ghost_interval == 1:
                     glBegin(GL_LINE_STRIP)
                     for vert in verts:
-                            glVertex3f(vert[0], vert[1], vert[2])
+                        glVertex3f(vert[0], vert[1], vert[2])
                     glEnd()
         
         if config.enable_trace:
@@ -315,7 +318,7 @@ class robot(object):
                 glColor3f(1.0, 0.0, 0)
             glBegin(GL_LINE_STRIP)
             for verts in self.trace:
-                vert = verts[-1:][0]
+                vert = verts[-1]
                 glVertex3f(vert[0], vert[1], vert[2])
             glEnd()
 
