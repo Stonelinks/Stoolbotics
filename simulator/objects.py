@@ -9,6 +9,7 @@ from tools.tools import *
 import config
 
 import sys, math, time
+from operator import itemgetter
 
 globals()['PI'] = 3.14159265
 globals()['pi'] = PI
@@ -134,23 +135,27 @@ class robot(object):
             c += 1
         
     def eval_syms(self):
-        # TODO: use regex for all of this
-        
         t = self.t
-        
-        x = array([[1], [0], [0] ], float)
-        y = array([[0], [1], [0] ], float)
-        z = array([[0], [0], [1] ], float)
+        x = array([[1], [0], [0]], float)
+        y = array([[0], [1], [0]], float)
+        z = array([[0], [0], [1]], float)
 
-        # eval syms
         for k, v in self.syms.iteritems():
             tmp = v
             for key, _ in self._d.iteritems():
-                tmp = str(tmp).replace( key, 'self._d[\'' + key + '\']')
-                if 'u\'' + key + '\'' in tmp:
-                    tmp = tmp.replace('u\'' + key + '\'', key)
-                    #something like this would be awesome: tmp = re.sub(r'u\'(.*)\'', tmp, tmp)
-            
+                collision = False
+                for key1, _ in self._d.iteritems():
+                    if key in key1 and key in tmp and not key == key1:
+                        if key1 in tmp:
+                            collision = True
+                            break
+                if not collision:
+                    tmp = str(tmp).replace(key, 'self._d[\'' + key + '\']')
+                    if 'u\'' + key + '\'' in tmp:
+                        tmp = tmp.replace('u\'' + key + '\'', key)
+                else:
+                    # avoid collision
+                    pass
             if (k[0] == 'P' or k[0] == 'h') and tmp[0] == '[':
                 tmp = 'array([' + tmp + '], float).T'
             elif k[0] == 'h' and v[0] != '[': #axis shorthand

@@ -5,6 +5,7 @@
 ###Robot.json File
 As covered in the quickstart, robots are specified in json files that contain sections in it for defining various aspects of a robot to be simulated. Here is an example file for the Phantom Omni and the explanation again in case you skipped over the quickstart:
 
+<pre>
         "N" : "3",
         
         "h1" : "z",
@@ -28,17 +29,20 @@ As covered in the quickstart, robots are specified in json files that contain se
         "R12" : "rot(h2, q2)",
         "R23" : "rot(h3, q3)",
         "R3T" : "eye(3, 3)"
+</pre>
 
-- "N" is first declared to tell the simulator the number of joints to expect in this robot.
-- All the joint axes are specified with an "h" and an index. In this case, shorthand is used (e.g. use of "z" instead of "[0, 0, 1]"), but if we wanted a non-standard axis vector we could have used something like "[-.1, .2, .4]".
-- Angle parameters are specified with a "q" and an index. These can be completely arbitrary functions of time, static numbers, or whatever you like. These parameters represent how much an axis has rotated or displaced along its axis.
-- Link lengths are specified with an "l" and an index.
-- Position vectors tell the simulator how to get from one frame to the next. Additionally, prismatic joints are specified here by including a joint axis parameter (a "q").
-- Finally, the rotation matrices are specified by using the <code>rot()</code> command, which calculates the rotation matrix using the Euler-Rodriguez formula. If no rotation is desired, just specify the identity matrix with the <code>eye()</code> command.
+- <code>N</code> is first declared to tell the simulator the number of joints to expect in this robot.
+- All the joint axes are specified with an <code>h</code> and an index. In this case, shorthand is used (e.g. use of <code>z</code> instead of <code>[0, 0, 1]</code>), but if we wanted a non-standard axis vector we could have used something like <code>[-.1, .2, .4]</code>.
+- Angle parameters are specified with a <code>q</code> and an index. These can be completely arbitrary functions of time, static numbers, or whatever you like. These parameters represent how much an axis has rotated or displaced along its axis.
+- Link lengths are specified with an <code>l</code> and an index.
+- Position vectors tell the simulator how to get from one frame to the next. Additionally, prismatic joints are specified here by including a joint axis parameter (a <code>q</code>) in the vector.
+- Finally, the rotation matrices are specified by using the <code>rot()</code> command, which calculates the rotation matrix using the Euler-Rodriguez formula. If no rotation is desired, just specify the identity matrix with the <code>eye()</code> command. Sometimes, for static links it is necessary to specify extra frames that don't have any rotation matrix. If this is the case, you would also just use the <code>eye()</code> command here.
 
 ###Loading a robot into the simulator
 
-First, all robots are pulled from the robots directory in root directory of the simulator. I recommend actually copying an existing one and modifying it to suit your needs.
+First, all robots are pulled from the <code>robots</code> directory in the root directory of the simulator. It is reccomended to actually copy an existing robot file and modify it to suit your needs.
+
+Writing and/or modifying one of these files is for the most part a straightforward process. The only hiccup you may encounter is in specifying extra frames in order to get the simulator to handle extra links. Additionally, another interesting way of specifying robots is by programmaticly generating a json file. An example of this can be seen with <code>snake.py</code> which generates <code>snake.json</code>.
 
 Once you have written a robot.json file, there are two commands that will help you out getting it into the simulator. First, use the <code>list</code> command to see all robot configuration files that the simulator believes to be properly configured and placed correctly. You should see a list containing the Omni, Puma560, etc. and whatever else you have put in the robots directory. Next, use the <code>load</code> command to load your robot.
 
@@ -50,7 +54,7 @@ Once you have written a robot.json file, there are two commands that will help y
 
 ###Changing the Environment
 
-The cosmetics of the simulation environment are highly configurable:
+The cosmetics of the simulation environment are highly configurable. Here are some of the commands that can modify the appearance:
 
 - Axis
     - The joint coordinate frame axis display can be turned on and off with the use of the <code>axis</code> command.
@@ -64,13 +68,13 @@ The cosmetics of the simulation environment are highly configurable:
     - The number of traces saved can be set by executing <code>trace limit &lt;somenumber&gt;</code>.
     - Finally, traces can get kind of ugly and annoying sometimes, so it is nice to be able to clear them by running <code>trace clear</code>.
 
-Here is an example of some simulation environment manipulation and the result:
+Here is an example of some simulation environment manipulation with the above commands and the result:
 
 <img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/8.png" width="780px" height="540px">
 
 ###Skew mode
 
-Skew mode allows you to rapidly adjust where the camera is positioned in the simulation as well as adjust the timestep. To enter skew mode, just type <code>skew</code>. From there you can use the arrow keys to translate the camera up or down, use 'f' and 'd' to speed up or slow down the simulation, and finally 'j' and 'k' to zoom in and out. While in skew mode, none of the other commands work, so to exit you need to type 't'.
+Skew mode allows you to rapidly adjust where the camera is positioned in the simulation as well as adjust the timestep. To enter skew mode, just type <code>skew</code>. From there you can use the arrow keys to translate the camera up or down, use 'f' and 'd' to speed up or slow down the simulation, and finally 'j' and 'k' to zoom in and out. While in skew mode, none of the other commands work, so to exit you need to type 't'. Its hard to show a picture of skew mode in action.
 
 ###Set
 
@@ -171,7 +175,7 @@ The file format that Stoolbotics uses to store robot activity is very straightfo
 
 ####Recording
 
-Recording is as easy as using the <code>record</code> command. Providing an argument to the command, such as "example" will automatically start recording to a file called "example.csv" in the root of Stoolbotics.
+Recording is as easy as using the <code>record</code> command. Providing an argument to the command, such as "example" will automatically start recording to a file called "example.csv" in the root folder of Stoolbotics.
 
 ####Playback
 

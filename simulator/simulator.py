@@ -17,7 +17,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import sys, os, json, numpy, math, time, csv
+import sys, os, json, numpy, math, time, csv, traceback
 import config
 
 import objects
@@ -308,10 +308,9 @@ class simulator():
                     self.robot = create_robot(robot_file)
                     self.robot.timestep()
                     glutPostRedisplay()
-                except AttributeError:
-                    self.response_print('Error in this robot file. Are you sure you\'re not missing a parameter?')
                 except:
-                    self.response_print('not a robot. try using the \'list\' command to find one.')
+                    self.response_print('Error with this robot file: ' + traceback.format_exc())
+                print traceback.format_exc()
             elif cmd == 'list':
                 for r in os.listdir('../robots'):
                     self.response_print(" " + r.split('.')[0])
