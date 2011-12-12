@@ -75,6 +75,7 @@
 <li><a href="#playback">Playback</a></li>
 </ul>
 </li>
+<li><a href="#realtime-control-from-matlab">Realtime Control from Matlab</a></li>
 </ul>
 </li>
 </ul>
@@ -94,6 +95,7 @@
 </li>
 <li><a href="#closing-remarks">Closing Remarks</a><ul>
 <li><a href="#future-improvements">Future Improvements</a></li>
+<li><a href="#thank-you">Thank You</a></li>
 </ul>
 </li>
 </ul>
@@ -113,6 +115,7 @@
 <li>Completely customizable simulation environment (time-stepping, etc)</li>
 <li>Ability to record simulator activity</li>
 <li>Ability to playback saved recordings, or even import a recording generated in MATLAB</li>
+<li>Able to be driven in real time from a UDP stream from other programs like MATLAB (includes an example)</li>
 <li>Change variables in the simulator on the fly</li>
 <li>Built in help from simulator command line, and of course this stellar and complete documentation</li>
 <li>Cross platform implementation</li>
@@ -186,7 +189,7 @@
 <p>Though you can't see it in a static picture, that joint is now moving pretty fast. Let’s use the <code>set</code> command again to slow it down. Type <code>set tscale .05</code> command and notice that it now goes slower. The value of an appropriate timescale may vary depending on how fast your computer is. <code>skew</code> mode can be enabled to rapidly adjust timescale as well as other parameters. For now though, just use <code>set</code>: </p>
 <img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/7.png" width="780px" height="540px">
 
-<p>This concludes the quickstart. To do more advanced things like play, record, manipulate the environment, etc., check out the examples section!</p>
+<p>This concludes the quickstart. To do more advanced things like play, record, manipulate the environment, drive the simulator from matlab, etc., check out the examples section!</p>
 <h1 id="using-the-simulator">Using the Simulator</h1>
 <h2 id="specifying-a-robot">Specifying a Robot</h2>
 <h3 id="robotjson-file">Robot.json File</h3>
@@ -355,6 +358,36 @@ set R12 eye(3, 3)
 <p>Recording is as easy as using the <code>record</code> command. Providing an argument to the command, such as "example" will automatically start recording to a file called "example.csv" in the root folder of Stoolbotics.</p>
 <h4 id="playback">Playback</h4>
 <p>When playing back, all you need to do is use the <code>play</code> command with the filename you want to play back. For example, after recording to "example", you could type <code>play example.csv</code> to start playing what was recorded in the file.</p>
+<h3 id="realtime-control-from-matlab">Realtime Control from Matlab</h3>
+<p>Stoolbotics also has the capacity to be driven by external applications like Matlab <em>without</em> the use of saved recordings. This is done through a UDP socket that accepts a comma separated list of joint angles and moves the arm to this position.</p>
+<p>Matlab can therefore compute things like inverse kinematics, and send the joint angles to the simulator to have them visualized over UDP. In order to accept UDP connections, the <code>server</code> command needs to be used. Specifically, running something like <code>server start 5005</code> will be run to start the server listening on port 5005. Then, from matlab you can use the included <code>judp.m</code> to send UDP messages to the simulator.</p>
+<p>A rudimentary example of this technique can be seen in the <code>matlab</code> folder by running <code>omni_invkin_example</code> in matlab. This is a drastically simple example attempts to move the phantom omni in a circle. Here it is reproduced below:</p>
+<pre>
+
+host = '127.0.0.1'
+port = 5005
+
+p = zeros(3, 1)
+
+for t = .01:1:1000
+    p(1) = 40 + 15*cos(t);
+    p(2) = 30;
+    p(3) = 50 + 15*sin(t);
+
+q = omni_invkin(p);
+
+msg = strcat(num2str(q(1)), ',', num2str(q(2)), ',', num2str(q(3)));
+    disp(msg)
+
+% send to stoolbotics
+    judp('send', port, host, int8(msg));
+    pause(.1);
+end
+
+</pre>
+
+<p>As you can see, since this is technically operating over a network we need to specify a host. If you're running matlab and stoolbotics on the same machine, this will always be 127.0.0.1 for localhost. Technically, you could be running the simulator and matlab on two separate computers. As long as you had the IP address of the computer running the simulator plugged into the 'host' variable inside matlab, everything will still work.</p>
+<p>Next, the port needs to match what you entered with the <code>&gt;server start</code> command. From then on, all that needs to happen is to do some calculation, and pass off the comma separated list of joint angled to the simulator.</p>
 <h1 id="implementation">Implementation</h1>
 <h2 id="overview">Overview</h2>
 <p>Many technical challenges were overcome during the development of Stoolbotics. To take a look at the code yourself, here is a <a href="https://github.com/Stonelinks/Stoolbotics">link</a> to our GitHub. Choice algorithms and segments of the code will be explained and highlighted in this section.</p>
@@ -402,9 +435,10 @@ p = (robot.P0T[0][0], robot.P0T[1][0], robot.P0T[2][0])
 <p>Therefore, the decision was made to implement a terminal inside OpenGL. This gave us the most control with regards to commands entered to the command prompt. Additionally, it makes the application more portable because no additional library dependencies are introduced.</p>
 <h1 id="closing-remarks">Closing Remarks</h1>
 <h2 id="future-improvements">Future Improvements</h2>
-<p>There are a number of future improvements that can be made the simulator.</p>
-<p>First, we really want to implement closed loop control from external applications such as MATLAB (IE not having to generate a file to be played back). In an effort to make this as cross platform as possible, the current plan is to do this using UDP sockets. Essentially, a program like MATLAB would send a list of joint angles to a UDP socket that the sumilator is listening on. Once the simulator receives the message, it would move the arm to that position.</p>
-<p>Second, a user scripting environment would have been nice. This could allow people to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.</p></div>
+<p>There is one future improvement that I can think of that could be made the simulator:</p>
+<p>Second, a user scripting environment would have been nice. This could allow people to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.</p>
+<h2 id="thank-you">Thank You</h2>
+<p>Thank you for reading this documentation! Please feel free to send any comments or questions to lucas.p.doyle@gmail.com.</p></div>
 </div>
 </body>
 </html>

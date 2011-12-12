@@ -17,6 +17,7 @@ Stoolbotics has many features that make it attractive to the aspiring roboticst 
 - Completely customizable simulation environment (time-stepping, etc)
 - Ability to record simulator activity
 - Ability to playback saved recordings, or even import a recording generated in MATLAB
+- Able to be driven in real time from a UDP stream from other programs like MATLAB (includes an example)
 - Change variables in the simulator on the fly
 - Built in help from simulator command line, and of course this stellar and complete documentation
 - Cross platform implementation
@@ -110,4 +111,4 @@ Though you can't see it in a static picture, that joint is now moving pretty fas
 
 <img src="https://github.com/Stonelinks/Stoolbotics/raw/master/docs/static/7.png" width="780px" height="540px">
 
-This concludes the quickstart. To do more advanced things like play, record, manipulate the environment, etc., check out the examples section!
+This concludes the quickstart. To do more advanced things like play, record, manipulate the environment, drive the simulator from matlab, etc., check out the examples section!

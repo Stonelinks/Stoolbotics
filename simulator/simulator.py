@@ -300,7 +300,7 @@ class simulator():
                     s.close()
 
                     self.sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-                    self.sock.settimeout(1.0)
+                    self.sock.settimeout(.1)
                     self.sock.bind(("",int(port)))
                 elif c2 == 'stop':
                     try:
