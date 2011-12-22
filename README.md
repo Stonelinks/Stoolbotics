@@ -46,7 +46,7 @@ TODO:
         - (x) screendump
     - (x) hide / show
 
-- matlab control via socket
+- (x) matlab control via socket
 
 - (x) movie making
     - (x) implement record - write to a file 

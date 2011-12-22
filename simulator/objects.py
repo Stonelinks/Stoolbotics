@@ -317,9 +317,12 @@ class robot(object):
             else:
                 glColor3f(1.0, 0.0, 0)
             glBegin(GL_LINE_STRIP)
+            i = 0
             for verts in self.trace:
+                glColor3f(cos(i + (2*PI/3)), cos(i + 2*(2*PI/3)), cos(i + 3*(2*PI/3)))
                 vert = verts[-1]
                 glVertex3f(vert[0], vert[1], vert[2])
+                i += 1
             glEnd()
 
 class room(object):

@@ -376,8 +376,6 @@ for link in robot.links:
 
 First, a few variables are initialized. <code>tmp</code> is the temporary rotation matrix for all links up until the current iteration. It starts off as the identity matrix. Second, the overall position vector, <code>P0T</code>, starts out as a three by one zero vectors. Next, for each link in the robot arm, the representation of the link's position vector in terms of the base frame is added to the current position vector. This is done by using the dot product of the <code>tmp</code> rotation matrix and the link's position vector. The temporary rotation matrix is then updated, and the current position vector is appended to the <code>verts</code> list, which contains all the robot's vertices for the current time-step. This list is later used to draw things like the arm ghosts and trace.
 
-##Time-stepping
-
 ##Drawing the Robot
 ###Joints
 When drawing the robot in a certain configuration in OpenGL, it is necessary to indicate which joints are rotational or prismatic. This is done inside the link class. Additionally, static links need to be distinguished from prismatic joints.
@@ -408,7 +406,7 @@ Therefore, the decision was made to implement a terminal inside OpenGL. This gav
 
 There is one future improvement that I can think of that could be made the simulator:
 
-Second, a user scripting environment would have been nice. This could allow people to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.
+A user scripting environment would have been nice. This could allow people to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.
 
 ##Thank You
 
