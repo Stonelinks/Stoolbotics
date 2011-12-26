@@ -149,7 +149,7 @@ class simulator():
         self.mouse.oldMouseDraggedX = self.mouse.x
         self.mouse.oldMouseDraggedY = self.mouse.y
         self.mouse.x = x
-
+        self.mouse.y = y
 
     # Mouse motion callback routine.
     def mouseMotion(self, x, y):
