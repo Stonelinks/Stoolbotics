@@ -39,7 +39,7 @@
 <div class="content">
 <h1>Welcome to Stoolbotics!</h1>
 
-<p>Luke Doyle and Scott Peck</p>
+<p>Luke Doyle</p>
 <div class="toc">
 <ul>
 <li><a href="#introduction">Introduction</a><ul>
@@ -101,12 +101,12 @@
 </div>
 <h1 id="introduction">Introduction</h1>
 <h2 id="welcome">Welcome</h2>
-<p>Hello and welcome to the Stoolbotics documentation! Stoolbotics is a general purpose robotic arm and kinematics simulator aimed at being a teaching tool for aspiring roboticists. The motivation for this project was simple: the linear algebra and mathematical concepts behind robotics is difficult for a beginner to understand without any visual context. This is especially true for people who are primarily visual learners.</p>
-<p>This tool will hopefully fill a gap in many higher education robotics classrooms. It was designed to be easy to use and compatible with other technologies (like MATLAB). The project itself was conceived halfway through the Fall 2011 semester at RPI by Lucas Doyle, and the implementation was carried out by Lucas Doyle and Scott Peck.</p>
+<p>Hello and welcome to the Stoolbotics writeup! Stoolbotics is a general purpose robotic arm and kinematics simulator aimed at being a teaching tool for aspiring roboticists. The motivation for this project was simple: the linear algebra and mathematical concepts behind robotics is difficult for a beginner to understand without any visual context. This is especially true for people who are primarily visual learners.</p>
+<p>This tool will hopefully fill a gap in many higher education robotics classrooms. It was designed to be easy to use and compatible with other technologies (like MATLAB). The project itself was conceived and implemented halfway through the Fall 2011 semester at RPI by Lucas Doyle with help from Scott Peck.</p>
 <h2 id="features">Features</h2>
 <p>Stoolbotics has many features that make it attractive to the aspiring roboticst and the higer education robotics classrom. To name a few, Stoolbotics features:</p>
 <ul>
-<li>Easy to use file format for specifying a robot arm</li>
+<li>Low barrier to entry eith an easy to use file format for specifying a robot arm</li>
 <li>Ability to visualize any robot that can be specified in such a file</li>
 <li>Compute the forward kinematics of any robot</li>
 <li>Animate and draw paths for arms</li>
@@ -433,8 +433,9 @@ p = (robot.P0T[0][0], robot.P0T[1][0], robot.P0T[2][0])
 <p>Therefore, the decision was made to implement a terminal inside OpenGL. This gave us the most control with regards to commands entered to the command prompt. Additionally, it makes the application more portable because no additional library dependencies are introduced.</p>
 <h1 id="closing-remarks">Closing Remarks</h1>
 <h2 id="future-improvements">Future Improvements</h2>
-<p>There is one future improvement that I can think of that could be made the simulator:</p>
-<p>A user scripting environment would have been nice. This could allow people to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.</p>
+<p>There are many future improvements that could be made to Stoolbotics. Two major ones come to mind:</p>
+<p>A support for a user scripting environment would have been nice. This could allow students to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.</p>
+<p>In conjunction with the above, integration with a physics engine would be nice for writing users to measure torques, writing their own PID loops, simulating forces applied, etc.</p>
 <h2 id="thank-you">Thank You</h2>
 <p>Thank you for reading this documentation! Please feel free to send any comments or questions to lucas.p.doyle@gmail.com.</p></div>
 </div>

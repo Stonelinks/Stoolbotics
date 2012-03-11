@@ -1,18 +1,18 @@
 <h1>Welcome to Stoolbotics!</h1>
-Luke Doyle and Scott Peck
+Luke Doyle
 
 #Introduction
 ##Welcome
 
-Hello and welcome to the Stoolbotics documentation! Stoolbotics is a general purpose robotic arm and kinematics simulator aimed at being a teaching tool for aspiring roboticists. The motivation for this project was simple: the linear algebra and mathematical concepts behind robotics is difficult for a beginner to understand without any visual context. This is especially true for people who are primarily visual learners.
+Hello and welcome to the Stoolbotics writeup! Stoolbotics is a general purpose robotic arm and kinematics simulator aimed at being a teaching tool for aspiring roboticists. The motivation for this project was simple: the linear algebra and mathematical concepts behind robotics is difficult for a beginner to understand without any visual context. This is especially true for people who are primarily visual learners.
 
-This tool will hopefully fill a gap in many higher education robotics classrooms. It was designed to be easy to use and compatible with other technologies (like MATLAB). The project itself was conceived halfway through the Fall 2011 semester at RPI by Lucas Doyle, and the implementation was carried out by Lucas Doyle and Scott Peck.
+This tool will hopefully fill a gap in many higher education robotics classrooms. It was designed to be easy to use and compatible with other technologies (like MATLAB). The project itself was conceived and implemented halfway through the Fall 2011 semester at RPI by Lucas Doyle with help from Scott Peck.
 
 ##Features
 
 Stoolbotics has many features that make it attractive to the aspiring roboticst and the higer education robotics classrom. To name a few, Stoolbotics features:
 
-- Easy to use file format for specifying a robot arm
+- Low barrier to entry eith an easy to use file format for specifying a robot arm
 - Ability to visualize any robot that can be specified in such a file
 - Compute the forward kinematics of any robot
 - Animate and draw paths for arms
@@ -403,10 +403,11 @@ Therefore, the decision was made to implement a terminal inside OpenGL. This gav
 
 ##Future Improvements
 
+There are many future improvements that could be made to Stoolbotics. Two major ones come to mind:
 
-There is one future improvement that I can think of that could be made the simulator:
+A support for a user scripting environment would have been nice. This could allow students to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.
 
-A user scripting environment would have been nice. This could allow people to write scripts that do things like inverse kinematics, workspace calculations, finding DH parameters, etc. The simulator would have to be modified to include hooks to look for scripts. In the case of inverse kinematics, a hook would need to look for a function and pass it forward kinematics information and expect to get a list of joint angles in return.
+In conjunction with the above, integration with a physics engine would be nice for writing users to measure torques, writing their own PID loops, simulating forces applied, etc.
 
 ##Thank You
 
