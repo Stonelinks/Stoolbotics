@@ -332,7 +332,7 @@ class simulator():
                 print traceback.format_exc()
             elif cmd == 'list':
                 for r in os.listdir('../robots'):
-                    if r.split('.')[1] == '.json':
+                    if r.split('.')[-1] == 'json':
                         self.response_print(" " + r.split('.')[0])
             elif cmd == 'axis':
                 if len(cmd_arr) == 1:
