@@ -1,0 +1,36 @@
+{
+  "name": "stoolbotics",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "gh-pages": "2.0.1",
+    "prettier": "1.16.4",
+    "react-scripts": "2.1.5"
+  },
+  "dependencies": {
+    "camera-controls": "1.10.8",
+    "prop-types": "15.7.2",
+    "react": "15.6.1",
+    "react-dom": "15.6.1",
+    "stats.js": "0.17.0",
+    "three": "0.86.0",
+    "three-sky": "1.1.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "prettier --write --no-semi *.js **/*.js",
+    "deploy": "npm run build && touch build/.nojekyll && gh-pages -d build"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
